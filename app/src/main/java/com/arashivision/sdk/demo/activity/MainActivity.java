@@ -7,8 +7,11 @@ import android.widget.Toast;
 import com.arashivision.sdk.demo.R;
 import com.arashivision.sdk.demo.util.NetworkManager;
 import com.arashivision.sdkcamera.camera.InstaCameraManager;
+import com.yanzhenjie.permission.Action;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.runtime.Permission;
+
+import java.util.List;
 
 public class MainActivity extends BaseObserveCameraActivity {
 
@@ -99,7 +102,11 @@ public class MainActivity extends BaseObserveCameraActivity {
                                 .setting()
                                 .start(1000);
                     }
-//                    finish();
+                    Toast.makeText(this, "Please check the permission on setting", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .onGranted(data -> {
+
                 })
                 .start();
     }

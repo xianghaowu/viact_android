@@ -1,9 +1,5 @@
 package com.arashivision.sdk.demo.myactivities;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -14,8 +10,14 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+
 import com.arashivision.sdk.demo.R;
 import com.arashivision.sdk.demo.activity.MainActivity;
+import com.arashivision.sdk.demo.util.API;
+import com.arashivision.sdk.demo.util.APICallback;
+import com.arashivision.sdk.demo.util.SaveSharedPrefrence;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -25,7 +27,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends BaseActivity {
 
     final int REQUEST_CUSTOM_PERMISSION = 9999;
 
@@ -38,6 +40,8 @@ public class LoginActivity extends AppCompatActivity {
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.login_tl_password)     TextInputLayout           tl_password;
 
+    SaveSharedPrefrence   sharedPref;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +50,7 @@ public class LoginActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         initLayout();
+        sharedPref = new SaveSharedPrefrence();
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -59,15 +64,21 @@ public class LoginActivity extends AppCompatActivity {
         String pword = Objects.requireNonNull(txt_password.getText()).toString().trim();
         if (uname.length() > 0){
             if (pword.length() > 0) {
-                if (uname.equals("user")){
-                    if (pword.equals("password")){
-                        startActivity(new Intent(this, MainActivity.class));
-                    } else {
-                        tl_password.setError("Wrong! Invalid password");
+                showProgress();
+                API.authLogin(uname, pword, new APICallback<String>() {
+                    @Override
+                    public void onSuccess(String response) {
+                        dismissProgress();
+                        sharedPref.putString(LoginActivity.this, SaveSharedPrefrence.PREFS_AUTH_TOKEN, response);
+                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     }
-                } else {
-                    tl_username.setError("Wrong! Invalid username");
-                }
+
+                    @Override
+                    public void onFailure(String error) {
+                        dismissProgress();
+                        showToast(error);
+                    }
+                });
             } else {
                 tl_password.setError("Wrong! Please type the password");
             }
@@ -118,16 +129,16 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CUSTOM_PERMISSION && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, "Please check the permission on setting", Toast.LENGTH_SHORT).show();
             finish();
         }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     private void requestPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermissions(new String[]{android.Manifest.permission.READ_PHONE_STATE}, REQUEST_CUSTOM_PERMISSION);
+            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CUSTOM_PERMISSION);
         }
     }
 }

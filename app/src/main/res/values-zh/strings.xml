@@ -79,6 +79,7 @@
     <string name="capture_play_camera_file">播放相机远程文件</string>
     <string name="capture_play_local_file">下载并播放本地文件</string>
     <string name="capture_toast_sd_card_error">未插入存储卡或剩余空间不足</string>
+    <string name="capture_upload_file">上载文件</string>
 
     <!-- Preview Activity -->
     <string name="preview_toolbar_title">预览 -- 正常模式</string>
