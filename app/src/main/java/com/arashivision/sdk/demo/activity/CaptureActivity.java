@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.common.Priority;
@@ -22,17 +23,23 @@ import com.arashivision.sdk.demo.util.SaveSharedPrefrence;
 import com.arashivision.sdk.demo.util.TimeFormat;
 import com.arashivision.sdkcamera.camera.InstaCameraManager;
 import com.arashivision.sdkcamera.camera.callback.ICaptureStatusListener;
+import com.arashivision.sdkmedia.export.ExportImageParamsBuilder;
+import com.arashivision.sdkmedia.export.ExportUtils;
+import com.arashivision.sdkmedia.export.ExportVideoParamsBuilder;
+import com.arashivision.sdkmedia.export.IExportCallback;
+import com.arashivision.sdkmedia.work.WorkWrapper;
 import com.kaopiz.kprogresshud.KProgressHUD;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.FileCallback;
 import com.lzy.okgo.model.Response;
 
 import java.io.File;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import androidx.annotation.Nullable;
 
-public class CaptureActivity extends BaseObserveCameraActivity implements ICaptureStatusListener {
+public class CaptureActivity extends BaseObserveCameraActivity implements ICaptureStatusListener, IExportCallback {
 
     private TextView mTvCaptureStatus;
     private TextView mTvCaptureTime;
@@ -275,99 +282,6 @@ public class CaptureActivity extends BaseObserveCameraActivity implements ICaptu
         AtomicInteger errorCount = new AtomicInteger(0);
         for (int i = 0; i < localPaths.length; i++) {
             String url = urls[i];
-            AndroidNetworking.download(url,localFolder,fileNames[i])
-                    .setTag("download")
-                    .setPriority(Priority.MEDIUM)
-                    .build()
-                    .setDownloadProgressListener(new DownloadProgressListener() {
-                        @Override
-                        public void onProgress(long bytesDownloaded, long totalBytes) {
-                            // do anything with progress
-                        }
-                    })
-                    .startDownload(new DownloadListener() {
-                        @Override
-                        public void onDownloadComplete() {
-                            successfulCount.incrementAndGet();
-                            checkDownloadCount();
-                        }
-                        @Override
-                        public void onError(ANError error) {
-                            errorCount.incrementAndGet();
-                            checkDownloadCount();
-                        }
-                        private void checkDownloadCount() {
-                            dialog.setContent(getString(R.string.osc_dialog_msg_downloading, urls.length, successfulCount.intValue(), errorCount.intValue()));
-                            if (successfulCount.intValue() + errorCount.intValue() >= urls.length) {
-                                PlayAndExportActivity.launchActivity(CaptureActivity.this, localPaths);
-                                dialog.dismiss();
-                            }
-                        }
-                    });
-//            OkGo.<File>get(url)
-//                    .execute(new FileCallback(localFolder, fileNames[i]) {
-//
-//                        @Override
-//                        public void onError(Response<File> response) {
-//                            super.onError(response);
-//                            errorCount.incrementAndGet();
-//                            checkDownloadCount();
-//                        }
-//
-//                        @Override
-//                        public void onSuccess(Response<File> response) {
-//                            successfulCount.incrementAndGet();
-//                            checkDownloadCount();
-//                        }
-//
-//                        private void checkDownloadCount() {
-//                            dialog.setContent(getString(R.string.osc_dialog_msg_downloading, urls.length, successfulCount.intValue(), errorCount.intValue()));
-//                            if (successfulCount.intValue() + errorCount.intValue() >= urls.length) {
-//                                PlayAndExportActivity.launchActivity(CaptureActivity.this, localPaths);
-//                                dialog.dismiss();
-//                            }
-//                        }
-//                    });
-        }
-    }
-
-    private void uploadFiles(String[] urls){
-        if (urls == null || urls.length == 0) {
-            return;
-        }
-
-        String localFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/SDK_DEMO_CAPTURE";
-        File folder = new File(localFolder);
-        if (!folder.exists()) {
-            folder.mkdirs();
-        }
-        String[] fileNames = new String[urls.length];
-        String[] localPaths = new String[urls.length];
-        boolean needDownload = false;
-        for (int i = 0; i < localPaths.length; i++) {
-            fileNames[i] = urls[i].substring(urls[i].lastIndexOf("/") + 1);
-            localPaths[i] = localFolder + "/" + fileNames[i];
-            if (!new File(localPaths[i]).exists()) {
-                needDownload = true;
-            }
-        }
-
-        if (!needDownload) {
-            uploadFilesToServer(localPaths);
-            return;
-        }
-
-        MaterialDialog dialog = new MaterialDialog.Builder(this)
-                .title(R.string.osc_dialog_title_downloading)
-                .content(getString(R.string.osc_dialog_msg_downloading, urls.length, 0, 0))
-                .cancelable(false)
-                .canceledOnTouchOutside(false)
-                .show();
-
-        AtomicInteger successfulCount = new AtomicInteger(0);
-        AtomicInteger errorCount = new AtomicInteger(0);
-        for (int i = 0; i < localPaths.length; i++) {
-            String url = urls[i];
             OkGo.<File>get(url)
                     .execute(new FileCallback(localFolder, fileNames[i]) {
 
@@ -387,7 +301,7 @@ public class CaptureActivity extends BaseObserveCameraActivity implements ICaptu
                         private void checkDownloadCount() {
                             dialog.setContent(getString(R.string.osc_dialog_msg_downloading, urls.length, successfulCount.intValue(), errorCount.intValue()));
                             if (successfulCount.intValue() + errorCount.intValue() >= urls.length) {
-                                uploadFilesToServer(localPaths);
+                                PlayAndExportActivity.launchActivity(CaptureActivity.this, localPaths);
                                 dialog.dismiss();
                             }
                         }
@@ -395,57 +309,89 @@ public class CaptureActivity extends BaseObserveCameraActivity implements ICaptu
         }
     }
 
-    void uploadFilesToServer(String[] local_paths){
+    //download image and video
+    WorkWrapper mWorkWrapper;
+    MaterialDialog mExportDialog;
+    String exp_filename;
+    int mCurrentExportId = -1;
+    final String EXPORT_DIR_PATH = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/SDK_DEMO_EXPORT";
+
+    private void uploadFiles(String[] urls){
+        if (urls == null || urls.length == 0) {
+            return;
+        }
+
+        File folder = new File(EXPORT_DIR_PATH);
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+
+        mWorkWrapper = new WorkWrapper(urls);
+        exp_filename = "exp_" + System.currentTimeMillis();
+        if (mWorkWrapper.isVideo()) {
+            exp_filename = exp_filename + ".mp4";
+            exportVideoOriginal();
+        } else {
+            exp_filename = exp_filename + ".jpg";
+            exportImageOriginal();
+        }
+        showExportDialog();
+    }
+
+    private void exportImageOriginal() {
+        ExportImageParamsBuilder builder = new ExportImageParamsBuilder()
+                .setExportMode(ExportUtils.ExportMode.PANORAMA)
+                .setImageFusion(mWorkWrapper.isPanoramaFile())
+                .setTargetPath(EXPORT_DIR_PATH + "/" +exp_filename);
+
+        mCurrentExportId = ExportUtils.exportImage(mWorkWrapper, builder, this);
+    }
+
+    private void exportVideoOriginal() {
+        ExportVideoParamsBuilder builder = new ExportVideoParamsBuilder()
+                .setExportMode(ExportUtils.ExportMode.PANORAMA)
+                .setTargetPath(EXPORT_DIR_PATH + "/" + exp_filename)
+                // 导出视频对手机性能要求较高，如导出5.7k时遇到oom或者app被系统强制杀掉的情况，请自行设置较小宽高
+                // Exporting video requires high performance of mobile phones. For example, when exporting 5.7k,
+                // you encounter oom or app being forcibly killed by the system, please set a smaller width and height by yourself
+                .setWidth(2048)
+                .setHeight(1024);
+//                .setBitrate(20 * 1024 * 1024);
+        mCurrentExportId = ExportUtils.exportVideo(mWorkWrapper, builder, this);
+    }
+
+    void uploadFilesToServer(String local_path){
         String token = sharedPref.getString(this, SaveSharedPrefrence.PREFS_AUTH_TOKEN);
         if (token.isEmpty()) {
             Toast.makeText(this, "Autherntication failed!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        AtomicInteger successfulCount = new AtomicInteger(0);
-        AtomicInteger errorCount = new AtomicInteger(0);
-        String[] urlPaths = new String[local_paths.length];
-        for (int i = 0; i < local_paths.length; i++) {
-            String one_path = local_paths[i];
-            File file = new File(one_path);
-            if (file.exists()){
-                showProgress("Uploading...");
-                API.uploadCaptureFile(token, file, new APICallback<UploadedData>() {
-                    @Override
-                    public void onSuccess(UploadedData response) {
-                        urlPaths[successfulCount.intValue()] = response.data;
-                        Toast.makeText(CaptureActivity.this, "Uploaded file : " + response.data, Toast.LENGTH_SHORT).show();
-                        successfulCount.incrementAndGet();
-                        checkUploadCount();
-                    }
+        File file = new File(local_path);
+        if (file.exists()){
+            showProgress("Uploading...");
+            API.uploadCaptureFile(token, file, new APICallback<UploadedData>() {
+                @Override
+                public void onSuccess(UploadedData response) {
+                    dismissProgress();
+                    Toast.makeText(CaptureActivity.this, "Success! Uploaded file : " + response.data, Toast.LENGTH_SHORT).show();
+                    showS3Paths(response.data);
+                }
 
-                    @Override
-                    public void onFailure(String error) {
-                        Toast.makeText(CaptureActivity.this, "Uploading Error : " + error, Toast.LENGTH_SHORT).show();
-                        errorCount.incrementAndGet();
-                        checkUploadCount();
-                    }
-
-                    private void checkUploadCount() {
-                        String msg = getString(R.string.osc_dialog_msg_downloading, local_paths.length, successfulCount.intValue(), errorCount.intValue());
-                        Toast.makeText(CaptureActivity.this, msg, Toast.LENGTH_SHORT).show();
-                        if (successfulCount.intValue() + errorCount.intValue() >= local_paths.length) {
-                            dismissProgress();
-                            showS3Paths(urlPaths);
-                        }
-                    }
-                });
-            }
+                @Override
+                public void onFailure(String error) {
+                    dismissProgress();
+                    Toast.makeText(CaptureActivity.this, "Uploading Error : " + error, Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, "Can not find the uploading file!", Toast.LENGTH_SHORT).show();
         }
     }
 
-    public void showS3Paths(String[] uploaded_paths){
+    public void showS3Paths(String uploaded_path){
         mTvUploadedUrl.setVisibility(View.VISIBLE);
-        String total_url = "";
-        for(int i = 0; i < uploaded_paths.length; i++){
-            total_url = uploaded_paths[i] + "\n";
-        }
-        mTvUploadedUrl.setText(total_url);
+        mTvUploadedUrl.setText(uploaded_path);
     }
 
     SaveSharedPrefrence sharedPref;
@@ -459,6 +405,60 @@ public class CaptureActivity extends BaseObserveCameraActivity implements ICaptu
     public void dismissProgress() {
         if (hud != null) {
             hud.dismiss();
+        }
+    }
+
+    //Export callback
+    private void showExportDialog() {
+        if (mExportDialog == null) {
+            mExportDialog = new MaterialDialog.Builder(this)
+                    .cancelable(false)
+                    .canceledOnTouchOutside(false)
+                    .positiveText(R.string.export_dialog_ok)
+                    .neutralText(R.string.export_dialog_stop)
+                    .build();
+        }
+        mExportDialog.setContent(R.string.export_dialog_msg_exporting);
+        mExportDialog.getActionButton(DialogAction.POSITIVE).setVisibility(View.GONE);
+        mExportDialog.show();
+        mExportDialog.getActionButton(DialogAction.NEUTRAL).setOnClickListener(v -> stopExport());
+    }
+
+    @Override
+    public void onSuccess() {
+        mExportDialog.dismiss();
+        mCurrentExportId = -1;
+        uploadFilesToServer(EXPORT_DIR_PATH + "/" + exp_filename);
+    }
+
+    @Override
+    public void onFail(int errorCode, String errorMsg) {
+        // if GPU not support, errorCode is -10003 or -10005 or -13020
+        mExportDialog.setContent(R.string.export_dialog_msg_export_failed, errorCode);
+        mExportDialog.getActionButton(DialogAction.POSITIVE).setVisibility(View.VISIBLE);
+        mExportDialog.getActionButton(DialogAction.NEUTRAL).setVisibility(View.GONE);
+        mCurrentExportId = -1;
+    }
+
+    @Override
+    public void onCancel() {
+        mExportDialog.setContent(R.string.export_dialog_msg_export_stopped);
+        mExportDialog.getActionButton(DialogAction.POSITIVE).setVisibility(View.VISIBLE);
+        mExportDialog.getActionButton(DialogAction.NEUTRAL).setVisibility(View.GONE);
+        mCurrentExportId = -1;
+    }
+
+    @Override
+    public void onProgress(float progress) {
+        // 仅在导出视频时有进度回调
+        // callback only when exporting video
+        mExportDialog.setContent(getString(R.string.export_dialog_msg_export_progress, String.format(Locale.CHINA, "%.1f", progress * 100) + "%"));
+    }
+
+    private void stopExport() {
+        if (mCurrentExportId != -1) {
+            ExportUtils.stopExport(mCurrentExportId);
+            mCurrentExportId = -1;
         }
     }
 }

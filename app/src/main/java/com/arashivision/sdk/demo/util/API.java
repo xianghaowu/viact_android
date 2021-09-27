@@ -63,10 +63,7 @@ public class API {
                 .addMultipartFile("file", file)
                 .setPriority(Priority.MEDIUM)
                 .build()
-                .setUploadProgressListener(new UploadProgressListener() {
-                    @Override
-                    public void onProgress(long bytesUploaded, long totalBytes) {
-                    }
+                .setUploadProgressListener((bytesUploaded, totalBytes) -> {
                 })
                 .getAsJSONObject(new JSONObjectRequestListener() {
                     @Override
