@@ -2,15 +2,23 @@ package com.arashivision.sdk.demo.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
+import android.view.View;
 import android.widget.Toast;
 
 import com.arashivision.sdk.demo.R;
+import com.arashivision.sdk.demo.dialog.SiteMapDlg;
+import com.arashivision.sdk.demo.models.UploadedData;
+import com.arashivision.sdk.demo.util.API;
+import com.arashivision.sdk.demo.util.APICallback;
 import com.arashivision.sdk.demo.util.NetworkManager;
+import com.arashivision.sdk.demo.util.SaveSharedPrefrence;
 import com.arashivision.sdkcamera.camera.InstaCameraManager;
 import com.yanzhenjie.permission.Action;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.runtime.Permission;
 
+import java.io.File;
 import java.util.List;
 
 public class MainActivity extends BaseObserveCameraActivity {
@@ -27,6 +35,8 @@ public class MainActivity extends BaseObserveCameraActivity {
         }
 
         findViewById(R.id.btn_full_demo).setOnClickListener(v -> {
+//            uploadTest();
+//            showSiteMapDlg();
             startActivity(new Intent(MainActivity.this, FullDemoActivity.class));
         });
 
@@ -145,6 +155,33 @@ public class MainActivity extends BaseObserveCameraActivity {
         } else {
             Toast.makeText(this, R.string.main_toast_sd_disabled, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    void uploadTest(){
+        SaveSharedPrefrence sharedPref;
+        sharedPref = new SaveSharedPrefrence();
+        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/front.png";
+        String token = sharedPref.getString(this, SaveSharedPrefrence.PREFS_AUTH_TOKEN);
+        File ff = new File(path);
+        API.uploadCaptureFile(token, ff, new APICallback<UploadedData>() {
+            @Override
+            public void onSuccess(UploadedData response) {
+                Toast.makeText(MainActivity.this, "Success! Uploaded file : " + response.data, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Toast.makeText(MainActivity.this, "Uploading Error : " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void showSiteMapDlg(){
+        SiteMapDlg inputDlg = new SiteMapDlg(this, "");
+
+        View decorView = inputDlg.getWindow().getDecorView();
+        decorView.setBackgroundResource(android.R.color.transparent);
+        inputDlg.show();
     }
 
 }

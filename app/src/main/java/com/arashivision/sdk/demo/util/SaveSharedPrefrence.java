@@ -8,6 +8,7 @@ public class SaveSharedPrefrence {
 
     public static final String PREFS_NAME = "Viact_Demo";
     public static final String PREFS_AUTH_TOKEN = "auth_token";
+    public static final String PREFS_COMPANY_CODE = "company_code";
 
     public String getString(Context context, String key) {
         sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);

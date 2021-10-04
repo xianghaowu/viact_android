@@ -7,4 +7,5 @@
     <color name="layout_bg_color">#EEEEEE</color>
     <color name="input_bg_color">#FFFFFF</color>
     <color name="btn_bg_color">#6060FF</color>
+    <color name="dlg_bg_transparent">#30000000</color>
 </resources>

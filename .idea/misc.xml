@@ -3,6 +3,8 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/SDK_Demo2/app/src/main/res/drawable/round_btn_bg.xml" value="0.36770833333333336" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/SDK_Demo2/app/src/main/res/drawable/round_dlg_top_bg.xml" value="0.36770833333333336" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/SDK_Demo2/app/src/main/res/layout/activity_camera_files.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/SDK_Demo2/app/src/main/res/layout/activity_capture.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/SDK_Demo2/app/src/main/res/layout/activity_fw_upgrade.xml" value="0.3515625" />
@@ -10,6 +12,7 @@
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/SDK_Demo2/app/src/main/res/layout/activity_main.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/SDK_Demo2/app/src/main/res/layout/activity_osc.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/SDK_Demo2/app/src/main/res/layout/activity_play_and_export.xml" value="0.3515625" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/SDK_Demo2/app/src/main/res/layout/dialog_site_map.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo_test)/SDK Dir/Android/SDK_Demo2/app/src/main/res/drawable/round_btn_bg.xml" value="0.36770833333333336" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo_test)/SDK Dir/Android/SDK_Demo2/app/src/main/res/drawable/round_input_bg_xml.xml" value="0.36770833333333336" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo_test)/SDK Dir/Android/SDK_Demo2/app/src/main/res/layout/activity_full_demo.xml" value="0.19479166666666667" />

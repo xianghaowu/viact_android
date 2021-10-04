@@ -15,6 +15,7 @@ import androidx.core.app.ActivityCompat;
 
 import com.arashivision.sdk.demo.R;
 import com.arashivision.sdk.demo.activity.MainActivity;
+import com.arashivision.sdk.demo.models.User;
 import com.arashivision.sdk.demo.util.API;
 import com.arashivision.sdk.demo.util.APICallback;
 import com.arashivision.sdk.demo.util.SaveSharedPrefrence;
@@ -70,7 +71,8 @@ public class LoginActivity extends BaseActivity {
                     public void onSuccess(String response) {
                         dismissProgress();
                         sharedPref.putString(LoginActivity.this, SaveSharedPrefrence.PREFS_AUTH_TOKEN, response);
-                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+//                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                        getSignedUser(response);
                     }
 
                     @Override
@@ -85,6 +87,28 @@ public class LoginActivity extends BaseActivity {
         } else {
             tl_username.setError("Wrong! Please type the username");
         }
+    }
+
+    void getSignedUser(String token){
+        showProgress("Signed User...");
+        API.getLoginUser(token, new APICallback<User>() {
+            @Override
+            public void onSuccess(User response) {
+                dismissProgress();
+                if (response.company_code != null && !response.company_code.isEmpty()){
+                    sharedPref.putString(LoginActivity.this, SaveSharedPrefrence.PREFS_COMPANY_CODE, response.company_code);
+                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                } else {
+                    showToast("Can not get the company code");
+                }
+            }
+
+            @Override
+            public void onFailure(String error) {
+                dismissProgress();
+                showToast(error);
+            }
+        });
     }
 
     void initLayout(){

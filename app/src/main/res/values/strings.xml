@@ -247,4 +247,8 @@
     <string name="btn_title_login">Login</string>
     <string name="txt_layout_username_hint">Username</string>
     <string name="txt_layout_password_hint">Password</string>
+
+    <!-- SiteMap Dialog -->
+    <string name="dlg_sitemap_btn_close">Close</string>
+    <string name="dlg_sitemap_btn_upload">Upload</string>
 </resources>

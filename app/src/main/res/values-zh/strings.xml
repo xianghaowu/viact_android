@@ -247,4 +247,8 @@
     <string name="btn_title_login">登录</string>
     <string name="txt_layout_username_hint">用户名</string>
     <string name="txt_layout_password_hint">密码</string>
+
+    <!-- SiteMap Dialog -->
+    <string name="dlg_sitemap_btn_close">關閉</string>
+    <string name="dlg_sitemap_btn_upload">上載</string>
 </resources>

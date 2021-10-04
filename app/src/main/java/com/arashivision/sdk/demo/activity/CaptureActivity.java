@@ -16,6 +16,7 @@ import com.androidnetworking.interfaces.DownloadListener;
 import com.androidnetworking.interfaces.DownloadProgressListener;
 import com.arashivision.insta360.basecamera.camera.CameraType;
 import com.arashivision.sdk.demo.R;
+import com.arashivision.sdk.demo.dialog.SiteMapDlg;
 import com.arashivision.sdk.demo.models.UploadedData;
 import com.arashivision.sdk.demo.util.API;
 import com.arashivision.sdk.demo.util.APICallback;
@@ -361,6 +362,7 @@ public class CaptureActivity extends BaseObserveCameraActivity implements ICaptu
     }
 
     void uploadFilesToServer(String local_path){
+        Toast.makeText(this, local_path, Toast.LENGTH_SHORT).show();
         String token = sharedPref.getString(this, SaveSharedPrefrence.PREFS_AUTH_TOKEN);
         if (token.isEmpty()) {
             Toast.makeText(this, "Autherntication failed!", Toast.LENGTH_SHORT).show();
@@ -376,6 +378,7 @@ public class CaptureActivity extends BaseObserveCameraActivity implements ICaptu
                     dismissProgress();
                     Toast.makeText(CaptureActivity.this, "Success! Uploaded file : " + response.data, Toast.LENGTH_SHORT).show();
                     showS3Paths(response.data);
+                    showSiteMapDlg(response.data);
                 }
 
                 @Override
@@ -460,5 +463,14 @@ public class CaptureActivity extends BaseObserveCameraActivity implements ICaptu
             ExportUtils.stopExport(mCurrentExportId);
             mCurrentExportId = -1;
         }
+    }
+
+    //show dialog
+    private void showSiteMapDlg(String pano_url){
+        SiteMapDlg inputDlg = new SiteMapDlg(this, pano_url);
+
+        View decorView = inputDlg.getWindow().getDecorView();
+        decorView.setBackgroundResource(android.R.color.transparent);
+        inputDlg.show();
     }
 }
