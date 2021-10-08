@@ -1,10 +1,25 @@
 package com.arashivision.sdk.demo.activity;
 
+import static com.arashivision.sdk.demo.util.Const.ACTIVE_MAIN_PAGE;
+import static com.arashivision.sdk.demo.util.Const.ACTIVE_OTHER_PAGE;
+import static com.arashivision.sdk.demo.util.Const.CONNECT_MODE_NONE;
+import static com.arashivision.sdk.demo.util.Const.CONNECT_MODE_USB;
+import static com.arashivision.sdk.demo.util.Const.CONNECT_MODE_WIFI;
+
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
 
 import com.arashivision.sdk.demo.R;
 import com.arashivision.sdk.demo.dialog.SiteMapDlg;
@@ -21,15 +36,49 @@ import com.yanzhenjie.permission.runtime.Permission;
 import java.io.File;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 public class MainActivity extends BaseObserveCameraActivity {
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.main_ll_home)     LinearLayout        view_main;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.main_ll_other)    LinearLayout        view_other;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.main_view_bg_connect)   View          view_connect_bg;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.main_view_connect_option)   View      view_connect_option;
+    //bottom bar
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.bottom_iv_main)    ImageView         iv_bt_main;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.bottom_iv_other)    ImageView        iv_bt_other;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.bottom_iv_center)    ImageView       iv_bt_center;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.bottom_txt_main)    TextView         txt_bt_main;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.bottom_txt_other)   TextView         txt_bt_other;
+
+    int active_page = ACTIVE_MAIN_PAGE;
+    int connect_mode = CONNECT_MODE_NONE;
+    int temp_connect = CONNECT_MODE_NONE;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setTitle(R.string.main_toolbar_title);
+        setTitle(R.string.app_name);
 
-//        checkStoragePermission();
+        ButterKnife.bind(this);
+        initLayout();
+    }
+
+    void initLayout(){
+        //        checkStoragePermission();
         if (InstaCameraManager.getInstance().getCameraConnectedType() != InstaCameraManager.CONNECT_TYPE_NONE) {
             onCameraStatusChanged(true);
         }
@@ -99,6 +148,14 @@ public class MainActivity extends BaseObserveCameraActivity {
         findViewById(R.id.btn_firmware_upgrade).setOnClickListener(v -> {
             startActivity(new Intent(MainActivity.this, FwUpgradeActivity.class));
         });
+
+        refreshLayout();
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        refreshLayout();
     }
 
     private void checkStoragePermission() {
@@ -135,10 +192,14 @@ public class MainActivity extends BaseObserveCameraActivity {
         findViewById(R.id.btn_firmware_upgrade).setEnabled(enabled);
         if (enabled) {
             Toast.makeText(this, R.string.main_toast_camera_connected, Toast.LENGTH_SHORT).show();
+            connect_mode = temp_connect;
+            temp_connect = CONNECT_MODE_NONE;
         } else {
             NetworkManager.getInstance().clearBindProcess();
             Toast.makeText(this, R.string.main_toast_camera_disconnected, Toast.LENGTH_SHORT).show();
+            connect_mode = CONNECT_MODE_NONE;
         }
+        refreshLayout();
     }
 
     @Override
@@ -155,6 +216,97 @@ public class MainActivity extends BaseObserveCameraActivity {
         } else {
             Toast.makeText(this, R.string.main_toast_sd_disabled, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    void refreshLayout(){
+        view_connect_option.setVisibility(View.GONE);
+        view_connect_bg.setVisibility(View.GONE);
+
+        switch (active_page){
+            case ACTIVE_OTHER_PAGE:
+                view_main.setVisibility(View.GONE);
+                view_other.setVisibility(View.VISIBLE);
+                iv_bt_main.setColorFilter(ContextCompat.getColor(this, R.color.menu_disable), android.graphics.PorterDuff.Mode.SRC_IN);
+                txt_bt_main.setTextColor(ContextCompat.getColor(this, R.color.menu_disable));
+                iv_bt_other.setColorFilter(ContextCompat.getColor(this, R.color.menu_active), android.graphics.PorterDuff.Mode.SRC_IN);
+                txt_bt_other.setTextColor(ContextCompat.getColor(this, R.color.menu_active));
+                break;
+            default:
+                view_main.setVisibility(View.VISIBLE);
+                view_other.setVisibility(View.GONE);
+                iv_bt_main.setColorFilter(ContextCompat.getColor(this, R.color.menu_active), android.graphics.PorterDuff.Mode.SRC_IN);
+                txt_bt_main.setTextColor(ContextCompat.getColor(this, R.color.menu_active));
+                iv_bt_other.setColorFilter(ContextCompat.getColor(this, R.color.menu_disable), android.graphics.PorterDuff.Mode.SRC_IN);
+                txt_bt_other.setTextColor(ContextCompat.getColor(this, R.color.menu_disable));
+                break;
+        }
+
+        switch (connect_mode) {
+            case CONNECT_MODE_WIFI:
+            case CONNECT_MODE_USB:
+                iv_bt_center.setImageResource(R.drawable.ic_connect);
+                break;
+            default:
+                iv_bt_center.setImageResource(R.drawable.ic_disconnect);
+                break;
+        }
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.bottom_ll_center) void onClickConnect(){
+        if (connect_mode != CONNECT_MODE_NONE){
+            InstaCameraManager.getInstance().closeCamera();
+        } else if (view_connect_bg.getVisibility() != View.VISIBLE){
+            showConnectOption();
+        } else if (view_connect_bg.getVisibility() == View.VISIBLE){
+            onClickConnectBack();
+        }
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.ll_bottom_home) void onClickHome(){
+        active_page = ACTIVE_MAIN_PAGE;
+        refreshLayout();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.ll_bottom_other) void onClickOther(){
+        active_page = ACTIVE_OTHER_PAGE;
+        refreshLayout();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.main_btn_wifi) void onClickConnectWifi(){
+        temp_connect = CONNECT_MODE_WIFI;
+        InstaCameraManager.getInstance().openCamera(InstaCameraManager.CONNECT_TYPE_WIFI);
+        onClickConnectBack();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.main_btn_usb) void onClickConnectUsb(){
+        temp_connect = CONNECT_MODE_USB;
+        InstaCameraManager.getInstance().openCamera(InstaCameraManager.CONNECT_TYPE_USB);
+        onClickConnectBack();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.main_view_bg_connect) void onClickConnectBack(){
+        Animation bottomDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
+        view_connect_option.startAnimation(bottomDown);
+        view_connect_option.setVisibility(View.GONE);
+        Animation fadeout = AnimationUtils.loadAnimation(this, R.anim.fade_out);
+        view_connect_bg.startAnimation(fadeout);
+        view_connect_bg.setVisibility(View.GONE);
+    }
+
+    void showConnectOption(){
+        Animation fadein = AnimationUtils.loadAnimation(this, R.anim.fade_in);
+        view_connect_bg.startAnimation(fadein);
+        view_connect_bg.setVisibility(View.VISIBLE);
+        Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
+
+        view_connect_option.startAnimation(bottomUp);
+        view_connect_option.setVisibility(View.VISIBLE);
     }
 
     void uploadTest(){

@@ -1,0 +1,19 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="bottom_bar_height">55dp</dimen>
+    <dimen name="bottom_circle_size">55dp</dimen>
+    <dimen name="bottom_center_margin">24dp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <dimen name="btn_height">40dp</dimen>
+
+    <dimen name="bar_round_radius">10dp</dimen>
+
+    <dimen name="bar_image_size">32dp</dimen>
+
+    <dimen name="text_size_12">12sp</dimen>
+    <dimen name="padding_size">8dp</dimen>
+
+</resources>

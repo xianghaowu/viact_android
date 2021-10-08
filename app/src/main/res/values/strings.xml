@@ -251,4 +251,7 @@
     <!-- SiteMap Dialog -->
     <string name="dlg_sitemap_btn_close">Close</string>
     <string name="dlg_sitemap_btn_upload">Upload</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_other">Other</string>
 </resources>

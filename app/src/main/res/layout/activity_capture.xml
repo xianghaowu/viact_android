@@ -19,7 +19,9 @@
         <Button
             android:id="@+id/btn_normal_capture"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/btn_height"
+            android:background="@drawable/round_btn_bg"
+            android:padding="@dimen/padding_size"
             android:layout_marginTop="8dp"
             android:text="@string/capture_normal_capture"
             android:textAllCaps="false" />
@@ -27,7 +29,9 @@
         <Button
             android:id="@+id/btn_normal_pano_capture"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/btn_height"
+            android:background="@drawable/round_btn_bg"
+            android:padding="@dimen/padding_size"
             android:layout_marginTop="8dp"
             android:text="@string/capture_normal_pano_capture"
             android:textAllCaps="false" />
@@ -35,32 +39,43 @@
         <Button
             android:id="@+id/btn_hdr_capture"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/btn_height"
+            android:background="@drawable/round_btn_bg"
+            android:padding="@dimen/padding_size"
+            android:layout_marginTop="@dimen/padding_size"
             android:text="@string/capture_hdr_capture"
             android:textAllCaps="false" />
 
         <Button
             android:id="@+id/btn_hdr_pano_capture"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/btn_height"
+            android:background="@drawable/round_btn_bg"
+            android:padding="@dimen/padding_size"
+            android:layout_marginTop="@dimen/padding_size"
             android:text="@string/capture_hdr_pano_capture"
             android:textAllCaps="false" />
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/padding_size">
 
             <Button
                 android:id="@+id/btn_interval_shooting_start"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/btn_height"
+                android:background="@drawable/round_btn_bg"
+                android:padding="@dimen/padding_size"
                 android:text="@string/capture_interval_shooting_start"
                 android:textAllCaps="false" />
 
             <Button
                 android:id="@+id/btn_interval_shooting_stop"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/btn_height"
+                android:background="@drawable/round_btn_bg"
+                android:padding="@dimen/padding_size"
                 android:layout_marginStart="8dp"
                 android:text="@string/capture_interval_shooting_stop"
                 android:textAllCaps="false" />
@@ -68,19 +83,24 @@
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/padding_size">
 
             <Button
                 android:id="@+id/btn_normal_record_start"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/btn_height"
+                android:background="@drawable/round_btn_bg"
+                android:padding="@dimen/padding_size"
                 android:text="@string/capture_normal_record_start"
                 android:textAllCaps="false" />
 
             <Button
                 android:id="@+id/btn_normal_record_stop"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/btn_height"
+                android:background="@drawable/round_btn_bg"
+                android:padding="@dimen/padding_size"
                 android:layout_marginStart="8dp"
                 android:text="@string/capture_normal_record_stop"
                 android:textAllCaps="false" />
@@ -88,19 +108,24 @@
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/padding_size">
 
             <Button
                 android:id="@+id/btn_hdr_record_start"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/btn_height"
+                android:background="@drawable/round_btn_bg"
+                android:padding="@dimen/padding_size"
                 android:text="@string/capture_hdr_record_start"
                 android:textAllCaps="false" />
 
             <Button
                 android:id="@+id/btn_hdr_record_stop"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/btn_height"
+                android:background="@drawable/round_btn_bg"
+                android:padding="@dimen/padding_size"
                 android:layout_marginStart="8dp"
                 android:text="@string/capture_hdr_record_stop"
                 android:textAllCaps="false" />
@@ -108,19 +133,24 @@
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/padding_size">
 
             <Button
                 android:id="@+id/btn_timelapse_start"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/btn_height"
+                android:background="@drawable/round_btn_bg"
+                android:padding="@dimen/padding_size"
                 android:text="@string/capture_timelapse_start"
                 android:textAllCaps="false" />
 
             <Button
                 android:id="@+id/btn_timelapse_stop"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/btn_height"
+                android:background="@drawable/round_btn_bg"
+                android:padding="@dimen/padding_size"
                 android:layout_marginStart="8dp"
                 android:text="@string/capture_timelapse_stop"
                 android:textAllCaps="false" />
@@ -160,7 +190,10 @@
         <Button
             android:id="@+id/btn_play_camera_file"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/btn_height"
+            android:background="@drawable/round_btn_bg"
+            android:padding="@dimen/padding_size"
+            android:layout_marginTop="@dimen/padding_size"
             android:text="@string/capture_play_camera_file"
             android:textAllCaps="false"
             android:visibility="gone"
@@ -169,7 +202,10 @@
         <Button
             android:id="@+id/btn_play_local_file"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/btn_height"
+            android:background="@drawable/round_btn_bg"
+            android:padding="@dimen/padding_size"
+            android:layout_marginTop="@dimen/padding_size"
             android:text="@string/capture_play_local_file"
             android:textAllCaps="false"
             android:visibility="gone"
@@ -178,7 +214,10 @@
         <Button
             android:id="@+id/btn_upload_file"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/btn_height"
+            android:background="@drawable/round_btn_bg"
+            android:padding="@dimen/padding_size"
+            android:layout_marginTop="@dimen/padding_size"
             android:text="@string/capture_upload_file"
             android:textAllCaps="false"
             android:visibility="gone"

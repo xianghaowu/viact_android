@@ -14,7 +14,9 @@
     <Button
         android:id="@+id/btn_choose_file"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/btn_height"
+        android:background="@drawable/round_btn_bg"
+        android:padding="@dimen/padding_size"
         android:layout_marginTop="8dp"
         android:text="@string/fw_choose_file" />
 
@@ -29,7 +31,9 @@
     <ToggleButton
         android:id="@+id/btn_upgrade"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/btn_height"
+        android:background="@drawable/round_btn_bg"
+        android:padding="@dimen/padding_size"
         android:layout_marginTop="8dp"
         android:textOff="@string/fw_start_upgrade"
         android:textOn="@string/fw_upgrade_cancel" />

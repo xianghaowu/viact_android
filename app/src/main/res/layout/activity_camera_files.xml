@@ -7,7 +7,9 @@
     <Button
         android:id="@+id/btn_all"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/btn_height"
+        android:background="@drawable/round_btn_bg"
+        android:padding="@dimen/padding_size"
         android:layout_marginStart="8dp"
         android:text="@string/camera_files_all"
         app:layout_constraintEnd_toStartOf="@+id/btn_image"
@@ -17,7 +19,9 @@
     <Button
         android:id="@+id/btn_image"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/btn_height"
+        android:background="@drawable/round_btn_bg"
+        android:padding="@dimen/padding_size"
         android:text="@string/camera_files_image"
         app:layout_constraintBottom_toBottomOf="@+id/btn_all"
         app:layout_constraintEnd_toStartOf="@+id/btn_video"
@@ -27,7 +31,9 @@
     <Button
         android:id="@+id/btn_video"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/btn_height"
+        android:background="@drawable/round_btn_bg"
+        android:padding="@dimen/padding_size"
         android:text="@string/camera_files_video"
         app:layout_constraintBottom_toBottomOf="@+id/btn_all"
         app:layout_constraintEnd_toEndOf="parent"

@@ -251,4 +251,7 @@
     <!-- SiteMap Dialog -->
     <string name="dlg_sitemap_btn_close">關閉</string>
     <string name="dlg_sitemap_btn_upload">上載</string>
+
+    <string name="menu_home">首页</string>
+    <string name="menu_other">其他</string>
 </resources>

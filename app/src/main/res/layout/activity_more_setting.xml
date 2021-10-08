@@ -130,7 +130,8 @@
             <Button
                 android:id="@+id/btn_set_ev"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/btn_height"
+                android:background="@drawable/round_btn_bg"
                 android:text="@string/setting_apply" />
         </LinearLayout>
 
@@ -180,7 +181,8 @@
             <Button
                 android:id="@+id/btn_set_exposure_mode"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/btn_height"
+                android:background="@drawable/round_btn_bg"
                 android:text="@string/setting_apply" />
         </LinearLayout>
 
@@ -207,7 +209,8 @@
             <Button
                 android:id="@+id/btn_set_iso"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/btn_height"
+                android:background="@drawable/round_btn_bg"
                 android:layout_marginStart="8dp"
                 android:text="@string/setting_apply" />
         </LinearLayout>
@@ -235,7 +238,8 @@
             <Button
                 android:id="@+id/btn_set_iso_top_limit"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/btn_height"
+                android:background="@drawable/round_btn_bg"
                 android:layout_marginStart="8dp"
                 android:text="@string/setting_apply" />
         </LinearLayout>
@@ -280,7 +284,8 @@
             <Button
                 android:id="@+id/btn_set_shutter_mode"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/btn_height"
+                android:background="@drawable/round_btn_bg"
                 android:layout_marginStart="8dp"
                 android:text="@string/setting_apply" />
         </LinearLayout>
@@ -308,7 +313,8 @@
             <Button
                 android:id="@+id/btn_set_shutter_speed"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/btn_height"
+                android:background="@drawable/round_btn_bg"
                 android:layout_marginStart="8dp"
                 android:text="@string/setting_apply" />
         </LinearLayout>
@@ -368,7 +374,8 @@
             <Button
                 android:id="@+id/btn_set_wb"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/btn_height"
+                android:background="@drawable/round_btn_bg"
                 android:layout_marginStart="8dp"
                 android:text="@string/setting_apply" />
         </LinearLayout>
@@ -409,14 +416,18 @@
         <Button
             android:id="@+id/btn_calibrate_gyro"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/btn_height"
+            android:background="@drawable/round_btn_bg"
+            android:padding="@dimen/padding_size"
             android:layout_marginTop="16dp"
             android:text="@string/setting_calibrate_gyro" />
 
         <Button
             android:id="@+id/btn_format_storage"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/btn_height"
+            android:background="@drawable/round_btn_bg"
+            android:padding="@dimen/padding_size"
             android:layout_marginTop="16dp"
             android:text="@string/setting_format_sd" />
     </LinearLayout>
