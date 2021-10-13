@@ -5,11 +5,16 @@ import static com.arashivision.sdk.demo.util.Const.ACTIVE_OTHER_PAGE;
 import static com.arashivision.sdk.demo.util.Const.CONNECT_MODE_NONE;
 import static com.arashivision.sdk.demo.util.Const.CONNECT_MODE_USB;
 import static com.arashivision.sdk.demo.util.Const.CONNECT_MODE_WIFI;
+import static com.arashivision.sdk.demo.util.Const.EXT_STORAGE_DOC_PATH;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -19,6 +24,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
 import com.arashivision.sdk.demo.R;
@@ -26,15 +34,17 @@ import com.arashivision.sdk.demo.dialog.SiteMapDlg;
 import com.arashivision.sdk.demo.models.UploadedData;
 import com.arashivision.sdk.demo.util.API;
 import com.arashivision.sdk.demo.util.APICallback;
+import com.arashivision.sdk.demo.util.ImageFilePath;
 import com.arashivision.sdk.demo.util.NetworkManager;
 import com.arashivision.sdk.demo.util.SaveSharedPrefrence;
 import com.arashivision.sdkcamera.camera.InstaCameraManager;
-import com.yanzhenjie.permission.Action;
+import com.kaopiz.kprogresshud.KProgressHUD;
 import com.yanzhenjie.permission.AndPermission;
 import com.yanzhenjie.permission.runtime.Permission;
 
 import java.io.File;
-import java.util.List;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -62,9 +72,16 @@ public class MainActivity extends BaseObserveCameraActivity {
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.bottom_txt_other)   TextView         txt_bt_other;
 
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.btn_built_in_preview)   Button         btn_built_in_preview;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.btn_built_in_upload)    Button         btn_built_in_upload;
+
     int active_page = ACTIVE_MAIN_PAGE;
     int connect_mode = CONNECT_MODE_NONE;
     int temp_connect = CONNECT_MODE_NONE;
+
+    String captured_file = "";
 
 
     @Override
@@ -78,7 +95,7 @@ public class MainActivity extends BaseObserveCameraActivity {
     }
 
     void initLayout(){
-        //        checkStoragePermission();
+        // checkStoragePermission();
         if (InstaCameraManager.getInstance().getCameraConnectedType() != InstaCameraManager.CONNECT_TYPE_NONE) {
             onCameraStatusChanged(true);
         }
@@ -250,6 +267,46 @@ public class MainActivity extends BaseObserveCameraActivity {
                 iv_bt_center.setImageResource(R.drawable.ic_disconnect);
                 break;
         }
+
+        if (captured_file.isEmpty()) {
+            btn_built_in_preview.setEnabled(false);
+            btn_built_in_upload.setEnabled(false);
+        } else {
+            btn_built_in_preview.setEnabled(true);
+            btn_built_in_upload.setEnabled(true);
+        }
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.btn_built_in_upload) void onClickBuiltinUpload(){
+        if (captured_file.isEmpty()) return;
+        uploadFilesToServer(captured_file);
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.btn_built_in_preview) void onClickBuiltinPreview(){
+        if (captured_file.isEmpty()) return;
+        String[] filePaths = new String[]{captured_file};
+        PlayAndExportActivity.launchActivity(this, filePaths);
+    }
+
+    @SuppressLint({"NonConstantResourceId", "QueryPermissionsNeeded"})
+    @OnClick(R.id.btn_built_in_capture) void onClickBuiltinCamera(){
+        captured_file = "";
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.main_capture_camera);
+        builder.setPositiveButton(R.string.main_capture_photo, (dialogInterface, i) -> {
+            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//            cameraIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
+            photoResultLauncher.launch(cameraIntent);
+        });
+        builder.setNegativeButton(R.string.main_capture_video, (dialogInterface, i) -> {
+            Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+            if (takeVideoIntent.resolveActivity(getPackageManager()) != null) {
+                videoResultLauncher.launch(takeVideoIntent);
+            }
+        });
+        builder.show();
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -309,8 +366,51 @@ public class MainActivity extends BaseObserveCameraActivity {
         view_connect_option.setVisibility(View.VISIBLE);
     }
 
+    // You can do the assignment inside onAttach or onCreate, i.e, before the activity is displayed
+    ActivityResultLauncher<Intent> photoResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    // There are no request codes
+                    Intent data = result.getData();
+                    Bitmap photo = (Bitmap) data.getExtras().get("data");
+                    String dir_name = EXT_STORAGE_DOC_PATH + getString(R.string.app_name) + File.separator;
+                    File dir = new File(dir_name);
+                    if (!dir.exists()){
+                        dir.mkdir();
+                    }
+                    String f_name = dir_name + "temp.png";
+                    try (FileOutputStream out = new FileOutputStream(f_name)) {
+                        photo.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
+                        // PNG is a lossless format, the compression factor (100) is ignored
+                        captured_file = f_name;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "File save error!", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    captured_file = "";
+                    Toast.makeText(this, "Camera was cancelled", Toast.LENGTH_SHORT).show();
+                }
+                refreshLayout();
+            });
+
+    ActivityResultLauncher<Intent> videoResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    // There are no request codes
+                    Intent data = result.getData();
+                    assert data != null;
+                    Uri contentUri = data.getData();
+                    captured_file = ImageFilePath.getPath(this, contentUri);
+                } else {
+                    captured_file = "";
+                }
+                refreshLayout();
+            });
+
     void uploadTest(){
-        SaveSharedPrefrence sharedPref;
         sharedPref = new SaveSharedPrefrence();
         String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/front.png";
         String token = sharedPref.getString(this, SaveSharedPrefrence.PREFS_AUTH_TOKEN);
@@ -328,12 +428,56 @@ public class MainActivity extends BaseObserveCameraActivity {
         });
     }
 
-    private void showSiteMapDlg(){
-        SiteMapDlg inputDlg = new SiteMapDlg(this, "");
+    private void showSiteMapDlg(String pano_url){
+        SiteMapDlg inputDlg = new SiteMapDlg(this, pano_url);
 
         View decorView = inputDlg.getWindow().getDecorView();
         decorView.setBackgroundResource(android.R.color.transparent);
         inputDlg.show();
+    }
+
+    void uploadFilesToServer(String local_path){
+        sharedPref = new SaveSharedPrefrence();
+        String token = sharedPref.getString(this, SaveSharedPrefrence.PREFS_AUTH_TOKEN);
+        if (token.isEmpty()) {
+            Toast.makeText(this, "Autherntication failed!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        File file = new File(local_path);
+        if (file.exists()){
+            showProgress("Uploading...");
+            API.uploadCaptureFile(token, file, new APICallback<UploadedData>() {
+                @Override
+                public void onSuccess(UploadedData response) {
+                    dismissProgress();
+                    Toast.makeText(MainActivity.this, "Success! Uploaded file : " + response.data, Toast.LENGTH_SHORT).show();
+                    showSiteMapDlg(response.data);
+                }
+
+                @Override
+                public void onFailure(String error) {
+                    dismissProgress();
+                    Toast.makeText(MainActivity.this, "Uploading Error : " + error, Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, "Can not find the uploading file!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    SaveSharedPrefrence sharedPref;
+    private KProgressHUD hud;
+
+    public void showProgress(String message) {
+        hud = KProgressHUD.create(this).setLabel(message);
+        hud.show();
+    }
+
+    public void dismissProgress() {
+        if (hud != null) {
+            hud.dismiss();
+        }
     }
 
 }

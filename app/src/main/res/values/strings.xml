@@ -254,4 +254,9 @@
 
     <string name="menu_home">Home</string>
     <string name="menu_other">Other</string>
+
+    <string name="main_item_desc_mobile">Built-in Camera Function</string>
+    <string name="main_capture_camera">Select Camera Action</string>
+    <string name="main_capture_photo">Take Photo</string>
+    <string name="main_capture_video">Take Video</string>
 </resources>

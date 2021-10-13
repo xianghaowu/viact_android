@@ -362,7 +362,7 @@ public class CaptureActivity extends BaseObserveCameraActivity implements ICaptu
     }
 
     void uploadFilesToServer(String local_path){
-        Toast.makeText(this, local_path, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, local_path, Toast.LENGTH_SHORT).show();
         String token = sharedPref.getString(this, SaveSharedPrefrence.PREFS_AUTH_TOKEN);
         if (token.isEmpty()) {
             Toast.makeText(this, "Autherntication failed!", Toast.LENGTH_SHORT).show();

@@ -254,4 +254,10 @@
 
     <string name="menu_home">首页</string>
     <string name="menu_other">其他</string>
+
+    <string name="main_item_desc_mobile">内置摄像头功能</string>
+
+    <string name="main_capture_camera">选择相机操作</string>
+    <string name="main_capture_photo">拍照</string>
+    <string name="main_capture_video">拍摄视频</string>
 </resources>
