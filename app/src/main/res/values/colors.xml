@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#1eabc9</color>
-    <color name="colorPrimaryDark">#136c7f</color>
-    <color name="colorAccent">#e5a75c</color>
+    <color name="colorPrimary">#303030</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#136c7f</color>
 
     <color name="layout_bg_color">#EEEEEE</color>
     <color name="input_bg_color">#FFFFFF</color>
     <color name="btn_bg_color">#55beb7</color>
     <color name="dlg_bg_transparent">#20000000</color>
+    <color name="dlg_black_transparent">#A0000000</color>
     <color name="menu_active">#EEEEEE</color>
     <color name="menu_disable">#808080</color>
+
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="colorGreen">#00FF00</color>
 
 </resources>
