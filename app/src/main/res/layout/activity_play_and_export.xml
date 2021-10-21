@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -56,6 +57,19 @@
         app:constraint_referenced_ids="tv_current,tv_total,seek_bar" />
 
     <Button
+        android:id="@+id/btn_pick_spot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:alpha="0.8"
+        android:text="@string/pick_spot_photo"
+        android:textAllCaps="false"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:visibility="gone"
         android:id="@+id/btn_export_original"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -68,6 +82,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
+        android:visibility="gone"
         android:id="@+id/btn_export_thumbnail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -87,7 +102,7 @@
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_export_original">
+        app:layout_constraintTop_toBottomOf="@+id/btn_pick_spot">
 
         <RadioButton
             android:id="@+id/rb_normal"

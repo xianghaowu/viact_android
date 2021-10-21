@@ -84,7 +84,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
-            android:background="@drawable/circle_btn_bg">
+            android:background="@drawable/circle_bottom_btn_bg">
             <ImageView
                 android:id="@+id/bottom_iv_center"
                 android:layout_width="@dimen/bottom_circle_size"

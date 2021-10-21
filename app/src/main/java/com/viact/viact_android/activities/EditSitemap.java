@@ -7,11 +7,6 @@ import static com.viact.viact_android.utils.Const.EXT_STORAGE_VIDEO_PATH;
 import static com.viact.viact_android.utils.Const.PIN_SIZE_MAX_LEN;
 import static com.viact.viact_android.utils.Const.PIN_SIZE_MIN_LEN;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
@@ -20,11 +15,19 @@ import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -66,6 +69,7 @@ public class EditSitemap extends BaseObserveCameraActivity implements ICaptureSt
     PinPoint edit_pin;
     int tempX, tempY;
     PinPoint selected_pin = null;
+    boolean bVideo_capture = false;
 
 
     @SuppressLint("NonConstantResourceId")
@@ -78,6 +82,8 @@ public class EditSitemap extends BaseObserveCameraActivity implements ICaptureSt
     @BindView(R.id.txt_choose_device)    TextView txt_sel_camera;
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.tv_capture_status)    TextView mTvCaptureStatus;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.ll_rec_stop)          LinearLayout ll_rec_stop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,12 +92,37 @@ public class EditSitemap extends BaseObserveCameraActivity implements ICaptureSt
         setTitle(R.string.edit_sitemap_title);
         ButterKnife.bind(this);
 
+        // Capture Status Callback
+        InstaCameraManager.getInstance().setCaptureStatusListener(this);
+
+        Bundle data = getIntent().getExtras();
+        cur_proc = (Project) data.getParcelable("project");
+        kind_camera = getIntent().getIntExtra("kind_camera", CAMERA_BUILT_IN);
+
+        Glide.with (this)
+                .load (cur_proc.site_map)
+                .into (photo_view);
+
         initLayout();
     }
 
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.edit_site_thumbnail) void onClickThumbnail(){
+        if (selected_pin != null) {
+            String[] Paths = new String[]{selected_pin.path};
+            PlayAndExportActivity.launchActivity(this, Paths, selected_pin.p_id);
+        } else if (edit_pin != null) {
+            String[] Paths = new String[]{edit_pin.path};
+            PlayAndExportActivity.launchActivity(this, Paths, edit_pin.p_id);
+        }
 
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.btn_rec_stop) void onClickVideoStop(){
+        InstaCameraManager.getInstance().stopNormalRecord();
+        bVideo_capture = false;
+        ll_rec_stop.setVisibility(View.GONE);
     }
 
     void refreshLayout(){
@@ -132,7 +163,8 @@ public class EditSitemap extends BaseObserveCameraActivity implements ICaptureSt
     }
 
     void drawPins(){
-        pinsContainer.removeAllViews();
+        if (pinsContainer.getChildCount() > 0)
+            pinsContainer.removeAllViews();
         pin_list = dbHelper.getPinsForProject(cur_proc.id + "");
         for (int i = 0 ; i < pin_list.size(); i++ ){
             PinPoint p_pin = pin_list.get(i);
@@ -150,6 +182,7 @@ public class EditSitemap extends BaseObserveCameraActivity implements ICaptureSt
             iv.setOnClickListener(view -> {
                 selected_pin = getPinFromList(view);
                 if (selected_pin != null && !selected_pin.path.isEmpty()){
+                    iv_thumbnail.setVisibility(View.VISIBLE);
                     Glide.with (this)
                             .load (selected_pin.path)
                             .into (iv_thumbnail);
@@ -182,42 +215,32 @@ public class EditSitemap extends BaseObserveCameraActivity implements ICaptureSt
             pin_list.get(i).iv_mark = iv;
         }
 
-        Glide.with (this)
-                .load (edit_pin.path)
-                .into (iv_thumbnail);
+        if (edit_pin != null){
+            iv_thumbnail.setVisibility(View.VISIBLE);
+            Glide.with (this)
+                    .load (edit_pin.path)
+                    .into (iv_thumbnail);
+        }
     }
 
     void initLayout(){
+        iv_thumbnail.setVisibility(View.GONE);
+        ll_rec_stop.setVisibility(View.GONE);
         dbHelper = DatabaseHelper.getInstance(this);
-        Bundle data = getIntent().getExtras();
-        cur_proc = (Project) data.getParcelable("project");
-        kind_camera = getIntent().getIntExtra("kind_camera", CAMERA_BUILT_IN);
 
-        Glide.with (this)
-                .load (cur_proc.site_map)
-                .into (photo_view);
-
-        photo_view.setOnMatrixChangeListener(rect -> refreshLayout());
+        photo_view.setOnMatrixChangeListener(rect -> {
+            if (pin_list.size() == 0)
+                drawPins();
+            else
+                refreshLayout();
+        });
 
         photo_view.setOnPhotoTapListener(new PhotoTapListener());
 
         if (kind_camera == CAMERA_360){
-            if (InstaCameraManager.getInstance().getCameraConnectedType() == InstaCameraManager.CONNECT_TYPE_NONE) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Connection Type");
-                // Set up the buttons
-                builder.setPositiveButton("Wifi", (dialog, which) -> {
-                    InstaCameraManager.getInstance().openCamera(InstaCameraManager.CONNECT_TYPE_WIFI);
-                });
-                builder.setNegativeButton("USB", (dialog, which) -> {
-                    InstaCameraManager.getInstance().openCamera(InstaCameraManager.CONNECT_TYPE_USB);
-                });
-
-                builder.show();
-            }
+            connect360Camera();
         }
-
-        drawPins();
+//        drawPins();
     }
 
     private PinPoint getPinFromList(View view){
@@ -274,9 +297,11 @@ public class EditSitemap extends BaseObserveCameraActivity implements ICaptureSt
                     videoResultLauncher.launch(takeVideoIntent);
                 }
             } else {
-
+                if (checkSdCardEnabled()) {
+                    InstaCameraManager.getInstance().startNormalRecord();
+                    bVideo_capture = true;
+                }
             }
-
         });
         builder.show();
     }
@@ -289,11 +314,13 @@ public class EditSitemap extends BaseObserveCameraActivity implements ICaptureSt
 
     @Override
     public void onCaptureFinish(String[] filePaths) {
+        bVideo_capture = false;
+        ll_rec_stop.setVisibility(View.GONE);
         mTvCaptureStatus.setVisibility(View.GONE);
         if (filePaths != null && filePaths.length > 0) {
             //download captured file as panorama
             mWorkWrapper = new WorkWrapper(filePaths);
-            exp_filename = "exp_" + System.currentTimeMillis();
+            exp_filename = "exp_" + (long)(System.currentTimeMillis()/1000);
             if (mWorkWrapper.isVideo()) {
                 File folder = new File(EXT_STORAGE_VIDEO_PATH);
                 if (!folder.exists()) {
@@ -384,29 +411,47 @@ public class EditSitemap extends BaseObserveCameraActivity implements ICaptureSt
         super.onCameraStatusChanged(enabled);
         if (enabled) {
             Toast.makeText(this, R.string.main_toast_camera_connected, Toast.LENGTH_SHORT).show();
+            // Capture Status Callback
+            InstaCameraManager.getInstance().setCaptureStatusListener(this);
         } else {
             NetworkManager.getInstance().clearBindProcess();
             Toast.makeText(this, R.string.main_toast_camera_disconnected, Toast.LENGTH_SHORT).show();
-            finish();
         }
         refreshLayout();
     }
 
     @Override
     public void onCaptureStarting() {
+        Log.d("Viact", "capture start");
         mTvCaptureStatus.setText(R.string.capture_capture_starting);
         mTvCaptureStatus.setVisibility(View.VISIBLE);
+        if (bVideo_capture){
+            ll_rec_stop.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
     public void onCaptureWorking() {
+        Log.d("Viact", "capture working");
         mTvCaptureStatus.setText(R.string.capture_capture_working);
     }
 
     @Override
     public void onCaptureStopping() {
+        bVideo_capture = false;
         mTvCaptureStatus.setVisibility(View.GONE);
+        ll_rec_stop.setVisibility(View.GONE);
         Toast.makeText(this, R.string.capture_capture_stopping, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onCaptureTimeChanged(long captureTime) {
+
+    }
+
+    @Override
+    public void onCaptureCountChanged(int captureCount) {
+
     }
 
     @Override
@@ -450,6 +495,47 @@ public class EditSitemap extends BaseObserveCameraActivity implements ICaptureSt
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_setting, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_setting_choose_device) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.main_desc_choose_camera);
+            // Set up the buttons
+            builder.setPositiveButton("Built-in", (dialog, which) -> {
+                kind_camera = CAMERA_BUILT_IN;
+                refreshLayout();
+            });
+            builder.setNegativeButton("360 Camera", (dialog, which) -> {
+                connect360Camera();
+            });
+
+            builder.show();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    void connect360Camera(){
+        if (InstaCameraManager.getInstance().getCameraConnectedType() == InstaCameraManager.CONNECT_TYPE_NONE) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Connection Type");
+            // Set up the buttons
+            builder.setPositiveButton("Wifi", (dialog, which) -> {
+                InstaCameraManager.getInstance().openCamera(InstaCameraManager.CONNECT_TYPE_WIFI);
+            });
+            builder.setNegativeButton("USB", (dialog, which) -> {
+                InstaCameraManager.getInstance().openCamera(InstaCameraManager.CONNECT_TYPE_USB);
+            });
+            builder.show();
+        }
+    }
+
     // You can do the assignment inside onAttach or onCreate, i.e, before the activity is displayed
     ActivityResultLauncher<Intent> photoResultLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -465,7 +551,7 @@ public class EditSitemap extends BaseObserveCameraActivity implements ICaptureSt
                     }
                     Long tsLong = System.currentTimeMillis()/1000;
                     String ts = tsLong.toString();
-                    String f_name = dir_name + cur_proc.id + ts + ".png";
+                    String f_name = dir_name + cur_proc.id +"_" + ts + ".png";
                     try (FileOutputStream out = new FileOutputStream(f_name)) {
                         photo.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
                         // PNG is a lossless format, the compression factor (100) is ignored

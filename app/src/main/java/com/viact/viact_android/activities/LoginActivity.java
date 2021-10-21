@@ -65,7 +65,8 @@ public class LoginActivity extends BaseActivity {
         String pword = Objects.requireNonNull(txt_password.getText()).toString().trim();
         if (uname.length() > 0){
             if (pword.length() > 0) {
-                showProgress();
+                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                /*showProgress();
                 API.authLogin(uname, pword, new APICallback<String>() {
                     @Override
                     public void onSuccess(String response) {
@@ -79,7 +80,7 @@ public class LoginActivity extends BaseActivity {
                         dismissProgress();
                         showToast(error);
                     }
-                });
+                });*/
             } else {
                 tl_password.setError("Wrong! Please type the password");
             }

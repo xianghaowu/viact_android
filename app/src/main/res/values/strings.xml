@@ -254,7 +254,7 @@
     <string name="dlg_sitemap_btn_upload">Upload</string>
 
     <string name="menu_home">Home</string>
-    <string name="menu_other">Other</string>
+    <string name="menu_other">Spot Photo</string>
     <string name="menu_choose_capture_device">Choose Camera</string>
 
     <string name="main_item_desc_mobile">Built-in Camera Function</string>
@@ -284,4 +284,8 @@
 
     <!-- Edit Sitemap -->
     <string name="edit_sitemap_title">Edit SiteMap</string>
+
+    <string name="pick_spot_photo">Spot Photo</string>
+    <string name="btn_create_spot">Create Spot</string>
+    <string name="main_desc_delete_spot">Are you sure to delete this spot?</string>
 </resources>

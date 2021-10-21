@@ -14,5 +14,8 @@
 
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorGreen">#00FF00</color>
+    <color name="colorRed">#A00000</color>
+
+    <color name="colorBottomBtn">#e5a75c</color>
 
 </resources>

@@ -8,8 +8,10 @@ public class Const {
     public static final String APP_NAME_REF = "viact_android";
 
     public static final String EXT_STORAGE_DOC_PATH = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)+ File.separator;
-    public static final String EXT_STORAGE_VIDEO_PATH = EXT_STORAGE_DOC_PATH + APP_NAME_REF + File.separator + "video" + File.separator;
-    public static final String EXT_STORAGE_PHOTO_PATH = EXT_STORAGE_DOC_PATH + APP_NAME_REF + File.separator + "photo" + File.separator;
+    public static final String EXT_STORAGE_APP_PATH = EXT_STORAGE_DOC_PATH + APP_NAME_REF + File.separator;
+    public static final String EXT_STORAGE_VIDEO_PATH = EXT_STORAGE_APP_PATH + "video" + File.separator;
+    public static final String EXT_STORAGE_PHOTO_PATH = EXT_STORAGE_APP_PATH + "photo" + File.separator;
+    public static final String EXT_STORAGE_SPOT_PATH  = EXT_STORAGE_APP_PATH + "spots" + File.separator;
 
     public static final String SITE_MAP_URL = "https://customindz-shinobi.s3.ap-southeast-1.amazonaws.com/cbimage.png";
 

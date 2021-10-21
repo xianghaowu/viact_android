@@ -3,17 +3,32 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/border_thumbnail.xml" value="0.328125" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/circle_bottom_btn_bg.xml" value="0.36770833333333336" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/circle_btn_bg.xml" value="0.36770833333333336" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/circle_btn_stop_bg.xml" value="0.36770833333333336" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/circle_white_bg.xml" value="0.328125" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/ic_add.xml" value="0.36770833333333336" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/ic_cloud_upload.xml" value="0.36770833333333336" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/round_bottom_bar.xml" value="0.36770833333333336" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/round_bottom_white_bar.xml" value="0.328125" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/round_btn_bg.xml" value="0.36770833333333336" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/round_dlg_top_bg.xml" value="0.2171875" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/round_input_bg_xml.xml" value="0.2171875" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_choose_sitemap.xml" value="0.19479166666666667" />
-        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_edit_sitemap.xml" value="0.3515625" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_edit_sitemap.xml" value="0.22" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_login.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_main.xml" value="0.3515625" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_play_and_export.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_splash.xml" value="0.3515625" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_spot_preview.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_stitch.xml" value="0.2421875" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/dialog_choose_sitemap.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/dialog_create_project.xml" value="0.3515625" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/dialog_create_spot.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/item_project_field.xml" value="0.3515625" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/item_spot_field.xml" value="0.3515625" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/layout_bottom.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/menu/menu_setting.xml" value="0.3515625" />
       </map>
     </option>

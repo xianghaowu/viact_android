@@ -12,6 +12,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.viact.viact_android.models.PinPoint;
 import com.viact.viact_android.models.Project;
+import com.viact.viact_android.models.SpotPhoto;
 
 import java.util.ArrayList;
 
@@ -23,6 +24,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
     public static final String TABLE_PROJECTS = "tbl_projects";
     public static final String TABLE_PINS = "tbl_pins";
+    public static final String TABLE_SPOTS = "tbl_spots";
 
     // projects Table Columns
     private static final String KEY_PROJECT_NAME = "name";
@@ -39,6 +41,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_PIN_X = "x_loc";
     private static final String KEY_PIN_Y = "y_loc";
     private static final String KEY_PIN_PATH = "path";
+
+    // spots Table Columns
+    private static final String KEY_SPOT_ID = "ID";
+    private static final String KEY_SPOT_PROJECT_ID = "project_id";
+    private static final String KEY_SPOT_NAME = "name";
+    private static final String KEY_SPOT_DESC = "description";
+    private static final String KEY_SPOT_PATH = "path";
 
     private static DatabaseHelper sInstance;
 
@@ -73,6 +82,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + KEY_PIN_PATH + " TEXT);";
         db.execSQL(query);
 
+        query = "CREATE TABLE " + TABLE_SPOTS + " (" + KEY_SPOT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + KEY_SPOT_PROJECT_ID + " TEXT, "
+                + KEY_SPOT_NAME + " TEXT, "
+                + KEY_SPOT_DESC + " TEXT, "
+                + KEY_SPOT_PATH + " TEXT);";
+        db.execSQL(query);
+
     }
 
     //upgrading database
@@ -81,8 +97,56 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (oldVersion != newVersion) {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROJECTS + ";");
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_PINS + ";");
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_SPOTS + ";");
             onCreate(db);
         }
+    }
+
+    //add the new spot
+    public void addSpot(SpotPhoto ct) {
+        SQLiteDatabase sqLiteDatabase = this .getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_SPOT_PROJECT_ID, ct.p_id);
+        values.put(KEY_SPOT_NAME, ct.name);
+        values.put(KEY_SPOT_DESC, ct.desc);
+        values.put(KEY_SPOT_PATH, ct.path);
+        //inserting new row
+        sqLiteDatabase.insert(TABLE_SPOTS, null , values);
+        //close database connection
+        sqLiteDatabase.close();
+    }
+
+    //get the pins for project
+    public ArrayList<SpotPhoto> getAllSpots() {
+        ArrayList<SpotPhoto> arrayList = new ArrayList<>();
+
+        // select all query
+        String select_query= "SELECT * FROM " + TABLE_SPOTS + ";";
+
+        SQLiteDatabase db = this .getWritableDatabase();
+        @SuppressLint("Recycle") Cursor cursor = db.rawQuery(select_query, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                SpotPhoto pin = new SpotPhoto();
+                pin.id = cursor.getInt(0);
+                pin.p_id = cursor.getString(1);
+                pin.name = cursor.getString(2);
+                pin.desc = cursor.getString(3);
+                pin.path = cursor.getString(4);
+                arrayList.add(pin);
+            }while (cursor.moveToNext());
+        }
+        return arrayList;
+    }
+
+    //delete the pin
+    public void deleteSpot(String ID) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        //deleting row
+        sqLiteDatabase.delete(TABLE_SPOTS, "ID=" + ID, null);
+        sqLiteDatabase.close();
     }
 
     //add the new pin
