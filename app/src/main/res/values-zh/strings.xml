@@ -254,7 +254,7 @@
     <string name="dlg_sitemap_btn_upload">上載</string>
 
     <string name="menu_home">首页</string>
-    <string name="menu_other">现场照片</string>
+    <string name="menu_other">房间</string>
     <string name="menu_choose_capture_device">选择相机</string>
 
     <string name="main_item_desc_mobile">内置摄像头功能</string>
@@ -285,8 +285,13 @@
 
     <!-- Edit Sitemap -->
     <string name="edit_sitemap_title">编辑网站图</string>
+    <string name="edit_sitemap_side_menu_add">添加现场照片</string>
+    <string name="edit_sitemap_side_menu_view">查看现场照片</string>
+    <string name="edit_sitemap_side_menu_update">更新</string>
+    <string name="edit_sitemap_side_menu_delete">删除</string>
+    <string name="title_photo_library">照片库</string>
 
     <string name="pick_spot_photo">现场照片</string>
-    <string name="btn_create_spot">创建现场照片</string>
+    <string name="btn_create_pin">创建</string>
     <string name="main_desc_delete_spot">你一定要删除这张现场照片吗？</string>
 </resources>

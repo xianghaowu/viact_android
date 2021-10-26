@@ -48,7 +48,7 @@ public class ProjectsAdapter extends RecyclerView.Adapter<ProjectsAdapter.ViewHo
 
         viewHolder.tv_title.setText(oneItem.name);
         viewHolder.tv_addr.setText(oneItem.address);
-        viewHolder.tv_desc.setText(oneItem.desc);
+        viewHolder.tv_desc.setText(oneItem.note);
         if (!oneItem.site_map.isEmpty()){
             Glide.with (context)
                     .load (oneItem.site_map)

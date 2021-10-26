@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    tools:context=".activities.CaptureAndPlay">
+
+    <com.arashivision.sdkmedia.player.image.InstaImagePlayerView
+        android:id="@+id/player_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
+    <com.arashivision.sdkmedia.player.video.InstaVideoPlayerView
+        android:id="@+id/player_video"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
+    <com.github.chrisbanes.photoview.PhotoView
+        android:id="@+id/photoview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/txt_choose_device"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:textStyle="bold"
+        android:textSize="@dimen/_10sdp"
+        android:textColor="@color/menu_disable"
+        android:text="@string/main_desc_camera_built_in"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/txt_capture_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:textStyle="bold"
+        android:textSize="@dimen/_10sdp"
+        android:textColor="@color/menu_disable"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/tv_current"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/seek_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/seek_bar" />
+
+    <SeekBar
+        android:id="@+id/seek_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="@dimen/bottom_center_margin"
+        android:backgroundTint="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@+id/ll_confirm_group"
+        app:layout_constraintEnd_toStartOf="@+id/tv_total"
+        app:layout_constraintStart_toEndOf="@+id/tv_current" />
+
+    <TextView
+        android:id="@+id/tv_total"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/seek_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/seek_bar" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="tv_current,tv_total,seek_bar" />
+
+    <LinearLayout
+        android:id="@+id/ll_confirm_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/btn_cancel"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginBottom="32dp"
+            android:background="@drawable/ic_close"
+            android:backgroundTint="@color/colorRed" />
+
+        <Button
+            android:id="@+id/btn_confirm"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="64dp"
+            android:layout_marginBottom="32dp"
+            android:background="@drawable/ic_check_circle"
+            android:backgroundTint="@color/colorGreen" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/ll_rec_stop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            android:id="@+id/btn_rec_stop"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/circle_btn_stop_bg"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/padding_size"
+            android:textColor="@color/menu_disable"
+            android:text="@string/capture_normal_record_stop"/>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

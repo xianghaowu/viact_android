@@ -6,30 +6,33 @@ import android.os.Parcelable;
 public class Project implements Parcelable {
     public int id = 0;
     public String name = "";
-    public String company = "";
     public String address = "";
-    public String desc = "";
+    public String note = "";
     public String site_map = "";
     public String sync = "false";
+    public String create_time = "";
+    public String update_time = "";
 
     public Project(){
         id = 0;
         name = "";
-        company = "";
         address = "";
-        desc = "";
+        note = "";
         site_map = "";
         sync = "false";
+        create_time = "";
+        update_time = "";
     }
 
     protected Project(Parcel in) {
         id = in.readInt();
         name = in.readString();
-        company = in.readString();
         address = in.readString();
-        desc = in.readString();
+        note = in.readString();
         site_map = in.readString();
         sync = in.readString();
+        create_time = in.readString();
+        update_time = in.readString();
     }
 
     public static final Creator<Project> CREATOR = new Creator<Project>() {
@@ -53,10 +56,11 @@ public class Project implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeInt(id);
         parcel.writeString(name);
-        parcel.writeString(company);
         parcel.writeString(address);
-        parcel.writeString(desc);
+        parcel.writeString(note);
         parcel.writeString(site_map);
         parcel.writeString(sync);
+        parcel.writeString(create_time);
+        parcel.writeString(update_time);
     }
 }

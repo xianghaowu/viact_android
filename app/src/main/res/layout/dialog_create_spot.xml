@@ -59,13 +59,6 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-
-            <ImageView
-                android:id="@+id/dlg_iv_spot"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/_200sdp"
-                android:layout_marginTop="@dimen/_16sdp"/>
-
             <Button
                 android:id="@+id/dlg_btn_create"
                 android:layout_width="match_parent"
@@ -75,7 +68,7 @@
                 android:textAllCaps="false"
                 android:textColor="@color/menu_active"
                 android:textSize="20sp"
-                android:text="@string/btn_create_spot"/>
+                android:text="@string/btn_create_pin"/>
 
         </LinearLayout>
     </RelativeLayout>

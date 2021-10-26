@@ -1,102 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/layout_bg_color">
-
-    <ImageView
-        android:id="@+id/dlg_iv_back"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_margin="@dimen/_16sdp"
-        android:src="@drawable/ic_back"/>
-
-    <LinearLayout
+    android:background="@color/dlg_bg_transparent">
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="@dimen/activity_horizontal_margin"
-        android:orientation="vertical">
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/dlg_tl_name"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true">
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_16sdp"
-            android:background="@drawable/round_input_bg_xml"
-            app:endIconMode="clear_text"
-            app:errorEnabled="false"
-            android:hint="@string/txt_layout_name_hint">
+            android:orientation="vertical"
+            android:background="@drawable/round_dlg_bg_xml">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/dlg_txt_name"
+            <ImageView
+                android:id="@+id/dlg_iv_back"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="@dimen/_16sdp"
+                android:src="@drawable/ic_back"/>
+
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:orientation="vertical">
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/dlg_tl_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_16sdp"
+                    android:background="@drawable/round_input_bg_xml"
+                    app:endIconMode="clear_text"
+                    app:errorEnabled="false"
+                    android:hint="@string/txt_layout_name_hint">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/dlg_txt_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/dlg_tl_company"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_16sdp"
-            android:background="@drawable/round_input_bg_xml"
-            app:endIconMode="clear_text"
-            app:errorEnabled="false"
-            android:hint="@string/txt_layout_company_hint">
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/dlg_txt_company"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/dlg_tl_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_16sdp"
+                    android:background="@drawable/round_input_bg_xml"
+                    app:endIconMode="clear_text"
+                    app:errorEnabled="false"
+                    android:hint="@string/txt_layout_address_hint">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/dlg_txt_address"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/dlg_tl_address"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_16sdp"
-            android:background="@drawable/round_input_bg_xml"
-            app:endIconMode="clear_text"
-            app:errorEnabled="false"
-            android:hint="@string/txt_layout_address_hint">
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/dlg_txt_address"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/dlg_tl_desc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_16sdp"
+                    android:background="@drawable/round_input_bg_xml"
+                    app:endIconMode="clear_text"
+                    app:errorEnabled="false"
+                    android:hint="@string/txt_layout_desc_hint">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/dlg_txt_desc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/dlg_tl_desc"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_16sdp"
-            android:background="@drawable/round_input_bg_xml"
-            app:endIconMode="clear_text"
-            app:errorEnabled="false"
-            android:hint="@string/txt_layout_desc_hint">
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/dlg_txt_desc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                <Button
+                    android:id="@+id/dlg_btn_create"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="64dp"
+                    android:background="@drawable/round_btn_bg"
+                    android:textAllCaps="false"
+                    android:textColor="@color/menu_active"
+                    android:textSize="20sp"
+                    android:text="@string/btn_create_project"/>
 
-        </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</RelativeLayout>
 
-        <Button
-            android:id="@+id/dlg_btn_create"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="64dp"
-            android:background="@drawable/round_btn_bg"
-            android:textAllCaps="false"
-            android:textColor="@color/menu_active"
-            android:textSize="20sp"
-            android:text="@string/btn_create_project"/>
-
-    </LinearLayout>
-</LinearLayout>

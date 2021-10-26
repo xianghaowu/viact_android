@@ -254,7 +254,7 @@
     <string name="dlg_sitemap_btn_upload">Upload</string>
 
     <string name="menu_home">Home</string>
-    <string name="menu_other">Spot Photo</string>
+    <string name="menu_other">Rooms</string>
     <string name="menu_choose_capture_device">Choose Camera</string>
 
     <string name="main_item_desc_mobile">Built-in Camera Function</string>
@@ -284,8 +284,13 @@
 
     <!-- Edit Sitemap -->
     <string name="edit_sitemap_title">Edit SiteMap</string>
+    <string name="edit_sitemap_side_menu_add">Add Spot Photo</string>
+    <string name="edit_sitemap_side_menu_view">View Spot Photos</string>
+    <string name="edit_sitemap_side_menu_update">Update Pin</string>
+    <string name="edit_sitemap_side_menu_delete">Delete Pin</string>
+    <string name="title_photo_library">Photo Library</string>
 
     <string name="pick_spot_photo">Spot Photo</string>
-    <string name="btn_create_spot">Create Spot</string>
+    <string name="btn_create_pin">Create Pin</string>
     <string name="main_desc_delete_spot">Are you sure to delete this spot?</string>
 </resources>

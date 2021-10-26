@@ -68,7 +68,7 @@ public class ChooseSitemap extends BaseActivity {
             inputSitemapUrl();
         });
         builder.setNegativeButton(R.string.choose_sitemap_from_gallery, (dialogInterface, i) -> {
-            Intent intent = new   Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            Intent intent = new  Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             chooseLauncher.launch(intent);
         });
         builder.show();
@@ -78,6 +78,9 @@ public class ChooseSitemap extends BaseActivity {
     @OnClick(R.id.btn_confirm) void onClickNext(){
         Drawable bm = photo_view.getDrawable();
         if (bm != null){
+            long timestamp = System.currentTimeMillis()/1000;
+            project.create_time = timestamp + "";
+            project.update_time = timestamp + "";
             dbHelper.addProject(project);
             finish();
         } else {
@@ -121,8 +124,6 @@ public class ChooseSitemap extends BaseActivity {
                     Uri contentUri = data.getData();
                     String path = ImageFilePath.getPath(this, contentUri);
                     if (path != null){
-//                        Bitmap myBitmap = BitmapFactory.decodeFile(path);
-//                        photo_view.setImageBitmap(myBitmap);
 
                         Glide.with (this)
                                 .load (path)

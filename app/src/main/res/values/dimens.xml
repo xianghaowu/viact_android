@@ -16,4 +16,7 @@
     <dimen name="text_size_12">12sp</dimen>
     <dimen name="padding_size">8dp</dimen>
 
+    <dimen name="large_margin">64dp</dimen>
+    <dimen name="xlarge_margin">72dp</dimen>
+
 </resources>

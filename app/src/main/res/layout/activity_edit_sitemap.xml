@@ -5,45 +5,206 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
+    android:background="@color/input_bg_color"
     tools:context=".activities.EditSitemap">
 
-    <com.github.chrisbanes.photoview.PhotoView
-        android:id="@+id/edit_site_photoview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
     <RelativeLayout
-        android:id="@+id/pinsContainer"
+        android:id="@+id/view_home"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/bottom_bar_height">
+        <com.github.chrisbanes.photoview.PhotoView
+            android:id="@+id/edit_site_photoview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
 
+        <RelativeLayout
+            android:id="@+id/pinsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:visibility="gone"
+            android:id="@+id/rl_menu_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/dlg_bg_transparent">
+            <LinearLayout
+                android:id="@+id/ll_side_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:background="@drawable/round_sidemenu_bg"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/ll_side_menu_add"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                    android:layout_marginVertical="@dimen/padding_size"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/padding_size"
+                        android:text="@string/edit_sitemap_side_menu_add"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="@dimen/_13sdp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="@dimen/bar_image_size"
+                    android:layout_marginEnd="@dimen/bottom_center_margin"
+                    android:background="@color/menu_disable" />
+
+                <LinearLayout
+                    android:id="@+id/ll_side_menu_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                    android:layout_marginVertical="@dimen/padding_size"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/padding_size"
+                        android:text="@string/edit_sitemap_side_menu_view"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="@dimen/_13sdp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="@dimen/bar_image_size"
+                    android:layout_marginEnd="@dimen/bottom_center_margin"
+                    android:background="@color/menu_disable" />
+
+                <LinearLayout
+                    android:id="@+id/ll_side_menu_update"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                    android:layout_marginVertical="@dimen/padding_size"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/padding_size"
+                        android:text="@string/edit_sitemap_side_menu_update"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="@dimen/_13sdp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="@dimen/bar_image_size"
+                    android:layout_marginEnd="@dimen/bottom_center_margin"
+                    android:background="@color/menu_disable" />
+
+                <LinearLayout
+                    android:id="@+id/ll_side_menu_delete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                    android:layout_marginVertical="@dimen/padding_size"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/padding_size"
+                        android:text="@string/edit_sitemap_side_menu_delete"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="@dimen/_13sdp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </RelativeLayout>
     </RelativeLayout>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <ImageView
-            android:id="@+id/edit_site_thumbnail"
-            android:layout_width="192dp"
-            android:layout_height="192dp"
-            android:layout_margin="4dp"
-            android:background="@drawable/border_thumbnail"/>
-    </RelativeLayout>
-
-    <TextView
+    <LinearLayout
         android:visibility="gone"
-        android:id="@+id/tv_capture_status"
-        android:layout_width="wrap_content"
+        android:id="@+id/main_view_other"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_marginBottom="@dimen/bottom_bar_height"
+        android:background="@color/layout_bg_color">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/room_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginVertical="@dimen/_8sdp"/>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:visibility="gone"
+        android:id="@+id/main_view_bg_connect"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/dlg_bg_transparent">
+
+        <LinearLayout
+            android:id="@+id/main_view_connect_option"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/round_bottom_white_bar"
+            android:orientation="vertical"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/main_btn_wifi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:background="@drawable/round_btn_bg"
+                android:text="@string/main_connect_wifi_button"
+                android:textAllCaps="false"
+                android:textColor="@color/menu_active" />
+
+            <Button
+                android:id="@+id/main_btn_usb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
+                android:layout_marginVertical="@dimen/activity_vertical_margin"
+                android:background="@drawable/round_btn_bg"
+                android:text="@string/main_connect_usb_button"
+                android:textAllCaps="false"
+                android:textColor="@color/menu_active" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/bottom_bar_height"
+                android:layout_marginVertical="@dimen/activity_vertical_margin" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/main_view_bottom"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="@dimen/_16sdp"
-        android:layout_marginBottom="@dimen/padding_size"
-        android:layout_marginTop="20dp"
-        android:textSize="@dimen/_10sdp"
-        android:textColor="@color/menu_disable"
-        tools:text="@string/capture_capture_working" />
+        android:layout_alignParentBottom="true">
+        <include layout="@layout/layout_bottom"/>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/txt_choose_device"
@@ -51,38 +212,11 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_margin="@dimen/padding_size"
+        android:layout_marginBottom="64dp"
+        android:layout_marginEnd="16dp"
         android:textStyle="bold"
         android:textSize="@dimen/_10sdp"
         android:textColor="@color/menu_disable"
         android:text="@string/main_desc_camera_built_in"/>
-
-    <LinearLayout
-        android:id="@+id/ll_rec_stop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/activity_horizontal_margin"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
-
-        <Button
-            android:id="@+id/btn_rec_stop"
-            android:layout_width="@dimen/_48sdp"
-            android:layout_height="@dimen/_48sdp"
-            android:background="@drawable/circle_btn_stop_bg" />
-
-        <TextView
-            android:id="@+id/txt_rec_stop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/padding_size"
-            android:text="@string/capture_normal_record_stop"
-            android:textColor="@color/menu_disable"
-            android:textSize="@dimen/_10sdp"
-            android:textStyle="bold" />
-    </LinearLayout>
-
 
 </RelativeLayout>

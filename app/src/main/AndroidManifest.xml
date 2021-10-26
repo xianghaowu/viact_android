@@ -28,14 +28,17 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".activities.PlayAndExportActivity"
-            android:exported="false" />
+            android:name=".activities.CaptureAndPlay"
+            android:exported="false"
+            android:theme="@style/splashTheme"/>
         <activity
-            android:name=".activities.SpotPreview"
-            android:exported="false" />
+            android:name=".activities.RoomViewActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/splashTheme"/>
         <activity
             android:name=".activities.EditSitemap"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>
@@ -78,7 +81,6 @@
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
         </activity>
-
     </application>
 
 </manifest>
