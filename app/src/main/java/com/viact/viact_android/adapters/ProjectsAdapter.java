@@ -16,7 +16,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.viact.viact_android.R;
+import com.viact.viact_android.helpers.DatabaseHelper;
 import com.viact.viact_android.models.Project;
+import com.viact.viact_android.models.Sheet;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,10 +29,12 @@ public class ProjectsAdapter extends RecyclerView.Adapter<ProjectsAdapter.ViewHo
     Context context;
     public List<Project> fields = new ArrayList<>();
     EventListener listener;
+    DatabaseHelper dbHelper;
     public ProjectsAdapter(Context context, List<Project> data, EventListener listener) {
         this.context = context;
         this.fields.addAll(data);  //cloneList(data);
         this.listener = listener;
+        dbHelper = DatabaseHelper.getInstance(context);
     }
 
     @NonNull
@@ -49,11 +53,7 @@ public class ProjectsAdapter extends RecyclerView.Adapter<ProjectsAdapter.ViewHo
         viewHolder.tv_title.setText(oneItem.name);
         viewHolder.tv_addr.setText(oneItem.address);
         viewHolder.tv_desc.setText(oneItem.note);
-        if (!oneItem.site_map.isEmpty()){
-            Glide.with (context)
-                    .load (oneItem.site_map)
-                    .into (viewHolder.iv_site);
-        }
+        setItemImage(viewHolder.iv_site, oneItem);
         if (oneItem.sync.equals("true")){
             viewHolder.iv_sync.setVisibility(View.GONE);
         } else {
@@ -70,6 +70,16 @@ public class ProjectsAdapter extends RecyclerView.Adapter<ProjectsAdapter.ViewHo
             }
             return false;
         });
+    }
+    void setItemImage(ImageView iv, Project one){
+        List<Sheet> sh_list = dbHelper.getAllSheets(one.id);
+        if (sh_list.size() == 0) return;
+        Sheet sh = sh_list.get(sh_list.size() - 1);
+        if (!sh.path.isEmpty()){
+            Glide.with (context)
+                 .load (sh.path)
+                 .into (iv);
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")

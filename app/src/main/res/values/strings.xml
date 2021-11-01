@@ -278,19 +278,39 @@
 
     <!-- Choose Sitemap -->
     <string name="btn_next">Next</string>
-    <string name="choose_sitemap_title">Choose SiteMap</string>
+    <string name="choose_sitemap_title">Choose Sheet</string>
     <string name="choose_sitemap_from_url">From Url</string>
     <string name="choose_sitemap_from_gallery">From Gallery</string>
 
     <!-- Edit Sitemap -->
-    <string name="edit_sitemap_title">Edit SiteMap</string>
-    <string name="edit_sitemap_side_menu_add">Add Spot Photo</string>
-    <string name="edit_sitemap_side_menu_view">View Spot Photos</string>
-    <string name="edit_sitemap_side_menu_update">Update Pin</string>
-    <string name="edit_sitemap_side_menu_delete">Delete Pin</string>
+    <string name="edit_sitemap_title">Edit Sheet</string>
+    <string name="edit_sitemap_side_menu_add">Add Photo</string>
+    <string name="edit_sitemap_side_menu_view">View Photos</string>
+    <string name="edit_sitemap_side_menu_update">Update Scene</string>
+    <string name="edit_sitemap_side_menu_delete">Delete Scene</string>
     <string name="title_photo_library">Photo Library</string>
 
     <string name="pick_spot_photo">Spot Photo</string>
-    <string name="btn_create_pin">Create Pin</string>
+    <string name="btn_create_pin">Create Scene</string>
     <string name="main_desc_delete_spot">Are you sure to delete this spot?</string>
+
+    <!-- Create Sheet -->
+    <string name="create_sheet_add">Add Sheet</string>
+    <string name="create_sheet_options">Sheet Options</string>
+    <string name="create_sheet_camera">Take photo of your Sheet</string>
+    <string name="create_sheet_pick">Pick a file</string>
+    <string name="create_sheet_dropbox">Dropbox Download</string>
+    <string name="create_sheet_google">Use Google Maps</string>
+    <string name="create_sheet_no">I don\'t have a sheet</string>
+
+    <!-- Project Activity -->
+    <string name="project_menu_rename">Rename project</string>
+    <string name="project_menu_remove">Remove from device</string>
+    <string name="project_menu_report">Report a problem</string>
+    <string name="project_type_project_name_desc">Enter Project Name</string>
+    <string name="project_type_sheet_name_desc">Enter Sheet Name</string>
+    <string name="sheet_menu_rename">Rename sheet</string>
+    <string name="sheet_menu_remove">Reduce local data storage</string>
+    <string name="project_desc_delete_confirm_sheet">Are you sure to delete this sheet?</string>
+
 </resources>

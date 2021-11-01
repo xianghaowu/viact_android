@@ -12,6 +12,7 @@ public class Const {
     public static final String EXT_STORAGE_VIDEO_PATH = EXT_STORAGE_APP_PATH + "video" + File.separator;
     public static final String EXT_STORAGE_PHOTO_PATH = EXT_STORAGE_APP_PATH + "photo" + File.separator;
     public static final String EXT_STORAGE_SPOT_PATH  = EXT_STORAGE_APP_PATH + "spots" + File.separator;
+    public static final String EXT_STORAGE_SHEET_PATH = EXT_STORAGE_APP_PATH + "sheets" + File.separator;
 
     public static final String SITE_MAP_URL = "https://customindz-shinobi.s3.ap-southeast-1.amazonaws.com/cbimage.png";
 
@@ -24,6 +25,10 @@ public class Const {
     public final static int CONNECT_MODE_NONE                     = 0;
     public final static int CONNECT_MODE_WIFI                     = 1;
     public final static int CONNECT_MODE_USB                      = 2;
+
+    public final static int SHEET_TYPE_NORMAL                     = 0;
+    public final static int SHEET_TYPE_GMAP                       = 1;
+    public final static int SHEET_TYPE_NO_FILE                    = 2;
 
     //Camera Type
     public final static int CAMERA_BUILT_IN                        = 1;

@@ -294,4 +294,23 @@
     <string name="pick_spot_photo">现场照片</string>
     <string name="btn_create_pin">创建</string>
     <string name="main_desc_delete_spot">你一定要删除这张现场照片吗？</string>
+
+    <!-- Create Sheet -->
+    <string name="create_sheet_add">添加表</string>
+    <string name="create_sheet_options">表选项</string>
+    <string name="create_sheet_camera">拍摄您的表的照片</string>
+    <string name="create_sheet_pick">选择文件</string>
+    <string name="create_sheet_dropbox">滴盒下载</string>
+    <string name="create_sheet_google">使用谷歌地图</string>
+    <string name="create_sheet_no">没有床单</string>
+
+    <!-- Project Activity -->
+    <string name="project_menu_rename">重命名项目</string>
+    <string name="project_menu_remove">从设备中取出</string>
+    <string name="project_menu_report">报告问题</string>
+    <string name="project_type_project_name_desc">输入项目名称</string>
+    <string name="project_type_sheet_name_desc">输入表名</string>
+    <string name="sheet_menu_rename">重命名表</string>
+    <string name="sheet_menu_remove">减少本地数据存储</string>
+    <string name="project_desc_delete_confirm_sheet">你一定要删除这张表吗？</string>
 </resources>

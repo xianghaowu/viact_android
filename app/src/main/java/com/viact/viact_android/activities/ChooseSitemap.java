@@ -57,7 +57,7 @@ public class ChooseSitemap extends BaseActivity {
         Glide.with (this)
                 .load (SITE_MAP_URL)
                 .into (photo_view);
-        project.site_map = SITE_MAP_URL;
+//        project.site_map = SITE_MAP_URL;
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -107,7 +107,7 @@ public class ChooseSitemap extends BaseActivity {
             Glide.with (this)
                     .load (m_Text)
                     .into (photo_view);
-            project.site_map = m_Text;
+//            project.site_map = m_Text;
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
@@ -128,7 +128,7 @@ public class ChooseSitemap extends BaseActivity {
                         Glide.with (this)
                                 .load (path)
                                 .into (photo_view);
-                        project.site_map = path;
+//                        project.site_map = path;
                     }
                 }
             });

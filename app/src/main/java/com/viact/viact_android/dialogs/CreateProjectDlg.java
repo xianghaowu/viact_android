@@ -6,12 +6,14 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.viact.viact_android.R;
+import com.viact.viact_android.helpers.DatabaseHelper;
 import com.viact.viact_android.models.Project;
 
 import java.util.Objects;
@@ -24,6 +26,7 @@ public class CreateProjectDlg extends Dialog {
 
     Context context;
     EventListener listener;
+    DatabaseHelper  dbHelper;
 
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.dlg_txt_name)    TextInputEditText       txt_name;
@@ -48,7 +51,9 @@ public class CreateProjectDlg extends Dialog {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialog_create_project);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         ButterKnife.bind(this);
+        dbHelper = DatabaseHelper.getInstance(context);
 
         setCancelable(false);
 
@@ -74,8 +79,11 @@ public class CreateProjectDlg extends Dialog {
         one.address = addr;
         one.note = desc;
         one.sync = "false";
+        one.create_time = (long)System.currentTimeMillis()/1000 + "";
+        one.update_time = one.create_time;
+        dbHelper.addProject(one);
         if (listener != null) {
-            listener.onClickCreate(one);
+            listener.onClickCreate();
             dismiss();
         }
     }
@@ -126,6 +134,6 @@ public class CreateProjectDlg extends Dialog {
     }
 
     public interface EventListener {
-        void onClickCreate(Project proc);
+        void onClickCreate();
     }
 }

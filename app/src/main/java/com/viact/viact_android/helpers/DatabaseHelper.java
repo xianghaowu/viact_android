@@ -12,6 +12,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.viact.viact_android.models.PinPoint;
 import com.viact.viact_android.models.Project;
+import com.viact.viact_android.models.Sheet;
 import com.viact.viact_android.models.SpotPhoto;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     //database version
     public static final int DATABASE_VERSION = 1;
     public static final String TABLE_PROJECTS = "tbl_projects";
+    public static final String TABLE_SHEETS = "tbl_sheets";
     public static final String TABLE_PINS = "tbl_pins";
     public static final String TABLE_SPOTS = "tbl_spots";
 
@@ -31,14 +33,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_PROJECT_NAME = "name";
     private static final String KEY_PROJECT_ADDRESS = "address";
     private static final String KEY_PROJECT_NOTE = "note";
-    private static final String KEY_PROJECT_SITEMAP = "sitemap";
     private static final String KEY_PROJECT_SYNC = "sync";
     private static final String KEY_PROJECT_CREATE = "create_time";
     private static final String KEY_PROJECT_UPDATE = "update_time";
 
+    // sheets Table Columns
+    private static final String KEY_SHEET_ID = "ID";
+    private static final String KEY_SHEET_PROJECT_ID = "project_id";
+    private static final String KEY_SHEET_NAME = "name";
+    private static final String KEY_SHEET_PATH = "path";
+    private static final String KEY_SHEET_TYPE = "type";
+    private static final String KEY_SHEET_LT   = "lt_loc";
+    private static final String KEY_SHEET_RB   = "rb_loc";
+    private static final String KEY_SHEET_CREATE = "create_time";
+    private static final String KEY_SHEET_UPDATE = "update_time";
+
     // pins Table Columns
     private static final String KEY_PIN_ID = "ID";
-    private static final String KEY_PIN_PROJECT_ID = "project_id";
+    private static final String KEY_PIN_SHEET_ID = "sh_id";
     private static final String KEY_PIN_X = "x_loc";
     private static final String KEY_PIN_Y = "y_loc";
     private static final String KEY_PIN_NAME = "name";
@@ -73,14 +85,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + KEY_PROJECT_NAME + " TEXT, "
                 + KEY_PROJECT_ADDRESS + " TEXT, "
                 + KEY_PROJECT_NOTE + " TEXT, "
-                + KEY_PROJECT_SITEMAP + " TEXT, "
                 + KEY_PROJECT_SYNC + " TEXT, "
                 + KEY_PROJECT_CREATE + " TEXT, "
                 + KEY_PROJECT_UPDATE + " TEXT);";
         db.execSQL(query);
 
+        query = "CREATE TABLE " + TABLE_SHEETS + " (" + KEY_SHEET_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + KEY_SHEET_PROJECT_ID + " TEXT, "
+                + KEY_SHEET_NAME + " TEXT, "
+                + KEY_SHEET_PATH + " TEXT, "
+                + KEY_SHEET_TYPE + " INTEGER, "
+                + KEY_SHEET_LT + " TEXT, "
+                + KEY_SHEET_RB + " TEXT, "
+                + KEY_SHEET_CREATE + " TEXT, "
+                + KEY_SHEET_UPDATE + " TEXT);";
+        db.execSQL(query);
+
         query = "CREATE TABLE " + TABLE_PINS + " (" + KEY_PIN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + KEY_PIN_PROJECT_ID + " TEXT, "
+                + KEY_PIN_SHEET_ID + " TEXT, "
                 + KEY_PIN_X + " TEXT, "
                 + KEY_PIN_Y + " TEXT, "
                 + KEY_PIN_NAME + " TEXT, "
@@ -102,10 +124,134 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion != newVersion) {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROJECTS + ";");
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_SHEETS + ";");
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_PINS + ";");
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_SPOTS + ";");
             onCreate(db);
         }
+    }
+
+    //sheet functions
+    public void addSheet(Sheet ct) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_SHEET_PROJECT_ID, ct.pro_id);
+        values.put(KEY_SHEET_NAME, ct.name);
+        values.put(KEY_SHEET_PATH, ct.path);
+        values.put(KEY_SHEET_TYPE, ct.type);
+        values.put(KEY_SHEET_LT, ct.lt_loc);
+        values.put(KEY_SHEET_RB, ct.rb_loc);
+        values.put(KEY_SHEET_CREATE, ct.create_time);
+        values.put(KEY_SHEET_UPDATE, ct.update_time);
+        //inserting new row
+        sqLiteDatabase.insert(TABLE_SHEETS, null , values);
+        //close database connection
+        sqLiteDatabase.close();
+    }
+
+    public boolean checkSheetName(int proc_id, String sh_name) {
+        ArrayList<Sheet> arrayList = new ArrayList<>();
+        // select all query
+        String select_query= "SELECT * FROM " + TABLE_SHEETS + " WHERE project_id = " + proc_id + " AND name LIKE " + sh_name + ";";
+
+        SQLiteDatabase db = this .getWritableDatabase();
+        Cursor cursor = db.rawQuery(select_query, null);
+
+        if (cursor == null) return false;
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                Sheet sh = new Sheet();
+                sh.id = cursor.getInt(0);
+                sh.pro_id = cursor.getString(1);
+                sh.name = cursor.getString(2);
+                sh.path = cursor.getString(3);
+                sh.type = cursor.getInt(4);
+                sh.lt_loc = cursor.getString(5);
+                sh.rb_loc = cursor.getString(6);
+                sh.create_time = cursor.getString(7);
+                sh.update_time = cursor.getString(8);
+                arrayList.add(sh);
+            }while (cursor.moveToNext());
+        }
+        if (arrayList.size() > 0){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public Sheet getSheet(int sh_id) {
+        // select all query
+        String select_query= "SELECT * FROM " + TABLE_SHEETS + " WHERE ID = " + sh_id + ";";
+
+        SQLiteDatabase db = this .getWritableDatabase();
+        @SuppressLint("Recycle") Cursor cursor = db.rawQuery(select_query, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            Sheet sh = new Sheet();
+            sh.id = cursor.getInt(0);
+            sh.pro_id = cursor.getString(1);
+            sh.name = cursor.getString(2);
+            sh.path = cursor.getString(3);
+            sh.type = cursor.getInt(4);
+            sh.lt_loc = cursor.getString(5);
+            sh.rb_loc = cursor.getString(6);
+            sh.create_time = cursor.getString(7);
+            sh.update_time = cursor.getString(8);
+            return sh;
+        }
+        return null;
+    }
+
+    public ArrayList<Sheet> getAllSheets(int proc_id) {
+        ArrayList<Sheet> arrayList = new ArrayList<>();
+        // select all query
+        String select_query= "SELECT * FROM " + TABLE_SHEETS + " WHERE project_id = " + proc_id + " ORDER BY create_time ASC;";
+
+        SQLiteDatabase db = this .getWritableDatabase();
+        @SuppressLint("Recycle") Cursor cursor = db.rawQuery(select_query, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                Sheet sh = new Sheet();
+                sh.id = cursor.getInt(0);
+                sh.pro_id = cursor.getString(1);
+                sh.name = cursor.getString(2);
+                sh.path = cursor.getString(3);
+                sh.type = cursor.getInt(4);
+                sh.lt_loc = cursor.getString(5);
+                sh.rb_loc = cursor.getString(6);
+                sh.create_time = cursor.getString(7);
+                sh.update_time = cursor.getString(8);
+                arrayList.add(sh);
+            }while (cursor.moveToNext());
+        }
+        return arrayList;
+    }
+    //update the sheet
+    public void updateSheet(Sheet ct) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        ContentValues values =  new ContentValues();
+        values.put(KEY_SHEET_NAME, ct.name);
+        values.put(KEY_SHEET_PATH, ct.path);
+        values.put(KEY_SHEET_TYPE, ct.type);
+        values.put(KEY_SHEET_LT, ct.lt_loc);
+        values.put(KEY_SHEET_RB, ct.rb_loc);
+        values.put(KEY_SHEET_CREATE, ct.create_time);
+        values.put(KEY_SHEET_UPDATE, ct.update_time);
+        //updating row
+        sqLiteDatabase.update(TABLE_SHEETS, values, "ID=" + ct.id, null);
+        sqLiteDatabase.close();
+    }
+    //delete the spot by id
+    public void deleteSheet(int sheet_id) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        //deleting row
+        sqLiteDatabase.delete(TABLE_SHEETS, "ID=" + sheet_id, null);
+        sqLiteDatabase.close();
     }
 
     //add the new spot
@@ -120,8 +266,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         //close database connection
         sqLiteDatabase.close();
     }
+
     //get the spots for pin
-    public ArrayList<SpotPhoto> getAllSpots(String pin_id) {
+    public ArrayList<SpotPhoto> getAllSpots(int pin_id) {
         ArrayList<SpotPhoto> arrayList = new ArrayList<>();
 
         // select all query
@@ -144,17 +291,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return arrayList;
     }
     //delete the spot by id
-    public void deleteSpot(String spot_id) {
+    public void deleteSpot(int spot_id) {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         //deleting row
         sqLiteDatabase.delete(TABLE_SPOTS, "ID=" + spot_id, null);
-        sqLiteDatabase.close();
-    }
-    //delete the spot by id
-    public void deleteSpotsByPin(String pin_id) {
-        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
-        //deleting row
-        sqLiteDatabase.delete(TABLE_SPOTS, "pin_id=" + pin_id, null);
         sqLiteDatabase.close();
     }
 
@@ -162,7 +302,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void addPin(PinPoint ct) {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(KEY_PIN_PROJECT_ID, ct.p_id);
+        values.put(KEY_PIN_SHEET_ID, ct.sh_id);
         values.put(KEY_PIN_X, ct.x + "");
         values.put(KEY_PIN_Y, ct.y + "");
         values.put(KEY_PIN_NAME, ct.name);
@@ -187,7 +327,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             pin.id = cursor.getInt(0);
-            pin.p_id = cursor.getString(1);
+            pin.sh_id = cursor.getString(1);
             pin.x = Float.parseFloat(cursor.getString(2));
             pin.y = Float.parseFloat(cursor.getString(3));
             pin.name = cursor.getString(4);
@@ -200,10 +340,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     //get the pins for project
-    public ArrayList<PinPoint> getPinsForProject(String proc_id) {
+    public ArrayList<PinPoint> getPinsForSheet(int sh_id) {
         ArrayList<PinPoint> arrayList = new ArrayList<>();
         // select all query
-        String select_query= "SELECT * FROM " + TABLE_PINS + " WHERE project_id = " + proc_id + ";";
+        String select_query= "SELECT * FROM " + TABLE_PINS + " WHERE sh_id = " + sh_id + ";";
 
         SQLiteDatabase db = this.getWritableDatabase();
         @SuppressLint("Recycle") Cursor cursor = db.rawQuery(select_query, null);
@@ -213,7 +353,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do {
                 PinPoint pin = new PinPoint();
                 pin.id = cursor.getInt(0);
-                pin.p_id = cursor.getString(1);
+                pin.sh_id = cursor.getString(1);
                 pin.x = Float.parseFloat(cursor.getString(2));
                 pin.y = Float.parseFloat(cursor.getString(3));
                 pin.name = cursor.getString(4);
@@ -229,7 +369,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void updatePin(PinPoint ct) {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         ContentValues values =  new ContentValues();
-        values.put(KEY_PIN_PROJECT_ID, ct.p_id);
+        values.put(KEY_PIN_SHEET_ID, ct.sh_id);
         values.put(KEY_PIN_X, ct.x + "");
         values.put(KEY_PIN_Y, ct.y + "");
         values.put(KEY_PIN_NAME, ct.name);
@@ -241,16 +381,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.close();
     }
     //delete the pin
-    public void deletePin(String ID) {
+    public void deletePin(int ID) {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         //deleting row
         sqLiteDatabase.delete(TABLE_PINS, "ID=" + ID, null);
-        sqLiteDatabase.close();
-    }
-    public void deletePinsForProject(String proID) {
-        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
-        //deleting row
-        sqLiteDatabase.delete(TABLE_PINS, "project_id=" + proID, null);
         sqLiteDatabase.close();
     }
 
@@ -261,7 +395,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_PROJECT_NAME, ct.name);
         values.put(KEY_PROJECT_ADDRESS, ct.address);
         values.put(KEY_PROJECT_NOTE, ct.note);
-        values.put(KEY_PROJECT_SITEMAP, ct.site_map);
         values.put(KEY_PROJECT_SYNC, ct.sync);
         values.put(KEY_PROJECT_CREATE, ct.create_time);
         values.put(KEY_PROJECT_UPDATE, ct.update_time);
@@ -289,10 +422,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 proc.name = cursor.getString(1);
                 proc.address = cursor.getString(2);
                 proc.note = cursor.getString(3);
-                proc.site_map = cursor.getString(4);
-                proc.sync = cursor.getString(5);
-                proc.create_time = cursor.getString(6);
-                proc.update_time = cursor.getString(7);
+                proc.sync = cursor.getString(4);
+                proc.create_time = cursor.getString(5);
+                proc.update_time = cursor.getString(6);
                 arrayList.add(proc);
             }while (cursor.moveToNext());
         }
@@ -300,7 +432,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     //delete the note
-    public void delete(String ID) {
+    public void deleteProject(int ID) {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         //deleting row
         sqLiteDatabase.delete(TABLE_PROJECTS, "ID=" + ID, null);
@@ -314,7 +446,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_PROJECT_NAME, ct.name);
         values.put(KEY_PROJECT_ADDRESS, ct.address);
         values.put(KEY_PROJECT_NOTE, ct.note);
-        values.put(KEY_PROJECT_SITEMAP, ct.site_map);
         values.put(KEY_PROJECT_SYNC, ct.sync);
         values.put(KEY_PROJECT_CREATE, ct.create_time);
         values.put(KEY_PROJECT_UPDATE, ct.update_time);

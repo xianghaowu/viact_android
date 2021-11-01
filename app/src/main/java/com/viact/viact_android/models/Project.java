@@ -8,7 +8,6 @@ public class Project implements Parcelable {
     public String name = "";
     public String address = "";
     public String note = "";
-    public String site_map = "";
     public String sync = "false";
     public String create_time = "";
     public String update_time = "";
@@ -18,7 +17,6 @@ public class Project implements Parcelable {
         name = "";
         address = "";
         note = "";
-        site_map = "";
         sync = "false";
         create_time = "";
         update_time = "";
@@ -29,7 +27,6 @@ public class Project implements Parcelable {
         name = in.readString();
         address = in.readString();
         note = in.readString();
-        site_map = in.readString();
         sync = in.readString();
         create_time = in.readString();
         update_time = in.readString();
@@ -58,7 +55,6 @@ public class Project implements Parcelable {
         parcel.writeString(name);
         parcel.writeString(address);
         parcel.writeString(note);
-        parcel.writeString(site_map);
         parcel.writeString(sync);
         parcel.writeString(create_time);
         parcel.writeString(update_time);

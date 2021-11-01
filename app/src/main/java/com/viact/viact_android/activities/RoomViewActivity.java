@@ -107,7 +107,7 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
     void initLayout(){
         txt_date.setText("");
         txt_time.setText("");
-        photo_list = dbHelper.getAllSpots(pin_id);
+        photo_list = dbHelper.getAllSpots(Integer.parseInt(pin_id));
         if (photo_list.size() == 0) {
             finish();
         } else {
@@ -287,10 +287,10 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
         // Set up the buttons
         builder.setPositiveButton("Confirm", (dialog, which) -> {
             if (sel_index >= 0 && sel_index < photo_list.size()){
-                SpotPhoto proc = photo_list.get(sel_index);
-                dbHelper.deleteSpot(proc.id + "");
+                SpotPhoto sp = photo_list.get(sel_index);
+                dbHelper.deleteSpot(sp.id);
                 photo_list.clear();
-                photo_list = dbHelper.getAllSpots(pin_id);
+                photo_list = dbHelper.getAllSpots(Integer.parseInt(pin_id));
                 if (sel_index == photo_list.size()){
                     sel_index--;
                 }

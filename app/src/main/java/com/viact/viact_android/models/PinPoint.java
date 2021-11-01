@@ -6,7 +6,7 @@ import android.widget.ImageView;
 
 public class PinPoint implements Parcelable {
     public int id = -1;
-    public String p_id = "";
+    public String sh_id = "";
     public float x = 0.0f;
     public float y = 0.0f;
     public String name = "";
@@ -18,7 +18,7 @@ public class PinPoint implements Parcelable {
 
     public PinPoint(){
         id = -1;
-        p_id = "";
+        sh_id = "";
         x = 0.0f;
         y = 0.0f;
         name = "";
@@ -29,7 +29,7 @@ public class PinPoint implements Parcelable {
 
     protected PinPoint(Parcel in) {
         id = in.readInt();
-        p_id = in.readString();
+        sh_id = in.readString();
         x = in.readFloat();
         y = in.readFloat();
         name = in.readString();
@@ -58,7 +58,7 @@ public class PinPoint implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeInt(id);
-        parcel.writeString(p_id);
+        parcel.writeString(sh_id);
         parcel.writeFloat(x);
         parcel.writeFloat(y);
         parcel.writeString(name);
