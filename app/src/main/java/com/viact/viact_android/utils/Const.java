@@ -29,7 +29,15 @@ public class Const {
     public final static int SHEET_TYPE_NORMAL                     = 0;
     public final static int SHEET_TYPE_GMAP                       = 1;
     public final static int SHEET_TYPE_NO_FILE                    = 2;
-
+    //Scene Media Type
+    public final static int SCENE_MEDIA_PHOTO_360                = 0;
+    public final static int SCENE_MEDIA_PHOTO_BUILT              = 1;
+    public final static int SCENE_MEDIA_VIDEO_360                = 2;
+    public final static int SCENE_MEDIA_VIDEO_BUILT              = 3;
+    //Scene Edit Type
+    public final static int SCENE_EDIT_NONE                      = 0;
+    public final static int SCENE_EDIT_MARKUP                    = 1;
+    public final static int SCENE_EDIT_IMAGE                     = 2;
     //Camera Type
     public final static int CAMERA_BUILT_IN                        = 1;
     public final static int CAMERA_360                             = 2;

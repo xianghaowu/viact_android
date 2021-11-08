@@ -38,12 +38,26 @@
             android:text="2 Photos"/>
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/item_txt_mark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/padding_size"
+        android:layout_toStartOf="@+id/item_iv_more"
+        android:background="@drawable/round_txt_bg_yellow"
+        android:paddingHorizontal="@dimen/activity_horizontal_margin"
+        android:paddingVertical="2dp"
+        android:text="5"
+        android:textColor="@color/colorBlack"
+        android:textSize="@dimen/_11sdp"
+        android:textStyle="bold" />
+
     <ImageView
         android:id="@+id/item_iv_more"
         android:layout_width="@dimen/image_size"
         android:layout_height="@dimen/image_size"
-        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
         android:layout_alignParentEnd="true"
+        android:layout_marginHorizontal="@dimen/activity_horizontal_margin"
         android:src="@drawable/ic_more_vert"
-        app:tint="@color/menu_disable"/>
+        app:tint="@color/menu_disable" />
 </RelativeLayout>

@@ -1,6 +1,6 @@
 package com.viact.viact_android;
 
-import android.app.Application;
+import androidx.multidex.MultiDexApplication;
 
 import com.arashivision.sdkcamera.InstaCameraSDK;
 import com.arashivision.sdkmedia.InstaMediaSDK;
@@ -9,7 +9,7 @@ import com.viact.viact_android.utils.AssetsUtil;
 
 import java.io.File;
 
-public class MyApp extends Application {
+public class MyApp extends MultiDexApplication {
 
     private static MyApp sInstance;
 

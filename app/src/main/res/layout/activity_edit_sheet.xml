@@ -61,9 +61,20 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_centerVertical="true"
-                android:layout_alignParentEnd="true"
+                android:layout_toStartOf="@+id/edit_sheet_ib_more"
+                android:layout_marginHorizontal="@dimen/padding_size"
                 android:background="@android:color/transparent"
                 android:src="@drawable/ic_edit"
+                app:tint="@color/colorWhite" />
+
+            <ImageButton
+                android:id="@+id/edit_sheet_ib_more"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_more_vert"
                 app:tint="@color/colorWhite" />
 
         </RelativeLayout>

@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <com.arashivision.sdk.demo.view.FlowRadioGroup
+    <com.viact.viact_android.views.FlowRadioGroup
         android:id="@+id/rg_stitch_mode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -22,7 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/stitch_hdr" />
-    </com.arashivision.sdk.demo.view.FlowRadioGroup>
+    </com.viact.viact_android.views.FlowRadioGroup>
 
     <com.arashivision.sdkmedia.player.image.InstaImagePlayerView
         android:id="@+id/player_image"

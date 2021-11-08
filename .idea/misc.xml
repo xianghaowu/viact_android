@@ -9,6 +9,7 @@
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/circle_btn_stop_bg.xml" value="0.36770833333333336" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/circle_white_bg.xml" value="0.328125" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/ic_add.xml" value="0.36770833333333336" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/ic_arrow_left.xml" value="0.36770833333333336" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/ic_back.xml" value="0.36770833333333336" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/ic_camera.xml" value="0.36770833333333336" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/ic_check_circle.xml" value="0.36770833333333336" />
@@ -20,10 +21,12 @@
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/round_bottom_bar.xml" value="0.36770833333333336" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/round_bottom_white_bar.xml" value="0.328125" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/round_btn_bg.xml" value="0.36770833333333336" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/round_btn_bg_gray.xml" value="0.36770833333333336" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/round_dlg_bg_xml.xml" value="0.27760416666666665" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/round_dlg_top_bg.xml" value="0.2171875" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/round_input_bg_xml.xml" value="0.2171875" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/round_sidemenu_bg.xml" value="0.27760416666666665" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/round_txt_bg_yellow.xml" value="0.36770833333333336" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_capture_and_play.xml" value="0.26145833333333335" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_choose_sitemap.xml" value="0.19479166666666667" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_create_sheet.xml" value="0.22" />
@@ -41,6 +44,7 @@
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/dialog_confirm_sheet.xml" value="0.2421875" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/dialog_create_project.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/dialog_create_spot.xml" value="0.3515625" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/dialog_markup.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/item_photo_field.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/item_project_field.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/item_room_field.xml" value="0.3515625" />

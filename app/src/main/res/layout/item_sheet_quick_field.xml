@@ -61,6 +61,20 @@
                         android:textColor="@color/layout_bg_color"
                         android:textSize="@dimen/_9sdp" />
                 </LinearLayout>
+
+                <TextView
+                    android:id="@+id/item_tv_mark"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/padding_size"
+                    android:layout_alignParentEnd="true"
+                    android:background="@drawable/round_txt_bg_yellow"
+                    android:paddingHorizontal="@dimen/activity_horizontal_margin"
+                    android:paddingVertical="2dp"
+                    android:text="5"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="@dimen/_11sdp"
+                    android:textStyle="bold" />
             </RelativeLayout>
 
         </androidx.cardview.widget.CardView>

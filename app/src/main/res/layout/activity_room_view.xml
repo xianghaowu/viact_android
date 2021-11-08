@@ -8,59 +8,260 @@
     android:background="@color/input_bg_color"
     tools:context=".activities.RoomViewActivity">
 
-    <RelativeLayout
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/room_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true">
+        android:layout_height="@dimen/bottom_bar_height"
+        android:background="@color/colorPrimaryDark">
         <RelativeLayout
-            android:id="@+id/room_views"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="16dp">
+
+            <ImageButton
+                android:id="@+id/room_ib_back"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_centerVertical="true"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_back"
+                app:tint="@color/colorWhite" />
+
+            <EditText
+                android:id="@+id/room_et_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@+id/room_ib_back"
+                android:layout_toStartOf="@+id/room_ib_edit"
+                android:gravity="center_vertical"
+                android:imeOptions="actionDone"
+                android:maxLines="1"
+                android:text="Sheet"
+                android:textColor="@color/colorWhite"
+                android:textSize="@dimen/_15sdp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/room_tv_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@+id/room_ib_edit"
+                android:layout_toEndOf="@+id/room_ib_back"
+                android:padding="@dimen/padding_size"
+                android:text="@string/btn_next"
+                android:textColor="@color/colorWhite"
+                android:textSize="@dimen/_12sdp"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/room_ib_edit"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_centerVertical="true"
+                android:layout_marginHorizontal="@dimen/padding_size"
+                android:layout_toStartOf="@+id/room_ib_more"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_edit"
+                app:tint="@color/colorWhite" />
+
+            <ImageButton
+                android:id="@+id/room_ib_more"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_more_vert"
+                app:tint="@color/colorWhite" />
+
+        </RelativeLayout>
+    </androidx.appcompat.widget.Toolbar>
+
+    <RelativeLayout
+        android:id="@+id/room_view_date"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/btn_height"
+        android:layout_below="@+id/room_toolbar"
+        android:background="@color/colorPrimary">
+
+        <ImageView
+            android:id="@+id/room_iv_back"
+            android:layout_width="@dimen/bar_image_size"
+            android:layout_height="@dimen/bar_image_size"
+            android:layout_centerVertical="true"
+            android:layout_marginHorizontal="@dimen/bottom_center_margin"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/ic_arrow_left"
+            app:tint="@color/colorWhite"/>
+
+        <TextView
+            android:id="@+id/room_txt_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/padding_size"
-            android:padding="4dp"
-            android:background="@drawable/border_thumbnail">
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@+id/room_iv_forward"
+            android:layout_toEndOf="@+id/room_iv_back"
+            android:gravity="center"
+            android:padding="@dimen/padding_size"
+            android:text="@string/btn_next"
+            android:textColor="@color/colorWhite"
+            android:textSize="@dimen/_12sdp"
+            android:textStyle="bold" />
 
-                <com.github.chrisbanes.photoview.PhotoView
-                    android:visibility="gone"
-                    android:id="@+id/room_photoview"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    app:layout_constraintDimensionRatio="H,1:1"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"/>
+        <ImageView
+            android:id="@+id/room_iv_forward"
+            android:layout_width="@dimen/bar_image_size"
+            android:layout_height="@dimen/bar_image_size"
+            android:layout_centerVertical="true"
+            android:layout_marginHorizontal="@dimen/bottom_center_margin"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_arrow_right"
+            app:tint="@color/colorWhite" />
 
-                <RelativeLayout
-                    android:id="@+id/room_play_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    app:layout_constraintDimensionRatio="H,1:1"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:orientation="horizontal">
+    </RelativeLayout>
 
-                </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/room_view_date"
+        android:background="@color/colorWhite">
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+        <com.github.chrisbanes.photoview.PhotoView
+            android:visibility="gone"
+            android:id="@+id/room_photoview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <RelativeLayout
+            android:id="@+id/room_play_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/room_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_side_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:background="@drawable/round_sidemenu_bg"
+            android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/room_iv_delete"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:layout_margin="@dimen/padding_size"
-                android:layout_alignParentEnd="true"
+                android:layout_marginStart="@dimen/padding_size"
+                android:layout_marginTop="@dimen/padding_size"
+                android:layout_marginEnd="@dimen/padding_size"
+                android:layout_marginBottom="@dimen/padding_size"
                 android:src="@drawable/ic_delete"
-                app:tint="@color/menu_disable"/>
-        </RelativeLayout>
+                app:tint="@color/colorWhite" />
+
+            <LinearLayout
+                android:id="@+id/room_view_photo_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="@dimen/padding_size"
+                    android:background="@color/menu_disable" />
+
+                <ImageView
+                    android:id="@+id/room_iv_menu_photo"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="@dimen/padding_size"
+                    android:layout_marginTop="@dimen/padding_size"
+                    android:layout_marginEnd="@dimen/padding_size"
+                    android:layout_marginBottom="@dimen/padding_size"
+                    android:src="@drawable/ic_add_photo"
+                    app:tint="@color/colorWhite" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="@dimen/padding_size"
+                    android:background="@color/menu_disable" />
+
+                <ImageView
+                    android:id="@+id/room_iv_menu_edit"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="@dimen/padding_size"
+                    android:layout_marginTop="@dimen/padding_size"
+                    android:layout_marginEnd="@dimen/padding_size"
+                    android:layout_marginBottom="@dimen/padding_size"
+                    android:src="@drawable/ic_edit"
+                    app:tint="@color/colorWhite" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="@dimen/padding_size"
+                    android:background="@color/menu_disable" />
+
+                <ImageView
+                    android:id="@+id/room_iv_menu_category"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="@dimen/padding_size"
+                    android:layout_marginTop="@dimen/padding_size"
+                    android:layout_marginEnd="@dimen/padding_size"
+                    android:layout_marginBottom="@dimen/padding_size"
+                    android:src="@drawable/ic_style"
+                    app:tint="@color/colorWhite" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/room_view_save_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="@dimen/padding_size"
+                    android:background="@color/menu_disable" />
+
+                <ImageView
+                    android:id="@+id/room_iv_menu_store"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="@dimen/padding_size"
+                    android:layout_marginTop="@dimen/padding_size"
+                    android:layout_marginEnd="@dimen/padding_size"
+                    android:layout_marginBottom="@dimen/padding_size"
+                    android:src="@drawable/ic_store"
+                    app:tint="@color/colorYellow" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/room_tv_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:textColor="@color/colorBlue"
+            android:layout_margin="@dimen/activity_vertical_margin"/>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="32dp"
-            android:layout_below="@+id/room_views"
+            android:layout_alignParentBottom="true"
             android:layout_marginHorizontal="@dimen/padding_size"
             android:layout_marginVertical="@dimen/activity_vertical_margin">
 
@@ -102,59 +303,97 @@
                 app:constraint_referenced_ids="tv_current,tv_total,seek_bar" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <RelativeLayout
-            android:id="@+id/room_ll_date"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/room_views"
-            android:layout_marginTop="@dimen/large_margin">
-
-            <ImageView
-                android:id="@+id/room_iv_back"
-                android:layout_width="@dimen/bar_image_size"
-                android:layout_height="@dimen/bar_image_size"
-                android:layout_marginEnd="@dimen/bottom_center_margin"
-                android:layout_toLeftOf="@+id/room_txt_date"
-                android:src="@drawable/ic_arrow_back" />
-
-            <TextView
-                android:id="@+id/room_txt_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="Oct 5"
-                android:textSize="@dimen/_13sdp" />
-
-            <ImageView
-                android:id="@+id/room_iv_forward"
-                android:layout_width="@dimen/bar_image_size"
-                android:layout_height="@dimen/bar_image_size"
-                android:layout_marginStart="@dimen/bottom_center_margin"
-                android:layout_toRightOf="@+id/room_txt_date"
-                android:src="@drawable/ic_arrow_forward" />
-        </RelativeLayout>
-
-        <TextView
-            android:id="@+id/room_txt_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@+id/room_ll_date"
-            android:layout_marginTop="@dimen/activity_vertical_margin"
-            android:textSize="@dimen/_11sdp"
-            android:text="13:00"/>
     </RelativeLayout>
 
+    <RelativeLayout
+        android:id="@+id/markup_menu_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/dlg_bg_transparent">
 
+        <LinearLayout
+            android:id="@+id/markup_menu_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/round_bottom_white_bar"
+            android:orientation="vertical">
 
-    <ImageView
-        android:id="@+id/room_iv_close"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_alignParentEnd="true"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/activity_horizontal_margin"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginBottom="@dimen/activity_horizontal_margin"
-        android:src="@drawable/ic_close" />
+            <TextView
+                android:id="@+id/markup_menu_tv_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:layout_marginBottom="@dimen/padding_size"
+                android:text="Markup"
+                android:textColor="@color/colorBlack"
+                android:textSize="@dimen/_12sdp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/menu_disable" />
+
+            <RelativeLayout
+                android:id="@+id/markup_menu_open"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorWhite">
+
+                <ImageView
+                    android:id="@+id/markup_menu_iv_open"
+                    android:layout_width="@dimen/image_size_small"
+                    android:layout_height="@dimen/image_size_small"
+                    android:layout_centerVertical="true"
+                    android:layout_marginVertical="@dimen/padding_size"
+                    android:layout_marginStart="@dimen/bottom_center_margin"
+                    android:src="@drawable/ic_open"
+                    app:tint="@color/colorGray" />
+
+                <TextView
+                    android:id="@+id/markup_menu_tv_open"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="@dimen/bottom_center_margin"
+                    android:layout_toEndOf="@+id/markup_menu_iv_open"
+                    android:text="@string/menu_title_open"
+                    android:textColor="@color/colorGray"
+                    android:textSize="@dimen/_11sdp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/markup_menu_delete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:background="@color/colorWhite">
+
+                <ImageView
+                    android:id="@+id/markup_menu_iv_delete"
+                    android:layout_width="@dimen/image_size_small"
+                    android:layout_height="@dimen/image_size_small"
+                    android:layout_centerVertical="true"
+                    android:layout_marginVertical="@dimen/padding_size"
+                    android:layout_marginStart="@dimen/bottom_center_margin"
+                    android:src="@drawable/ic_delete"
+                    app:tint="@color/colorGray" />
+
+                <TextView
+                    android:id="@+id/markup_menu_tv_delete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="@dimen/bottom_center_margin"
+                    android:layout_toEndOf="@+id/markup_menu_iv_delete"
+                    android:text="@string/menu_title_delete"
+                    android:textColor="@color/colorGray"
+                    android:textSize="@dimen/_11sdp" />
+            </RelativeLayout>
+
+        </LinearLayout>
+    </RelativeLayout>
+
 </RelativeLayout>

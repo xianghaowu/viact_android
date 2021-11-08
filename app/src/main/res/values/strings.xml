@@ -313,4 +313,11 @@
     <string name="sheet_menu_remove">Reduce local data storage</string>
     <string name="project_desc_delete_confirm_sheet">Are you sure to delete this sheet?</string>
 
+    <!-- Scene View Activity -->
+    <string name="scene_view_markup_status">Tag and drag to draw with the markup. Click save to store the markup and finish the edit status.</string>
+    <string name="menu_title_open">Open</string>
+    <string name="menu_title_delete">Delete</string>
+    <string name="markup_dlg_description">Please enter the markup title and information :</string>
+    <string name="btn_save_markup">Save Markup</string>
+
 </resources>

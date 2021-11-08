@@ -1,5 +1,8 @@
 package com.viact.viact_android.utils;
 
+import android.text.format.DateFormat;
+
+import java.util.Calendar;
 import java.util.Locale;
 
 public class TimeFormat {
@@ -14,6 +17,14 @@ public class TimeFormat {
         return hour == 0
                 ? String.format(Locale.getDefault(), "%02d:%02d", minute, second)
                 : String.format(Locale.getDefault(), "%02d:%02d:%02d", hour, minute, second);
+    }
+
+    // Format as dd, MM 00:00
+    public static String updateTimeFormat(long msec) {
+        Calendar cal = Calendar.getInstance(Locale.ENGLISH);
+        cal.setTimeInMillis(msec * 1000);
+        String date = DateFormat.format("dd,MMM hh:mm", cal).toString();
+        return date;
     }
 
 }

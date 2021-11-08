@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dlg_bg_transparent">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginHorizontal="@dimen/middle_margin"
+        android:background="@drawable/round_input_bg_xml">
+
+        <TextView
+            android:id="@+id/dlg_tv_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_16sdp"
+            android:textColor="@color/colorBlack"
+            android:textSize="@dimen/_13sdp"
+            android:text="@string/markup_dlg_description"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/dlg_tv_description"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:orientation="vertical">
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/dlg_tl_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_16sdp"
+                android:background="@drawable/round_input_bg_xml"
+                app:endIconMode="clear_text"
+                app:errorEnabled="false"
+                android:hint="@string/txt_layout_name_hint">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/dlg_txt_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/dlg_tl_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_16sdp"
+                android:background="@drawable/round_input_bg_xml"
+                app:endIconMode="clear_text"
+                app:errorEnabled="false"
+                android:hint="@string/txt_layout_desc_hint">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/dlg_txt_desc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="64dp">
+
+                <Button
+                    android:id="@+id/dlg_btn_cancel"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="@dimen/activity_horizontal_margin"
+                    android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                    android:background="@drawable/round_btn_bg_gray"
+                    android:textAllCaps="false"
+                    android:textColor="@color/menu_active"
+                    android:textSize="16sp"
+                    android:text="@string/setting_dialog_cancel"/>
+                <Button
+                    android:id="@+id/dlg_btn_save"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:paddingHorizontal="@dimen/activity_horizontal_margin"
+                    android:layout_marginStart="@dimen/activity_horizontal_margin"
+                    android:background="@drawable/round_btn_bg"
+                    android:textAllCaps="false"
+                    android:textColor="@color/menu_active"
+                    android:textSize="16sp"
+                    android:text="@string/btn_save_markup"/>
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>

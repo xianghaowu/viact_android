@@ -1,11 +1,30 @@
 package com.viact.viact_android.activities;
 
+import static com.viact.viact_android.utils.Const.SCENE_EDIT_IMAGE;
+import static com.viact.viact_android.utils.Const.SCENE_EDIT_MARKUP;
+import static com.viact.viact_android.utils.Const.SCENE_EDIT_NONE;
+import static com.viact.viact_android.utils.Const.SCENE_MEDIA_PHOTO_360;
+import static com.viact.viact_android.utils.Const.SCENE_MEDIA_PHOTO_BUILT;
+import static com.viact.viact_android.utils.Const.SCENE_MEDIA_VIDEO_360;
+import static com.viact.viact_android.utils.Const.SCENE_MEDIA_VIDEO_BUILT;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.view.DragEvent;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -25,7 +44,11 @@ import com.arashivision.sdkmedia.work.WorkWrapper;
 import com.bumptech.glide.Glide;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.viact.viact_android.R;
+import com.viact.viact_android.dialogs.MarkupDlg;
 import com.viact.viact_android.helpers.DatabaseHelper;
+import com.viact.viact_android.models.Markup;
+import com.viact.viact_android.models.PinPoint;
+import com.viact.viact_android.models.Scene;
 import com.viact.viact_android.models.SpotPhoto;
 import com.viact.viact_android.utils.TimeFormat;
 
@@ -45,8 +68,6 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.room_txt_date)       TextView                    txt_date;
     @SuppressLint("NonConstantResourceId")
-    @BindView(R.id.room_txt_time)       TextView                    txt_time;
-    @SuppressLint("NonConstantResourceId")
     @BindView(R.id.tv_current)          TextView                    mTvCurrent;
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.tv_total)            TextView                    mTvTotal;
@@ -60,24 +81,50 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
     @BindView(R.id.room_iv_forward)     ImageView                   iv_forward;
 
     @SuppressLint("NonConstantResourceId")
-    @BindView(R.id.room_play_view)    RelativeLayout player_container;
+    @BindView(R.id.room_play_view)      RelativeLayout              player_container;
+
+    //toolbar
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.room_ib_edit)    ImageButton               btn_edit;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.room_tv_title)   TextView                  tv_title;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.room_et_title)    EditText                 et_title;
+    //side menu
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.room_view_photo_menu)    View                    view_photo_menu;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.room_tv_status)          TextView                tv_status;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.room_view_save_menu)    View                     view_save_menu;
+    //Markup Menu
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.markup_menu_bg)             View                 markup_menu_bg;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.markup_menu_view)           View                 markup_menu_view;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.markup_menu_tv_name)        TextView             menu_markup_title;
+
+
     InstaImagePlayerView    mImagePlayerView;
     InstaVideoPlayerView    mVideoPlayerView;
 
-    String pin_id;
+    PinPoint    cur_pin;
     DatabaseHelper dbHelper;
     List<SpotPhoto> photo_list = new ArrayList<>();
+    SpotPhoto sel_photo;
     WorkWrapper mWorkWrapper;
     private int sel_index = 0;
+    private int media_type = SCENE_MEDIA_PHOTO_360;
+    private int edit_type = SCENE_EDIT_NONE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_room_view);
         ButterKnife.bind(this);
-        String title = getIntent().getStringExtra("name");
-        setTitle(title);
-        pin_id = getIntent().getIntExtra("pin_id", 0) + "";
+        cur_pin = (PinPoint) getIntent().getParcelableExtra("pin");
+        setTitle(cur_pin.name);
 
         dbHelper = DatabaseHelper.getInstance(this);
         initLayout();
@@ -105,17 +152,38 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
     }
 
     void initLayout(){
+        et_title.setVisibility(View.GONE);
+        view_save_menu.setVisibility(View.GONE);
+        markup_menu_bg.setVisibility(View.GONE);
         txt_date.setText("");
-        txt_time.setText("");
-        photo_list = dbHelper.getAllSpots(Integer.parseInt(pin_id));
+        tv_title.setText(cur_pin.name);
+
+        photo_list = dbHelper.getAllSpots(cur_pin.id);
         if (photo_list.size() == 0) {
             finish();
         } else {
             playPhoto();
         }
+
+        et_title.setOnKeyListener((v, keyCode, event) -> {
+            // If the event is a key-down event on the "enter" button
+            if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                // Perform action on key press
+                onClickEdit();
+                return true;
+            }
+            return false;
+        });
+        photoView.setOnMatrixChangeListener(rect -> {
+//            redrawMarkup();
+            refreshMarkups();
+        });
+        photoView.setMaximumScale(10.0f);
     }
 
     void playPhoto(){
+        edit_type = SCENE_EDIT_NONE;
+        tv_status.setVisibility(View.GONE);
         if (sel_index == 0) {
             iv_back.setVisibility(View.GONE);
         } else {
@@ -135,25 +203,34 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
         }
         player_container.setVisibility(View.GONE);
 
-        SpotPhoto photo = photo_list.get(sel_index);
-        String filename = photo.path;
-        long ctime = Long.parseLong(photo.create_time);
+        sel_photo = photo_list.get(sel_index);
+        String filename = sel_photo.path;
+        long ctime = Long.parseLong(sel_photo.create_time);
         showDateTime(ctime);
+        mrk_list = dbHelper.getAllMarkups(sel_photo.id);
         String[] filepaths = new String[] {filename};
         mWorkWrapper = new WorkWrapper(filepaths);
         if (filename.contains("exp_360_")){
             if (mWorkWrapper.isVideo()){
+                media_type = SCENE_MEDIA_VIDEO_360;
+                view_photo_menu.setVisibility(View.GONE);
                 playVideo(mWorkWrapper);
             } else {
+                media_type = SCENE_MEDIA_PHOTO_360;
+                view_photo_menu.setVisibility(View.VISIBLE);
                 playImage(mWorkWrapper);
             }
         } else {
             if (filename.contains(".png")){
+                media_type = SCENE_MEDIA_PHOTO_BUILT;
                 photoView.setVisibility(View.VISIBLE);
+                view_photo_menu.setVisibility(View.VISIBLE);
                 Glide.with (this)
                         .load (filename)
                         .into (photoView);
             } else {
+                media_type = SCENE_MEDIA_VIDEO_BUILT;
+                view_photo_menu.setVisibility(View.GONE);
                 playVideo(mWorkWrapper);
             }
         }
@@ -162,10 +239,8 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
     private void showDateTime(long time) {
         Calendar cal = Calendar.getInstance(Locale.ENGLISH);
         cal.setTimeInMillis(time * 1000);
-        String sdate = DateFormat.format("MMM dd", cal).toString();
-        String stime = DateFormat.format("hh:mm", cal).toString();
+        String sdate = DateFormat.format("MMM dd, yyyy hh:mm", cal).toString();
         txt_date.setText(sdate);
-        txt_time.setText(stime);
     }
 
     private void playVideo(WorkWrapper mWrapper) {
@@ -255,6 +330,7 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
             public void onLoadingFinish() {
                 Toast.makeText(RoomViewActivity.this, R.string.play_toast_load_finish, Toast.LENGTH_SHORT).show();
                 mImagePlayerView.refreshDrawableState();
+                refreshMarkups();
             }
 
             @Override
@@ -272,12 +348,30 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
 //            builder.setScreenRatio(2, 1);
 //        }
 
+        mImagePlayerView.setGestureListener(new PlayerGestureListener() {
+            @Override
+            public void onUp() {
+                refreshMarkups();
+            }
+
+            @Override
+            public void onZoom() {
+                refreshMarkups();
+            }
+
+            @Override
+            public void onScroll() {
+                refreshMarkups();
+            }
+        });
+
+
         mImagePlayerView.prepare(mWrapper, builder);
         mImagePlayerView.play();
     }
 
     @SuppressLint("NonConstantResourceId")
-    @OnClick(R.id.room_iv_close) void onClickClose(){
+    @OnClick(R.id.room_ib_back) void onClickClose(){
         finish();
     }
 
@@ -290,7 +384,7 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
                 SpotPhoto sp = photo_list.get(sel_index);
                 dbHelper.deleteSpot(sp.id);
                 photo_list.clear();
-                photo_list = dbHelper.getAllSpots(Integer.parseInt(pin_id));
+                photo_list = dbHelper.getAllSpots(cur_pin.id);
                 if (sel_index == photo_list.size()){
                     sel_index--;
                 }
@@ -316,4 +410,460 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
             mVideoPlayerView.destroy();
         }
     }
+
+    //side menu
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.room_iv_menu_photo) void onClickMenuPhoto(){
+
+    }
+
+    // draw markup
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.room_iv_menu_edit) void onClickMenuEdit(){
+        if (media_type == SCENE_MEDIA_PHOTO_BUILT || media_type == SCENE_MEDIA_PHOTO_360){
+            view_save_menu.setVisibility(View.VISIBLE);
+            tv_status.setVisibility(View.VISIBLE);
+            tv_status.setText(R.string.scene_view_markup_status);
+            edit_type = SCENE_EDIT_MARKUP;
+            editMarkup();
+        }
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.room_iv_menu_category) void onClickMenuCategory(){
+
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.room_iv_menu_store) void onClickMenuStore(){
+        edit_type = SCENE_EDIT_NONE;
+        view_save_menu.setVisibility(View.GONE);
+        tv_status.setVisibility(View.GONE);
+        if (media_type == SCENE_MEDIA_PHOTO_BUILT){
+            photoView.setFocusableInTouchMode(true);
+            //show Markup dialog
+            if (iv_markup != null){
+                Markup mrk = new Markup();
+                mrk.rc = new RectF(originR);
+                mrk.photo_id = sel_photo.id + "";
+                MarkupDlg markupDlg = new MarkupDlg(this, mrk, markup_listener);
+
+                View decorView = markupDlg.getWindow().getDecorView();
+                decorView.setBackgroundResource(android.R.color.transparent);
+                markupDlg.show();
+                image_parent.removeView(iv_markup);
+                iv_markup = null;
+            }
+        } else if (media_type == SCENE_MEDIA_PHOTO_360){
+            mImagePlayerView.setFocusableInTouchMode(true);
+            //show Markup dialog
+            if (iv_markup != null){
+                Markup mrk = new Markup();
+                mrk.rc = new RectF(originR);
+                mrk.photo_id = sel_photo.id + "";
+                MarkupDlg markupDlg = new MarkupDlg(this, mrk, markup_listener);
+
+                View decorView = markupDlg.getWindow().getDecorView();
+                decorView.setBackgroundResource(android.R.color.transparent);
+                markupDlg.show();
+                image_parent.removeView(iv_markup);
+                iv_markup = null;
+            }
+        }
+        iv_markup = null;
+        originR = null;
+    }
+
+    //Toolbar
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.room_ib_more) void onClickMore(){
+
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.room_ib_edit) void onClickEdit(){
+        if (et_title.getVisibility() == View.GONE){
+            et_title.setText(cur_pin.name);
+            tv_title.setVisibility(View.GONE);
+            et_title.setVisibility(View.VISIBLE);
+            et_title.requestFocus();
+            showKeyboard();
+            btn_edit.setImageResource(R.drawable.ic_done);
+        } else {
+            hideKeyboard();
+            String new_name = et_title.getText().toString().trim();
+            if (!new_name.equals(cur_pin.name)){
+                cur_pin.name = new_name;
+                cur_pin.update_time = (long)System.currentTimeMillis()/1000 + "";
+                dbHelper.updatePin(cur_pin);
+                tv_title.setText(cur_pin.name);
+            }
+            et_title.setVisibility(View.GONE);
+            tv_title.setVisibility(View.VISIBLE);
+            btn_edit.setImageResource(R.drawable.ic_edit);
+        }
+    }
+    void showKeyboard(){
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        if(imm != null){
+            imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
+        }
+    }
+
+    void hideKeyboard(){
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    //Edit Markup
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.room_container)  RelativeLayout    image_parent;
+
+    ImageView   iv_markup;
+    Point   s_pos = new Point();
+    Point   e_pos = new Point();
+    float   iv_scal = 0.0f;
+    RectF   originF = new RectF();
+    RectF   originR;
+
+    List<Markup> mrk_list = new ArrayList<>();
+    Markup sel_mrk;
+
+    void editMarkup(){
+        if (media_type == SCENE_MEDIA_PHOTO_BUILT){
+            photoView.setFocusableInTouchMode(false);
+        } else if (media_type == SCENE_MEDIA_PHOTO_360){
+            mImagePlayerView.setFocusableInTouchMode(false);
+        }
+
+        image_parent.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent mevent) {
+                if (mevent.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (edit_type == SCENE_EDIT_MARKUP || edit_type == SCENE_EDIT_IMAGE) {
+                        s_pos.x = (int)mevent.getX();
+                        s_pos.y = (int)mevent.getY();
+                        return true;
+                    }
+                } else if (mevent.getAction() == MotionEvent.ACTION_MOVE){
+                    if (edit_type == SCENE_EDIT_MARKUP || edit_type == SCENE_EDIT_IMAGE){
+                        e_pos.x = (int) mevent.getX();
+                        e_pos.y = (int) mevent.getY();
+                        if (media_type == SCENE_MEDIA_PHOTO_360){
+                            float fov = mImagePlayerView.getFov();
+                            if (fov < 1.0){
+                                moveImageView(s_pos, e_pos);
+                            }
+                        } else {
+                            moveImageView(s_pos, e_pos);
+                        }
+                        return true;
+                    }
+                } else if (mevent.getAction() == MotionEvent.ACTION_UP){
+                    if (edit_type == SCENE_EDIT_MARKUP || edit_type == SCENE_EDIT_IMAGE){
+                        if (iv_markup != null){
+                            if (media_type == SCENE_MEDIA_PHOTO_BUILT){
+                                iv_scal = photoView.getScale();
+                                originF = photoView.getDisplayRect();
+                                originR = new RectF();
+                                originR.left = (Math.abs(originF.left) + iv_markup.getLeft())/iv_scal;
+                                originR.top = (Math.abs(originF.top) + iv_markup.getTop())/iv_scal;
+                                originR.right = originR.left + iv_markup.getWidth()/iv_scal;
+                                originR.bottom = originR.top + iv_markup.getHeight()/iv_scal;
+                                redrawMarkup();
+                            } else if (media_type == SCENE_MEDIA_PHOTO_360){
+                                Rect win_rc = new Rect();
+                                mImagePlayerView.getDrawingRect(win_rc);
+
+                                float fov = mImagePlayerView.getFov();
+                                float yaw = (float) (mImagePlayerView.getYaw() % (2* Math.PI));
+                                float pitch = (float) (mImagePlayerView.getPitch() % (Math.PI));
+                                if (fov > 1.0) return false;
+
+                                int x1 = iv_markup.getLeft();
+                                int y1 = iv_markup.getTop();
+                                int x2 = iv_markup.getRight();
+                                int y2 = iv_markup.getBottom();
+
+                                int o_w = mWorkWrapper.O8〇oO8〇88.getWidthOrigin();
+                                int o_h = mWorkWrapper.O8〇oO8〇88.getHeightOrigin();
+                                float radius = (float)(o_w / Math.PI); //(float) o_w / 4;
+                                int o_x = (int)((float)radius * (-1) * yaw / (2 * Math.PI));
+                                int o_y = (int)((float)radius * (-1) * pitch / (2 * Math.PI));
+
+                                double delta_l = (double)(win_rc.width()/2 - x1) * Math.tan(fov / 2);
+                                double delta_t = (double)(win_rc.height()/2 - y1) * Math.tan(fov / 2);
+                                double delta_r = (double)(win_rc.width()/2 - x2) * Math.tan(fov / 2);
+                                double delta_b = (double)(win_rc.height()/2 - y2) * Math.tan(fov / 2);
+
+                                originR = new RectF();
+                                originR.left = (float) (o_x - delta_l);
+                                originR.top = (float) (o_y - delta_t);
+                                originR.right = (float) (o_x - delta_r);
+                                originR.bottom = (float) (o_y - delta_b);
+                            }
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+        });
+    }
+
+    void redrawMarkup(){
+        if (iv_markup != null){
+            float cur_scale = photoView.getScale();
+            int width = (int) (originR.width() * cur_scale);
+            int height = (int) (originR.height() * cur_scale);
+            RectF rcF = photoView.getDisplayRect();
+            float dx_view = originR.left * cur_scale + rcF.left;
+            float dy_view = originR.top * cur_scale + rcF.top;
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(width, height);
+            layoutParams.leftMargin = (int)dx_view;
+            layoutParams.topMargin = (int)dy_view;
+            iv_markup.setLayoutParams(layoutParams);
+            iv_markup.requestLayout();
+        }
+    }
+
+    void redrawMarkup360(){
+        Rect win_rc = new Rect();
+        mImagePlayerView.getDrawingRect(win_rc);
+        float fov = mImagePlayerView.getFov();
+        float yaw = (float) (mImagePlayerView.getYaw() % (2 * Math.PI));
+        float pitch = (float) (mImagePlayerView.getPitch() % (Math.PI));
+
+        int o_w = mWorkWrapper.O8〇oO8〇88.getWidthOrigin();
+        int o_h = mWorkWrapper.O8〇oO8〇88.getHeightOrigin();
+        //------05/11------
+        float radius = (float)(o_w / Math.PI); //(float) o_w / 4;
+        int o_x = (int)((float)radius * (-1) * yaw / (2 * Math.PI));
+        int o_y = (int)((float)radius * (-1) * pitch /  (2 * Math.PI));
+
+        float delta_l = (float) (o_x - originR.left);
+        float delta_t = (float) (o_y - originR.top);
+        float delta_r = (float) (o_x - originR.right);
+        float delta_b = (float) (o_y - originR.bottom);
+        int left = win_rc.width()/2 - (int)(delta_l / Math.tan(fov/2));
+        int top = win_rc.height()/2 - (int)(delta_t / Math.tan(fov/2));
+        int right = win_rc.width()/2 - (int)(delta_r / Math.tan(fov/2));
+        int bottom = win_rc.height()/2 - (int)(delta_b / Math.tan(fov/2));
+
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(Math.abs(right-left), Math.abs(bottom - top));
+        layoutParams.leftMargin = Math.min(left, right);
+        layoutParams.topMargin = Math.min(top, bottom);
+        iv_markup.setLayoutParams(layoutParams);
+        iv_markup.requestLayout();
+    }
+
+    void moveImageView(Point sp, Point ep){
+        int sx = sp.x;
+        int ex = ep.x;
+        if (sp.x > ep.x) {
+            sx = ep.x;
+            ex = sp.x;
+        }
+        int sy = sp.y;
+        int ey = ep.y;
+        if (sp.y > ep.y){
+            sy = ep.y;
+            ey = sp.y;
+        }
+
+        if (iv_markup == null){
+            iv_markup = new ImageView(this);
+            iv_markup.setImageResource(R.drawable.ic_rect);
+            iv_markup.setScaleType(ImageView.ScaleType.FIT_XY);
+            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(ex-sx, ey-sy);
+
+            lp.setMargins(sx, sy, 0, 0);
+            lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+            lp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+            image_parent.addView(iv_markup, lp);
+            iv_markup.requestLayout();
+
+        } else {
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ex-sx, ey-sy);
+            layoutParams.leftMargin = sx;
+            layoutParams.topMargin = sy;
+            iv_markup.setLayoutParams(layoutParams);
+            iv_markup.requestLayout();
+        }
+    }
+
+    //Markup menu
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.markup_menu_open) void onClickMarkupOpen(){
+        hideMarkupMenu();
+        MarkupDlg markupDlg = new MarkupDlg(this, sel_mrk, markup_listener);
+
+        View decorView = markupDlg.getWindow().getDecorView();
+        decorView.setBackgroundResource(android.R.color.transparent);
+        markupDlg.show();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.markup_menu_delete) void onClickMarkupDelete(){
+        hideMarkupMenu();
+        confirmDeleteMarkup();
+    }
+
+    void showMarkupMenu(){
+        Animation fadein = AnimationUtils.loadAnimation(this, R.anim.fade_in);
+        markup_menu_bg.startAnimation(fadein);
+        markup_menu_bg.setVisibility(View.VISIBLE);
+        Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
+        markup_menu_view.startAnimation(bottomUp);
+        markup_menu_view.setVisibility(View.VISIBLE);
+    }
+
+    void hideMarkupMenu(){
+        Animation bottomDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
+        markup_menu_view.startAnimation(bottomDown);
+        markup_menu_view.setVisibility(View.GONE);
+        Animation fadeout = AnimationUtils.loadAnimation(this, R.anim.fade_out);
+        markup_menu_bg.startAnimation(fadeout);
+        markup_menu_bg.setVisibility(View.GONE);
+    }
+
+    void confirmDeleteMarkup(){
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+        builder.setTitle(R.string.main_desc_delete_confirm);
+        // Set up the buttons
+        builder.setPositiveButton("Confirm", (dialog, which) -> {
+            //DeleteMarkup
+            if (sel_mrk != null){
+                dbHelper.deleteMarkup(sel_mrk.id);
+                mrk_list.remove(sel_mrk);
+                image_parent.removeView(sel_mrk.iv_markup);
+                refreshMarkups();
+            }
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+        builder.show();
+    }
+
+    MarkupDlg.EventListener markup_listener = new MarkupDlg.EventListener() {
+        @Override
+        public void onClickCreate() {
+            mrk_list = dbHelper.getAllMarkups(sel_photo.id);
+            refreshMarkups();
+        }
+    };
+
+    void refreshMarkups(){
+        if (iv_markup != null){
+            image_parent.removeView(iv_markup);
+            iv_markup = null;
+        }
+
+        for (int i = 0; i < mrk_list.size(); i++){
+            Markup mrk = mrk_list.get(i);
+            if (media_type == SCENE_MEDIA_PHOTO_BUILT){
+                float cur_scale = photoView.getScale();
+                int width = (int) (mrk.rc.width() * cur_scale);
+                int height = (int) (mrk.rc.height() * cur_scale);
+                RectF rcF = photoView.getDisplayRect();
+                float dx_view = mrk.rc.left * cur_scale + rcF.left;
+                float dy_view = mrk.rc.top * cur_scale + rcF.top;
+                if (mrk.iv_markup == null){
+                    mrk.iv_markup = new ImageView(this);
+                    mrk.iv_markup.setImageResource(R.drawable.ic_rect);
+                    mrk.iv_markup.setScaleType(ImageView.ScaleType.FIT_XY);
+                    RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(width, height);
+
+                    lp.setMargins((int)dx_view, (int)dy_view, 0, 0);
+                    lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                    lp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                    image_parent.addView(mrk.iv_markup, lp);
+                    mrk.iv_markup.requestLayout();
+
+                    mrk.iv_markup.setOnClickListener(view -> {
+                        sel_mrk = getMarkupFromList(view);
+                        if (sel_mrk != null){
+                            showMarkupMenu();
+                        }
+                    });
+                } else {
+                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(width, height);
+                    layoutParams.leftMargin = (int)dx_view;
+                    layoutParams.topMargin = (int)dy_view;
+                    mrk.iv_markup.setLayoutParams(layoutParams);
+                    mrk.iv_markup.requestLayout();
+                }
+            } else if (media_type == SCENE_MEDIA_PHOTO_360){
+                Rect win_rc = new Rect();
+                mImagePlayerView.getDrawingRect(win_rc);
+                float fov = mImagePlayerView.getFov();
+                float yaw = (float) (mImagePlayerView.getYaw() % (2 * Math.PI));
+                float pitch = (float) (mImagePlayerView.getPitch() % (Math.PI));
+
+//                if (fov > 1.0){
+//                    if (mrk.iv_markup != null) {
+//                        mrk.iv_markup.setVisibility(View.INVISIBLE);
+//                    }
+//                    return;
+//                }
+
+                int o_w = mWorkWrapper.O8〇oO8〇88.getWidthOrigin();
+                int o_h = mWorkWrapper.O8〇oO8〇88.getHeightOrigin();
+                //------05/11------
+                float radius = (float)(o_w / Math.PI); //(float) o_w / 4;
+                int o_x = (int)((float)radius * (-1) * yaw / (2 * Math.PI));
+                int o_y = (int)((float)radius * (-1) * pitch /  (2 * Math.PI));
+
+                float delta_l = (float) (o_x - mrk.rc.left);
+                float delta_t = (float) (o_y - mrk.rc.top);
+                float delta_r = (float) (o_x - mrk.rc.right);
+                float delta_b = (float) (o_y - mrk.rc.bottom);
+                int left = win_rc.width()/2 - (int)(delta_l / Math.tan(fov/2));
+                int top = win_rc.height()/2 - (int)(delta_t / Math.tan(fov/2));
+                int right = win_rc.width()/2 - (int)(delta_r / Math.tan(fov/2));
+                int bottom = win_rc.height()/2 - (int)(delta_b / Math.tan(fov/2));
+
+                if (mrk.iv_markup == null) {
+                    mrk.iv_markup = new ImageView(this);
+                    mrk.iv_markup.setImageResource(R.drawable.ic_rect);
+                    mrk.iv_markup.setScaleType(ImageView.ScaleType.FIT_XY);
+                    RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(Math.abs(right-left), Math.abs(bottom - top));
+                    lp.setMargins(Math.min(left, right), Math.min(top, bottom), 0, 0);
+                    lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                    lp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                    image_parent.addView(mrk.iv_markup, lp);
+                    mrk.iv_markup.requestLayout();
+
+                    mrk.iv_markup.setOnClickListener(view -> {
+                        sel_mrk = getMarkupFromList(view);
+                        if (sel_mrk != null){
+                            showMarkupMenu();
+                        }
+                    });
+                } else {
+                    mrk.iv_markup.setVisibility(View.VISIBLE);
+                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(Math.abs(right-left), Math.abs(bottom - top));
+                    layoutParams.leftMargin = Math.min(left, right);
+                    layoutParams.topMargin = Math.min(top, bottom);
+                    mrk.iv_markup.setLayoutParams(layoutParams);
+                    mrk.iv_markup.requestLayout();
+                }
+            }
+        }
+
+    }
+
+    private Markup getMarkupFromList(View view){
+        for (int i = 0; i < mrk_list.size(); i++){
+            Markup pin = mrk_list.get(i);
+            if (pin.iv_markup != null && pin.iv_markup == view){
+                return mrk_list.get(i);
+            }
+        }
+        return null;
+    }
+
 }

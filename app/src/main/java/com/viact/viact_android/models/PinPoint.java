@@ -3,6 +3,7 @@ package com.viact.viact_android.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 public class PinPoint implements Parcelable {
     public int id = -1;
@@ -15,6 +16,7 @@ public class PinPoint implements Parcelable {
     public String update_time = "";
 
     public ImageView iv_mark = null;
+    public TextView tv_time = null;
 
     public PinPoint(){
         id = -1;

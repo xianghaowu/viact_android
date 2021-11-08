@@ -10,6 +10,7 @@ import static com.viact.viact_android.utils.Const.PIN_SIZE_MIN_LEN;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.os.Bundle;
@@ -38,14 +39,15 @@ import com.bumptech.glide.Glide;
 import com.github.chrisbanes.photoview.OnPhotoTapListener;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.viact.viact_android.R;
-import com.viact.viact_android.adapters.RoomsAdapter;
+import com.viact.viact_android.adapters.ScenesAdapter;
 import com.viact.viact_android.dialogs.CreatePinDlg;
 import com.viact.viact_android.helpers.DatabaseHelper;
 import com.viact.viact_android.models.PinPoint;
-import com.viact.viact_android.models.Room;
+import com.viact.viact_android.models.Scene;
 import com.viact.viact_android.models.Sheet;
 import com.viact.viact_android.models.SpotPhoto;
 import com.viact.viact_android.utils.NetworkManager;
+import com.viact.viact_android.utils.TimeFormat;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -58,13 +60,12 @@ import butterknife.OnClick;
 public class EditSheetActivity extends BaseObserveCameraActivity {
 
     Sheet cur_sheet;
-    List<PinPoint> pin_list = new ArrayList<>();
 
     DatabaseHelper dbHelper;
 
     PinPoint edit_pin;
     int tempX, tempY;
-    PinPoint selected_pin = null;
+    Scene selected_scene = null;
 
     int kind_camera = CAMERA_360;
 
@@ -111,7 +112,6 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_sheet);
-//        setTitle(R.string.edit_sitemap_title);
         ButterKnife.bind(this);
 
         Bundle data = getIntent().getExtras();
@@ -145,10 +145,9 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.ll_side_menu_view) void onClickMenuView(){
         hideSideMenu();
-        if (selected_pin != null && selected_pin.id >= 0){
+        if (selected_scene.ppt != null && selected_scene.ppt.id >= 0){
             Intent viewIntent = new Intent(this, RoomViewActivity.class);
-            viewIntent.putExtra("name", selected_pin.name);
-            viewIntent.putExtra("pin_id", selected_pin.id);
+            viewIntent.putExtra("pin", selected_scene.ppt);
             startActivity(viewIntent);
         }
     }
@@ -156,8 +155,8 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.ll_side_menu_update) void onClickMenuUpdate(){
         hideSideMenu();
-        if (selected_pin != null && selected_pin.id >= 0){
-            CreatePinDlg createDlg = new CreatePinDlg(this, selected_pin, null);
+        if (selected_scene.ppt != null && selected_scene.ppt.id >= 0){
+            CreatePinDlg createDlg = new CreatePinDlg(this, selected_scene.ppt, null);
 
             View decorView = createDlg.getWindow().getDecorView();
             decorView.setBackgroundResource(android.R.color.transparent);
@@ -168,7 +167,7 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.ll_side_menu_delete) void onClickMenuDelete(){
         hideSideMenu();
-        if (selected_pin != null && selected_pin.id >= 0){
+        if (selected_scene.ppt != null && selected_scene.ppt.id >= 0){
             confirmDeletePin();
         }
     }
@@ -188,8 +187,8 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     }
 
     void refreshLayout(){
-        for (int i = 0 ; i < pin_list.size(); i++ ) {
-            PinPoint pp_pin = pin_list.get(i);
+        for (int i = 0; i < scene_list.size(); i++ ) {
+            PinPoint pp_pin = scene_list.get(i).ppt;
             if (pp_pin.iv_mark != null){
                 float img_scale = photo_view.getScale();
                 int pin_wh = (int)((PIN_SIZE_MAX_LEN - PIN_SIZE_MIN_LEN) * img_scale);
@@ -199,12 +198,26 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
                 tempX = (int) (site_width * pp_pin.x + rc.left) - pin_wh / 4;
                 tempY = (int) (site_height * pp_pin.y + rc.top) - pin_wh * 3 / 4;
 
+                if (scene_list.get(i).photos.size() == 0){
+                    pp_pin.iv_mark.setImageResource(R.drawable.ic_mark);
+                } else {
+                    pp_pin.iv_mark.setImageResource(R.drawable.ic_point);
+                }
+
                 RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(pin_wh, pin_wh);
-                // Setting position of our ImageView
                 layoutParams.leftMargin = tempX;
                 layoutParams.topMargin = tempY;
                 pp_pin.iv_mark.setLayoutParams(layoutParams);
                 pp_pin.iv_mark.requestLayout();
+
+
+                RelativeLayout.LayoutParams tvParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                tvParams.leftMargin = tempX;
+                tvParams.topMargin = tempY + pin_wh;
+                pp_pin.tv_time.setLayoutParams(tvParams);
+                pp_pin.tv_time.requestLayout();
+
+                pp_pin.tv_time.setText(TimeFormat.updateTimeFormat(Long.parseLong(pp_pin.update_time)));
 
                 int xMax = photo_view.getWidth();
                 int yMax = photo_view.getHeight();
@@ -213,6 +226,12 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
                     pp_pin.iv_mark.setVisibility(View.INVISIBLE);
                 } else{
                     pp_pin.iv_mark.setVisibility(View.VISIBLE);
+                }
+
+                if (tempX < 0 || tempY < 0 || tempX > xMax || tempY+pin_wh > yMax) {
+                    pp_pin.tv_time.setVisibility(View.INVISIBLE);
+                } else{
+                    pp_pin.tv_time.setVisibility(View.VISIBLE);
                 }
             }
         }
@@ -227,9 +246,9 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     void drawPins(){
         if (pinsContainer.getChildCount() > 0)
             pinsContainer.removeAllViews();
-        pin_list = dbHelper.getPinsForSheet(cur_sheet.id);
-        for (int i = 0 ; i < pin_list.size(); i++ ){
-            PinPoint p_pin = pin_list.get(i);
+        configureRoomList();
+        for (int i = 0; i < scene_list.size(); i++ ){
+            PinPoint p_pin = scene_list.get(i).ppt;
             // calculate Pin position
             float img_scale = photo_view.getScale();
             int pin_wh = (int)((PIN_SIZE_MAX_LEN - PIN_SIZE_MIN_LEN) * img_scale);
@@ -240,10 +259,15 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
             tempY = (int) (site_height * p_pin.y + rc.top) - pin_wh * 3 / 4;
 
             ImageView iv = new ImageView(this);
-            iv.setImageResource(R.drawable.pin);
+//            iv.setImageResource(R.drawable.pin);
+            if (scene_list.get(i).photos.size() == 0){
+                iv.setImageResource(R.drawable.ic_mark);
+            } else {
+                iv.setImageResource(R.drawable.ic_point);
+            }
             iv.setOnClickListener(view -> {
-                selected_pin = getPinFromList(view);
-                if (selected_pin != null){
+                selected_scene = getRoomFromList(view);
+                if (selected_scene != null && selected_scene.ppt != null){
                     //show side menu
                     showSideMenu();
                 }
@@ -259,6 +283,19 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
             iv.getLayoutParams().height = pin_wh;
             iv.getLayoutParams().width = pin_wh;
             iv.requestLayout();
+
+            TextView tv = new TextView(this);
+            tv.setText(TimeFormat.updateTimeFormat(Long.parseLong(p_pin.update_time)));
+            tv.setTextColor(Color.BLUE);
+            RelativeLayout.LayoutParams tvlp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+
+            tvlp.setMargins(tempX, tempY+pin_wh, 0, 0);
+            tvlp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+            tvlp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+            pinsContainer.addView(tv, lp);
+            tv.requestLayout();
+
+
             int xMax = photo_view.getWidth();
             int yMax = photo_view.getHeight();
 
@@ -267,7 +304,14 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
             } else{
                 iv.setVisibility(View.VISIBLE);
             }
-            pin_list.get(i).iv_mark = iv;
+
+            if (tempX < 0 || tempY < 0 || tempX > xMax || tempY+pin_wh > yMax) {
+                tv.setVisibility(View.INVISIBLE);
+            } else{
+                tv.setVisibility(View.VISIBLE);
+            }
+            scene_list.get(i).ppt.iv_mark = iv;
+            scene_list.get(i).ppt.tv_time = tv;
         }
     }
 
@@ -279,18 +323,20 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
         tv_title.setText(cur_sheet.name);
 
         photo_view.setOnMatrixChangeListener(rect -> {
-            if (pin_list.size() == 0)
-                drawPins();
-            else
-                refreshLayout();
+            if (scene_list.size() > 0){
+                if (scene_list.get(0).ppt.iv_mark == null)
+                    drawPins();
+                else
+                    refreshLayout();
+            }
         });
 
         photo_view.setOnPhotoTapListener(new PhotoTapListener());
 
         configureRoomList();
-        roomsAdapter = new RoomsAdapter(this, room_list, roomsListener);
+        scenesAdapter = new ScenesAdapter(this, scene_list, roomsListener);
         room_recycler.setLayoutManager(new LinearLayoutManager(this));
-        room_recycler.setAdapter(roomsAdapter);
+        room_recycler.setAdapter(scenesAdapter);
 
         et_title.setOnKeyListener((v, keyCode, event) -> {
             // If the event is a key-down event on the "enter" button
@@ -303,11 +349,11 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
         });
     }
 
-    private PinPoint getPinFromList(View view){
-        for (int i = 0 ; i < pin_list.size(); i++){
-            PinPoint pin = pin_list.get(i);
+    private Scene getRoomFromList(View view){
+        for (int i = 0; i < scene_list.size(); i++){
+            PinPoint pin = scene_list.get(i).ppt;
             if (pin.iv_mark != null && pin.iv_mark == view){
-                return pin;
+                return scene_list.get(i);
             }
         }
         return null;
@@ -317,16 +363,17 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     public void onResume(){
         super.onResume();
         drawBottomBar();
+        configureRoomList();
         refreshLayout();
     }
 
     void confirmDeletePin(){
-        if (selected_pin != null && selected_pin.id > -1){
+        if (selected_scene.ppt != null && selected_scene.ppt.id > -1){
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
             alertDialogBuilder.setMessage("Are you sure to remove this Pin?");
             alertDialogBuilder.setPositiveButton("Yes", (arg0, arg1) -> {
 
-                List<SpotPhoto> sp_list = dbHelper.getAllSpots(selected_pin.id);
+                List<SpotPhoto> sp_list = dbHelper.getAllSpots(selected_scene.ppt.id);
                 for (int k = 0; k < sp_list.size(); k++)
                 {
                     SpotPhoto sp = sp_list.get(k);
@@ -334,11 +381,14 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
                     sp_f.delete();
                     dbHelper.deleteSpot(sp.id);
                 }
-                dbHelper.deletePin(selected_pin.id);
-                pin_list.remove(selected_pin);
-                pinsContainer.removeView(selected_pin.iv_mark);
-                selected_pin = null;
+                dbHelper.deletePin(selected_scene.ppt.id);
+                scene_list.remove(selected_scene);
+                pinsContainer.removeView(selected_scene.ppt.iv_mark);
+                selected_scene = null;
                 Toast.makeText(this, "Selected Pin was removed", Toast.LENGTH_SHORT).show();
+                if (scene_list.size() == 0) {
+                    finish();
+                }
             });
             alertDialogBuilder.setNegativeButton("No", null);
 
@@ -348,14 +398,14 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     }
 
     void selectCaptureKind(){
-        if (selected_pin != null && selected_pin.id > -1){
+        if (selected_scene.ppt != null && selected_scene.ppt.id > -1){
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.main_capture_camera);
             builder.setPositiveButton(R.string.main_capture_photo, (dialogInterface, i) -> {
                 if (kind_camera == CAMERA_BUILT_IN) {
                     Intent intent = new Intent(this, CaptureAndPlay.class);
                     intent.putExtra("capture_mode", "photo");
-                    intent.putExtra("pin_id", selected_pin.id);
+                    intent.putExtra("pin_id", selected_scene.ppt.id);
                     intent.putExtra("camera_kind", kind_camera);
                     startActivity(intent);
                 } else {
@@ -366,7 +416,7 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
                         if (checkSdCardEnabled()) {
                             Intent intent = new Intent(this, CaptureAndPlay.class);
                             intent.putExtra("capture_mode", "photo");
-                            intent.putExtra("pin_id", selected_pin.id);
+                            intent.putExtra("pin_id", selected_scene.ppt.id);
                             intent.putExtra("camera_kind", kind_camera);
                             startActivity(intent);
                         }
@@ -377,7 +427,7 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
                 if (kind_camera == CAMERA_BUILT_IN) {
                     Intent intent = new Intent(this, CaptureAndPlay.class);
                     intent.putExtra("capture_mode", "video");
-                    intent.putExtra("pin_id", selected_pin.id);
+                    intent.putExtra("pin_id", selected_scene.ppt.id);
                     intent.putExtra("camera_kind", kind_camera);
                     startActivity(intent);
                 } else {
@@ -388,7 +438,7 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
                         if (checkSdCardEnabled()) {
                             Intent intent = new Intent(this, CaptureAndPlay.class);
                             intent.putExtra("capture_mode", "video");
-                            intent.putExtra("pin_id", selected_pin.id);
+                            intent.putExtra("pin_id", selected_scene.ppt.id);
                             intent.putExtra("camera_kind", kind_camera);
                             startActivity(intent);
                         }
@@ -408,7 +458,7 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
         if (active_page == ACTIVE_OTHER_PAGE) {
             setTitle(R.string.title_photo_library);
             configureRoomList();
-            roomsAdapter.setDataList(room_list);
+            scenesAdapter.setDataList(scene_list);
 
             view_home.setVisibility(View.GONE);
             view_other.setVisibility(View.VISIBLE);
@@ -539,7 +589,6 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
         if (item.getItemId() == R.id.menu_setting_choose_device) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.main_desc_choose_camera);
-            // Set up the buttons
             builder.setPositiveButton("Built-in", (dialog, which) -> {
                 kind_camera = CAMERA_BUILT_IN;
                 refreshLayout();
@@ -556,29 +605,28 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     //Spot Photo View
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.room_recycler)    RecyclerView room_recycler;
-    List<Room> room_list = new ArrayList<>();
+    List<Scene> scene_list = new ArrayList<>();
 
-    RoomsAdapter roomsAdapter;
+    ScenesAdapter scenesAdapter;
 
     void configureRoomList(){
-        if (room_list.size() > 0){
-            room_list.clear();
+        if (scene_list.size() > 0){
+            scene_list.clear();
         }
         List<PinPoint> pin_list = dbHelper.getPinsForSheet(cur_sheet.id);
         for (int i = 0; i < pin_list.size(); i++){
-            Room room = new Room();
+            Scene scene = new Scene();
             PinPoint pin = pin_list.get(i);
-            room.ppt = pin;
-            room.photos = dbHelper.getAllSpots(pin.id);
-            room_list.add(room);
+            scene.ppt = pin;
+            scene.photos = dbHelper.getAllSpots(pin.id);
+            scene_list.add(scene);
         }
     }
 
-    RoomsAdapter.EventListener roomsListener = index -> {
-        Room one = room_list.get(index);
+    ScenesAdapter.EventListener roomsListener = index -> {
+        Scene one = scene_list.get(index);
         Intent viewIntent = new Intent(this, RoomViewActivity.class);
-        viewIntent.putExtra("name", one.ppt.name);
-        viewIntent.putExtra("pin_id", one.ppt.id);
+        viewIntent.putExtra("pin", one.ppt);
         startActivity(viewIntent);
     };
 
@@ -608,11 +656,25 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
             createPin(edit_pin);
         }
     }
-
     //Toolbar
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.edit_sheet_ib_back) void onClickBack(){
         onBackPressed();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.edit_sheet_ib_more) void onClickMore(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.main_desc_choose_camera);
+        builder.setPositiveButton("Built-in", (dialog, which) -> {
+            kind_camera = CAMERA_BUILT_IN;
+            refreshLayout();
+        });
+        builder.setNegativeButton("360 Camera", (dialog, which) -> {
+            connectCamera();
+        });
+
+        builder.show();
     }
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.edit_sheet_ib_edit) void onClickEdit(){

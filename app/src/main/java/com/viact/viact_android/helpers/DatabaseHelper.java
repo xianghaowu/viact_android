@@ -8,8 +8,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.RectF;
 
 
+import com.viact.viact_android.models.Markup;
 import com.viact.viact_android.models.PinPoint;
 import com.viact.viact_android.models.Project;
 import com.viact.viact_android.models.Sheet;
@@ -27,6 +29,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String TABLE_SHEETS = "tbl_sheets";
     public static final String TABLE_PINS = "tbl_pins";
     public static final String TABLE_SPOTS = "tbl_spots";
+    public static final String TABLE_MARKUPS = "tbl_markups";
 
     // projects Table Columns
     private static final String KEY_PROJECT_ID = "ID";
@@ -63,6 +66,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_SPOT_PIN_ID = "pin_id";
     private static final String KEY_SPOT_PATH = "path";
     private static final String KEY_SPOT_CREATE = "create_time";
+
+    // markups Table Columns
+    private static final String KEY_MARKUP_ID = "ID";
+    private static final String KEY_MARKUP_PHOTO_ID = "photo_id";
+    private static final String KEY_MARKUP_NAME = "name";
+    private static final String KEY_MARKUP_NOTE = "note";
+    private static final String KEY_MARKUP_LEFT = "lt";
+    private static final String KEY_MARKUP_TOP = "tp";
+    private static final String KEY_MARKUP_RIGHT = "rt";
+    private static final String KEY_MARKUP_BOTTOM = "bt";
+    private static final String KEY_MARKUP_CREATE = "create_time";
+    private static final String KEY_MARKUP_UPDATE = "update_time";
+
 
     private static DatabaseHelper sInstance;
 
@@ -117,6 +133,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + KEY_SPOT_CREATE + " TEXT);";
         db.execSQL(query);
 
+        query = "CREATE TABLE " + TABLE_MARKUPS + " (" + KEY_MARKUP_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + KEY_MARKUP_PHOTO_ID + " TEXT, "
+                + KEY_MARKUP_NAME + " TEXT, "
+                + KEY_MARKUP_NOTE + " TEXT, "
+                + KEY_MARKUP_LEFT + " TEXT, "
+                + KEY_MARKUP_TOP + " TEXT, "
+                + KEY_MARKUP_RIGHT + " TEXT, "
+                + KEY_MARKUP_BOTTOM + " TEXT, "
+                + KEY_MARKUP_CREATE + " TEXT, "
+                + KEY_MARKUP_UPDATE + " TEXT);";
+        db.execSQL(query);
+
     }
 
     //upgrading database
@@ -127,8 +155,89 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_SHEETS + ";");
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_PINS + ";");
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_SPOTS + ";");
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_MARKUPS + ";");
+
             onCreate(db);
         }
+    }
+
+    //markup functions
+    public void addMarkup(Markup ct) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_MARKUP_PHOTO_ID, ct.photo_id);
+        values.put(KEY_MARKUP_NAME, ct.name);
+        values.put(KEY_MARKUP_NOTE, ct.note);
+        values.put(KEY_MARKUP_LEFT, ct.rc.left);
+        values.put(KEY_MARKUP_TOP, ct.rc.top);
+        values.put(KEY_MARKUP_RIGHT, ct.rc.right);
+        values.put(KEY_MARKUP_BOTTOM, ct.rc.bottom);
+        values.put(KEY_MARKUP_CREATE, ct.create_time);
+        values.put(KEY_MARKUP_UPDATE, ct.update_time);
+        //inserting new row
+        sqLiteDatabase.insert(TABLE_MARKUPS, null , values);
+        //close database connection
+        sqLiteDatabase.close();
+    }
+
+    public ArrayList<Markup> getAllMarkups(int photo_id) {
+        ArrayList<Markup> arrayList = new ArrayList<>();
+        // select all query
+        String select_query= "SELECT * FROM " + TABLE_MARKUPS + " WHERE photo_id = " + photo_id + " ORDER BY create_time ASC;";
+
+        SQLiteDatabase db = this .getWritableDatabase();
+        @SuppressLint("Recycle") Cursor cursor = db.rawQuery(select_query, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                Markup sh = new Markup();
+                sh.id = cursor.getInt(0);
+                sh.photo_id = cursor.getString(1);
+                sh.name = cursor.getString(2);
+                sh.note = cursor.getString(3);
+                sh.rc = new RectF();
+                sh.rc.left = Float.parseFloat(cursor.getString(4));
+                sh.rc.top = Float.parseFloat(cursor.getString(5));
+                sh.rc.right = Float.parseFloat(cursor.getString(6));
+                sh.rc.bottom = Float.parseFloat(cursor.getString(7));
+                sh.create_time = cursor.getString(8);
+                sh.update_time = cursor.getString(9);
+                arrayList.add(sh);
+            }while (cursor.moveToNext());
+        }
+        return arrayList;
+    }
+    //update the markup
+    public void updateMarkup(Markup ct) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        ContentValues values =  new ContentValues();
+        values.put(KEY_MARKUP_PHOTO_ID, ct.photo_id);
+        values.put(KEY_MARKUP_NAME, ct.name);
+        values.put(KEY_MARKUP_NOTE, ct.note);
+        values.put(KEY_MARKUP_LEFT, ct.rc.left);
+        values.put(KEY_MARKUP_TOP, ct.rc.top);
+        values.put(KEY_MARKUP_RIGHT, ct.rc.right);
+        values.put(KEY_MARKUP_BOTTOM, ct.rc.bottom);
+        values.put(KEY_MARKUP_CREATE, ct.create_time);
+        values.put(KEY_MARKUP_UPDATE, ct.update_time);
+        //updating row
+        sqLiteDatabase.update(TABLE_MARKUPS, values, "ID=" + ct.id, null);
+        sqLiteDatabase.close();
+    }
+    //delete the markup by id
+    public void deleteMarkup(int mark_id) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        //deleting row
+        sqLiteDatabase.delete(TABLE_MARKUPS, "ID=" + mark_id, null);
+        sqLiteDatabase.close();
+    }
+    //delete the markups by photo_id
+    public void deleteMarkupsByPhoto(int photo_id) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        //deleting row
+        sqLiteDatabase.delete(TABLE_MARKUPS, "photo_id=" + photo_id, null);
+        sqLiteDatabase.close();
     }
 
     //sheet functions

@@ -313,4 +313,12 @@
     <string name="sheet_menu_rename">重命名表</string>
     <string name="sheet_menu_remove">减少本地数据存储</string>
     <string name="project_desc_delete_confirm_sheet">你一定要删除这张表吗？</string>
+
+    <!-- Scene View Activity -->
+    <string name="scene_view_markup_status">标记和拖动以绘制标记。 单击保存以存储标记并完成编辑状态。</string>
+    <string name="menu_title_open">打开</string>
+    <string name="menu_title_delete">删除</string>
+    <string name="markup_dlg_description">请输入标记标题和信息：</string>
+    <string name="btn_save_markup">保存标记</string>
+
 </resources>

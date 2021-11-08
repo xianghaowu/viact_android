@@ -55,6 +55,8 @@ public class ListSheetsAdapter extends RecyclerView.Adapter<ListSheetsAdapter.Vi
             viewHolder.item_count.setText(getCount(sh));
         }
 
+        setMarkTxt(viewHolder.item_mark, sh);
+
         viewHolder.item_parent.setOnClickListener( view -> {
             if (listener != null){
                 listener.onClickItem(position);
@@ -66,6 +68,24 @@ public class ListSheetsAdapter extends RecyclerView.Adapter<ListSheetsAdapter.Vi
                 listener.onClickMenu(position);
             }
         });
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void setMarkTxt(TextView txt_v, Sheet sh){
+        List<PinPoint> pp_list = dbHelper.getPinsForSheet(sh.id);
+        int cnt = 0;
+        for (int i = 0; i < pp_list.size(); i++){
+            List<SpotPhoto> sp_list = dbHelper.getAllSpots(pp_list.get(i).id);
+            if (sp_list.size() == 0){
+                cnt ++;
+            }
+        }
+        if (cnt > 0) {
+            txt_v.setVisibility(View.VISIBLE);
+            txt_v.setText(cnt + "");
+        } else{
+            txt_v.setVisibility(View.GONE);
+        }
     }
 
     private String getCount(Sheet sh){
@@ -98,7 +118,7 @@ public class ListSheetsAdapter extends RecyclerView.Adapter<ListSheetsAdapter.Vi
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView item_name, item_count;
+        TextView item_name, item_count, item_mark;
         ImageView  item_menu;
         View    item_parent;
         public ViewHolder(@NonNull View itemView) {
@@ -107,6 +127,7 @@ public class ListSheetsAdapter extends RecyclerView.Adapter<ListSheetsAdapter.Vi
             item_name   =       itemView.findViewById(R.id.item_tv_name);
             item_count   =       itemView.findViewById(R.id.item_tv_count);
             item_menu   =       itemView.findViewById(R.id.item_iv_more);
+            item_mark   =       itemView.findViewById(R.id.item_txt_mark);
         }
     }
 
