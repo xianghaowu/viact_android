@@ -8,9 +8,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.PointF;
 import android.graphics.RectF;
 
 
+import com.viact.viact_android.models.InsImg;
 import com.viact.viact_android.models.Markup;
 import com.viact.viact_android.models.PinPoint;
 import com.viact.viact_android.models.Project;
@@ -30,6 +32,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String TABLE_PINS = "tbl_pins";
     public static final String TABLE_SPOTS = "tbl_spots";
     public static final String TABLE_MARKUPS = "tbl_markups";
+    public static final String TABLE_INS_IMGS = "tbl_ins_imgs";
 
     // projects Table Columns
     private static final String KEY_PROJECT_ID = "ID";
@@ -78,6 +81,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_MARKUP_BOTTOM = "bt";
     private static final String KEY_MARKUP_CREATE = "create_time";
     private static final String KEY_MARKUP_UPDATE = "update_time";
+
+    // images Table Columns
+    private static final String KEY_INS_IMG_ID = "ID";
+    private static final String KEY_INS_IMG_PHOTO_ID = "photo_id";
+    private static final String KEY_INS_IMG_PATH = "name";
+    private static final String KEY_INS_IMG_X = "x_loc";
+    private static final String KEY_INS_IMG_Y = "y_loc";
+    private static final String KEY_INS_IMG_CREATE = "create_time";
+    private static final String KEY_INS_IMG_UPDATE = "update_time";
 
 
     private static DatabaseHelper sInstance;
@@ -145,6 +157,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + KEY_MARKUP_UPDATE + " TEXT);";
         db.execSQL(query);
 
+        query = "CREATE TABLE " + TABLE_INS_IMGS + " (" + KEY_INS_IMG_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + KEY_INS_IMG_PHOTO_ID + " TEXT, "
+                + KEY_INS_IMG_PATH + " TEXT, "
+                + KEY_INS_IMG_X + " TEXT, "
+                + KEY_INS_IMG_Y + " TEXT, "
+                + KEY_INS_IMG_CREATE + " TEXT, "
+                + KEY_INS_IMG_UPDATE + " TEXT);";
+        db.execSQL(query);
+
     }
 
     //upgrading database
@@ -156,9 +177,80 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_PINS + ";");
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_SPOTS + ";");
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_MARKUPS + ";");
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_INS_IMGS + ";");
 
             onCreate(db);
         }
+    }
+
+    //insert image functions
+    public void addInsImg(InsImg ct) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_INS_IMG_PHOTO_ID, ct.photo_id);
+        values.put(KEY_INS_IMG_PATH, ct.path);
+        values.put(KEY_INS_IMG_X, ct.point.x);
+        values.put(KEY_INS_IMG_Y, ct.point.y);
+        values.put(KEY_INS_IMG_CREATE, ct.create_time);
+        values.put(KEY_INS_IMG_UPDATE, ct.update_time);
+        //inserting new row
+        sqLiteDatabase.insert(TABLE_INS_IMGS, null , values);
+        //close database connection
+        sqLiteDatabase.close();
+    }
+
+    public ArrayList<InsImg> getAllImgs(int photo_id) {
+        ArrayList<InsImg> arrayList = new ArrayList<>();
+        // select all query
+        String select_query= "SELECT * FROM " + TABLE_INS_IMGS + " WHERE photo_id = " + photo_id + " ORDER BY create_time ASC;";
+
+        SQLiteDatabase db = this .getWritableDatabase();
+        @SuppressLint("Recycle") Cursor cursor = db.rawQuery(select_query, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                InsImg sh = new InsImg();
+                sh.id = cursor.getInt(0);
+                sh.photo_id = cursor.getString(1);
+                sh.path = cursor.getString(2);
+                sh.point = new PointF();
+                sh.point.x = Float.parseFloat(cursor.getString(3));
+                sh.point.y = Float.parseFloat(cursor.getString(4));
+                sh.create_time = cursor.getString(5);
+                sh.update_time = cursor.getString(6);
+                arrayList.add(sh);
+            }while (cursor.moveToNext());
+        }
+        return arrayList;
+    }
+    //update the image
+    public void updateInsImg(InsImg ct) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        ContentValues values =  new ContentValues();
+        values.put(KEY_INS_IMG_PHOTO_ID, ct.photo_id);
+        values.put(KEY_INS_IMG_PATH, ct.path);
+        values.put(KEY_INS_IMG_X, ct.point.x);
+        values.put(KEY_INS_IMG_Y, ct.point.y);
+        values.put(KEY_INS_IMG_CREATE, ct.create_time);
+        values.put(KEY_INS_IMG_UPDATE, ct.update_time);
+        //updating row
+        sqLiteDatabase.update(TABLE_INS_IMGS, values, "ID=" + ct.id, null);
+        sqLiteDatabase.close();
+    }
+    //delete the image by id
+    public void deleteInsImg(int mark_id) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        //deleting row
+        sqLiteDatabase.delete(TABLE_INS_IMGS, "ID=" + mark_id, null);
+        sqLiteDatabase.close();
+    }
+    //delete the image by photo_id
+    public void deleteInsImgsByPhoto(int photo_id) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        //deleting row
+        sqLiteDatabase.delete(TABLE_INS_IMGS, "photo_id=" + photo_id, null);
+        sqLiteDatabase.close();
     }
 
     //markup functions

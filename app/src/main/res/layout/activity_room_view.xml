@@ -86,6 +86,18 @@
         android:layout_below="@+id/room_toolbar"
         android:background="@color/colorPrimary">
 
+        <TextView
+            android:id="@+id/room_txt_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:padding="@dimen/padding_size"
+            android:text="@string/btn_next"
+            android:textColor="@color/colorWhite"
+            android:textSize="@dimen/_12sdp"
+            android:textStyle="bold" />
+
         <ImageView
             android:id="@+id/room_iv_back"
             android:layout_width="@dimen/bar_image_size"
@@ -95,20 +107,6 @@
             android:layout_alignParentStart="true"
             android:src="@drawable/ic_arrow_left"
             app:tint="@color/colorWhite"/>
-
-        <TextView
-            android:id="@+id/room_txt_date"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toStartOf="@+id/room_iv_forward"
-            android:layout_toEndOf="@+id/room_iv_back"
-            android:gravity="center"
-            android:padding="@dimen/padding_size"
-            android:text="@string/btn_next"
-            android:textColor="@color/colorWhite"
-            android:textSize="@dimen/_12sdp"
-            android:textStyle="bold" />
 
         <ImageView
             android:id="@+id/room_iv_forward"
@@ -394,6 +392,31 @@
             </RelativeLayout>
 
         </LinearLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/view_preview_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorWhite"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/iv_preview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"/>
+
+        <ImageView
+            android:id="@+id/preview_iv_close"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="@dimen/_16sdp"
+            android:layout_marginTop="@dimen/_16sdp"
+            android:layout_marginEnd="@dimen/_16sdp"
+            android:layout_marginBottom="@dimen/_16sdp"
+            android:src="@drawable/ic_close" />
     </RelativeLayout>
 
 </RelativeLayout>

@@ -300,6 +300,7 @@ public class ProjectActivity extends AppCompatActivity {
                     SpotPhoto sp = sp_list.get(k);
                     File sp_f = new File(sp.path);
                     sp_f.delete();
+                    dbHelper.deleteMarkupsByPhoto(sp.id);
                     dbHelper.deleteSpot(sp.id);
                 }
                 dbHelper.deletePin(pt.id);
@@ -335,6 +336,7 @@ public class ProjectActivity extends AppCompatActivity {
                 SpotPhoto sp = sp_list.get(k);
                 File sp_f = new File(sp.path);
                 sp_f.delete();
+                dbHelper.deleteMarkupsByPhoto(sp.id);
                 dbHelper.deleteSpot(sp.id);
             }
             dbHelper.deletePin(pt.id);

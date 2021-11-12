@@ -1,5 +1,7 @@
 package com.viact.viact_android.activities;
 
+import static com.viact.viact_android.utils.Const.CUSTOM_IMG_SIZE;
+import static com.viact.viact_android.utils.Const.EXT_STORAGE_IMG_PATH;
 import static com.viact.viact_android.utils.Const.SCENE_EDIT_IMAGE;
 import static com.viact.viact_android.utils.Const.SCENE_EDIT_MARKUP;
 import static com.viact.viact_android.utils.Const.SCENE_EDIT_NONE;
@@ -9,14 +11,19 @@ import static com.viact.viact_android.utils.Const.SCENE_MEDIA_VIDEO_360;
 import static com.viact.viact_android.utils.Const.SCENE_MEDIA_VIDEO_BUILT;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.format.DateFormat;
-import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -31,6 +38,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.constraintlayout.widget.Group;
 
 import com.arashivision.sdkmedia.player.image.ImageParamsBuilder;
@@ -46,12 +55,17 @@ import com.github.chrisbanes.photoview.PhotoView;
 import com.viact.viact_android.R;
 import com.viact.viact_android.dialogs.MarkupDlg;
 import com.viact.viact_android.helpers.DatabaseHelper;
+import com.viact.viact_android.models.InsImg;
 import com.viact.viact_android.models.Markup;
 import com.viact.viact_android.models.PinPoint;
-import com.viact.viact_android.models.Scene;
 import com.viact.viact_android.models.SpotPhoto;
+import com.viact.viact_android.utils.FileUtils;
+import com.viact.viact_android.utils.ImageFilePath;
 import com.viact.viact_android.utils.TimeFormat;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -104,6 +118,11 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
     @BindView(R.id.markup_menu_view)           View                 markup_menu_view;
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.markup_menu_tv_name)        TextView             menu_markup_title;
+    //Preview
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.view_preview_image)      RelativeLayout              view_preview;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.iv_preview)              ImageView                   iv_preview;
 
 
     InstaImagePlayerView    mImagePlayerView;
@@ -155,6 +174,7 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
         et_title.setVisibility(View.GONE);
         view_save_menu.setVisibility(View.GONE);
         markup_menu_bg.setVisibility(View.GONE);
+        view_preview.setVisibility(View.GONE);
         txt_date.setText("");
         tv_title.setText(cur_pin.name);
 
@@ -207,7 +227,13 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
         String filename = sel_photo.path;
         long ctime = Long.parseLong(sel_photo.create_time);
         showDateTime(ctime);
+
+        if (image_parent.getChildCount() > 0){
+            image_parent.removeAllViews();
+        }
         mrk_list = dbHelper.getAllMarkups(sel_photo.id);
+        insImg_list = dbHelper.getAllImgs(sel_photo.id);
+
         String[] filepaths = new String[] {filename};
         mWorkWrapper = new WorkWrapper(filepaths);
         if (filename.contains("exp_360_")){
@@ -382,11 +408,15 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
         builder.setPositiveButton("Confirm", (dialog, which) -> {
             if (sel_index >= 0 && sel_index < photo_list.size()){
                 SpotPhoto sp = photo_list.get(sel_index);
+                dbHelper.deleteMarkupsByPhoto(sp.id);
                 dbHelper.deleteSpot(sp.id);
                 photo_list.clear();
                 photo_list = dbHelper.getAllSpots(cur_pin.id);
                 if (sel_index == photo_list.size()){
                     sel_index--;
+                }
+                if (photo_list.size() == 0){
+                    finish();
                 }
                 playPhoto();
             }
@@ -414,18 +444,27 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
     //side menu
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.room_iv_menu_photo) void onClickMenuPhoto(){
-
+        if (edit_type == SCENE_EDIT_NONE){
+            if (media_type == SCENE_MEDIA_PHOTO_BUILT || media_type == SCENE_MEDIA_PHOTO_360) {
+                edit_type = SCENE_EDIT_IMAGE;
+                tv_status.setVisibility(View.VISIBLE);
+                tv_status.setText(R.string.scene_view_photo_status);
+                editMarkup();
+            }
+        }
     }
 
     // draw markup
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.room_iv_menu_edit) void onClickMenuEdit(){
-        if (media_type == SCENE_MEDIA_PHOTO_BUILT || media_type == SCENE_MEDIA_PHOTO_360){
-            view_save_menu.setVisibility(View.VISIBLE);
-            tv_status.setVisibility(View.VISIBLE);
-            tv_status.setText(R.string.scene_view_markup_status);
-            edit_type = SCENE_EDIT_MARKUP;
-            editMarkup();
+        if (edit_type == SCENE_EDIT_NONE) {
+            if (media_type == SCENE_MEDIA_PHOTO_BUILT || media_type == SCENE_MEDIA_PHOTO_360){
+                view_save_menu.setVisibility(View.VISIBLE);
+                tv_status.setVisibility(View.VISIBLE);
+                tv_status.setText(R.string.scene_view_markup_status);
+                edit_type = SCENE_EDIT_MARKUP;
+                editMarkup();
+            }
         }
     }
 
@@ -522,7 +561,7 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.room_container)  RelativeLayout    image_parent;
 
-    ImageView   iv_markup;
+    ImageView   iv_markup, iv_img;
     Point   s_pos = new Point();
     Point   e_pos = new Point();
     float   iv_scal = 0.0f;
@@ -531,6 +570,8 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
 
     List<Markup> mrk_list = new ArrayList<>();
     Markup sel_mrk;
+    List<InsImg>    insImg_list = new ArrayList<>();
+    InsImg sel_img;
 
     void editMarkup(){
         if (media_type == SCENE_MEDIA_PHOTO_BUILT){
@@ -543,13 +584,28 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
             @Override
             public boolean onTouch(View view, MotionEvent mevent) {
                 if (mevent.getAction() == MotionEvent.ACTION_DOWN) {
-                    if (edit_type == SCENE_EDIT_MARKUP || edit_type == SCENE_EDIT_IMAGE) {
+                    if (edit_type == SCENE_EDIT_MARKUP) {
                         s_pos.x = (int)mevent.getX();
                         s_pos.y = (int)mevent.getY();
                         return true;
+                    } else if (edit_type == SCENE_EDIT_IMAGE){
+                        s_pos.x = (int)mevent.getX();
+                        s_pos.y = (int)mevent.getY();
+                        iv_img = new ImageView(RoomViewActivity.this);
+                        iv_img.setImageResource(R.drawable.ic_image);
+                        iv_img.setScaleType(ImageView.ScaleType.FIT_XY);
+                        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(CUSTOM_IMG_SIZE, CUSTOM_IMG_SIZE);
+
+                        lp.setMargins(s_pos.x - CUSTOM_IMG_SIZE/2, s_pos.y - CUSTOM_IMG_SIZE/2, 0, 0);
+                        lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                        lp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                        image_parent.addView(iv_img, lp);
+                        iv_img.requestLayout();
+                        chooseCustomImage();
+                        return true;
                     }
                 } else if (mevent.getAction() == MotionEvent.ACTION_MOVE){
-                    if (edit_type == SCENE_EDIT_MARKUP || edit_type == SCENE_EDIT_IMAGE){
+                    if (edit_type == SCENE_EDIT_MARKUP){
                         e_pos.x = (int) mevent.getX();
                         e_pos.y = (int) mevent.getY();
                         if (media_type == SCENE_MEDIA_PHOTO_360){
@@ -699,11 +755,22 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.markup_menu_open) void onClickMarkupOpen(){
         hideMarkupMenu();
-        MarkupDlg markupDlg = new MarkupDlg(this, sel_mrk, markup_listener);
+        if (sel_type == SEL_MARKUP) {
+            MarkupDlg markupDlg = new MarkupDlg(this, sel_mrk, markup_listener);
 
-        View decorView = markupDlg.getWindow().getDecorView();
-        decorView.setBackgroundResource(android.R.color.transparent);
-        markupDlg.show();
+            View decorView = markupDlg.getWindow().getDecorView();
+            decorView.setBackgroundResource(android.R.color.transparent);
+            markupDlg.show();
+        } else if (sel_type == SEL_IMAGE){
+            if (sel_img != null){
+                view_preview.setVisibility(View.VISIBLE);
+
+                Glide.with (this)
+                        .load (sel_img.path)
+                        .into (iv_preview);
+            }
+        }
+        sel_type = SEL_NONE;
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -711,6 +778,18 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
         hideMarkupMenu();
         confirmDeleteMarkup();
     }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.markup_menu_bg) void onClickMarkupMenuBG(){
+        hideMarkupMenu();
+        sel_type = SEL_NONE;
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.preview_iv_close) void onClickPreviewClose(){
+        view_preview.setVisibility(View.GONE);
+    }
+
 
     void showMarkupMenu(){
         Animation fadein = AnimationUtils.loadAnimation(this, R.anim.fade_in);
@@ -736,14 +815,29 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
         // Set up the buttons
         builder.setPositiveButton("Confirm", (dialog, which) -> {
             //DeleteMarkup
-            if (sel_mrk != null){
-                dbHelper.deleteMarkup(sel_mrk.id);
-                mrk_list.remove(sel_mrk);
-                image_parent.removeView(sel_mrk.iv_markup);
-                refreshMarkups();
+            if (sel_type == SEL_MARKUP){
+                if (sel_mrk != null){
+                    dbHelper.deleteMarkup(sel_mrk.id);
+                    mrk_list.remove(sel_mrk);
+                    image_parent.removeView(sel_mrk.iv_markup);
+                    refreshMarkups();
+                    sel_mrk = null;
+                }
+            } else if (sel_type == SEL_IMAGE) {
+                if (sel_img != null){
+                    dbHelper.deleteInsImg(sel_img.id);
+                    insImg_list.remove(sel_img);
+                    image_parent.removeView(sel_img.iv_img);
+                    refreshMarkups();
+                    sel_img = null;
+                }
             }
+            sel_type = SEL_NONE;
         });
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            sel_type = SEL_NONE;
+            dialog.cancel();
+        });
 
         builder.show();
     }
@@ -786,6 +880,7 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
                     mrk.iv_markup.setOnClickListener(view -> {
                         sel_mrk = getMarkupFromList(view);
                         if (sel_mrk != null){
+                            sel_type = SEL_MARKUP;
                             showMarkupMenu();
                         }
                     });
@@ -840,6 +935,7 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
                     mrk.iv_markup.setOnClickListener(view -> {
                         sel_mrk = getMarkupFromList(view);
                         if (sel_mrk != null){
+                            sel_type = SEL_MARKUP;
                             showMarkupMenu();
                         }
                     });
@@ -854,6 +950,93 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
             }
         }
 
+        if (iv_img != null){
+            image_parent.removeView(iv_img);
+            iv_img = null;
+        }
+
+        for (int i = 0; i < insImg_list.size(); i++){
+            InsImg insImg = insImg_list.get(i);
+            if (media_type == SCENE_MEDIA_PHOTO_BUILT){
+                float cur_scale = photoView.getScale();
+                int width = CUSTOM_IMG_SIZE;
+                int height = CUSTOM_IMG_SIZE;
+                RectF rcF = photoView.getDisplayRect();
+                float dx_view = insImg.point.x * cur_scale + rcF.left;
+                float dy_view = insImg.point.y * cur_scale + rcF.top;
+                if (insImg.iv_img == null){
+                    insImg.iv_img = new ImageView(this);
+                    insImg.iv_img.setImageResource(R.drawable.ic_image);
+                    insImg.iv_img.setScaleType(ImageView.ScaleType.FIT_XY);
+                    RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(width, height);
+
+                    lp.setMargins((int)dx_view, (int)dy_view, 0, 0);
+                    lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                    lp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                    image_parent.addView(insImg.iv_img, lp);
+                    insImg.iv_img.requestLayout();
+
+                    insImg.iv_img.setOnClickListener(view -> {
+                        sel_img = getImageFromList(view);
+                        if (sel_img != null){
+                            sel_type = SEL_IMAGE;
+                            showMarkupMenu();
+                        }
+                    });
+                } else {
+                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(width, height);
+                    layoutParams.leftMargin = (int)dx_view;
+                    layoutParams.topMargin = (int)dy_view;
+                    insImg.iv_img.setLayoutParams(layoutParams);
+                    insImg.iv_img.requestLayout();
+                }
+            } else if (media_type == SCENE_MEDIA_PHOTO_360){
+                Rect win_rc = new Rect();
+                mImagePlayerView.getDrawingRect(win_rc);
+                float fov = mImagePlayerView.getFov();
+                float yaw = (float) (mImagePlayerView.getYaw() % (2 * Math.PI));
+                float pitch = (float) (mImagePlayerView.getPitch() % (Math.PI));
+
+                int o_w = mWorkWrapper.O8〇oO8〇88.getWidthOrigin();
+                int o_h = mWorkWrapper.O8〇oO8〇88.getHeightOrigin();
+                //------05/11------
+                float radius = (float)(o_w / Math.PI); //(float) o_w / 4;
+                int o_x = (int)((float)radius * (-1) * yaw / (2 * Math.PI));
+                int o_y = (int)((float)radius * (-1) * pitch /  (2 * Math.PI));
+
+                float delta_l = (float) (o_x - insImg.point.x);
+                float delta_t = (float) (o_y - insImg.point.y);
+                int left = win_rc.width()/2 - (int)(delta_l / Math.tan(fov/2));
+                int top = win_rc.height()/2 - (int)(delta_t / Math.tan(fov/2));
+
+                if (insImg.iv_img == null) {
+                    insImg.iv_img = new ImageView(this);
+                    insImg.iv_img.setImageResource(R.drawable.ic_image);
+                    insImg.iv_img.setScaleType(ImageView.ScaleType.FIT_XY);
+                    RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(CUSTOM_IMG_SIZE, CUSTOM_IMG_SIZE);
+                    lp.setMargins(left, top, 0, 0);
+                    lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                    lp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                    image_parent.addView(insImg.iv_img, lp);
+                    insImg.iv_img.requestLayout();
+
+                    insImg.iv_img.setOnClickListener(view -> {
+                        sel_img = getImageFromList(view);
+                        if (sel_img != null){
+                            sel_type = SEL_IMAGE;
+                            showMarkupMenu();
+                        }
+                    });
+                } else {
+                    insImg.iv_img.setVisibility(View.VISIBLE);
+                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(CUSTOM_IMG_SIZE, CUSTOM_IMG_SIZE);
+                    layoutParams.leftMargin = left;
+                    layoutParams.topMargin = top;
+                    insImg.iv_img.setLayoutParams(layoutParams);
+                    insImg.iv_img.requestLayout();
+                }
+            }
+        }
     }
 
     private Markup getMarkupFromList(View view){
@@ -865,5 +1048,168 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
         }
         return null;
     }
+
+    private InsImg getImageFromList(View view){
+        for (int i = 0; i < insImg_list.size(); i++){
+            InsImg pin = insImg_list.get(i);
+            if (pin.iv_img != null && pin.iv_img == view){
+                return insImg_list.get(i);
+            }
+        }
+        return null;
+    }
+
+    void chooseCustomImage(){
+        final CharSequence[] options = { "Take Photo", "Choose from Gallery","Cancel" };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Choose your profile picture");
+
+        builder.setItems(options, (dialog, item) -> {
+
+            if (options[item].equals("Take Photo")) {
+                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                photoResultLauncher.launch(cameraIntent);
+
+            } else if (options[item].equals("Choose from Gallery")) {
+                Intent intent = new  Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                chooseLauncher.launch(intent);
+
+            } else if (options[item].equals("Cancel")) {
+                dialog.dismiss();
+                releaseEditMode();
+            }
+        });
+        builder.show();
+    }
+
+    void saveCustomImg(String fpath){
+        PointF pos = new PointF();
+        if (media_type == SCENE_MEDIA_PHOTO_BUILT){
+            iv_scal = photoView.getScale();
+            originF = photoView.getDisplayRect();
+            pos.x = (Math.abs(originF.left) + iv_img.getLeft())/iv_scal;
+            pos.y = (Math.abs(originF.top) + iv_img.getTop())/iv_scal;
+        } else if (media_type == SCENE_MEDIA_PHOTO_360){
+            Rect win_rc = new Rect();
+            mImagePlayerView.getDrawingRect(win_rc);
+
+            float fov = mImagePlayerView.getFov();
+            float yaw = (float) (mImagePlayerView.getYaw() % (2* Math.PI));
+            float pitch = (float) (mImagePlayerView.getPitch() % (Math.PI));
+
+            int x1 = iv_img.getLeft();
+            int y1 = iv_img.getTop();
+
+            int o_w = mWorkWrapper.O8〇oO8〇88.getWidthOrigin();
+            int o_h = mWorkWrapper.O8〇oO8〇88.getHeightOrigin();
+            float radius = (float)(o_w / Math.PI); //(float) o_w / 4;
+            int o_x = (int)((float)radius * (-1) * yaw / (2 * Math.PI));
+            int o_y = (int)((float)radius * (-1) * pitch / (2 * Math.PI));
+
+            double delta_l = (double)(win_rc.width()/2 - x1) * Math.tan(fov / 2);
+            double delta_t = (double)(win_rc.height()/2 - y1) * Math.tan(fov / 2);
+
+            pos.x = (float) (o_x - delta_l);
+            pos.y = (float) (o_y - delta_t);
+        }
+        releaseEditMode();
+
+        InsImg ins = new InsImg();
+        ins.photo_id = sel_photo.id + "";
+        ins.point = pos;
+        ins.path = fpath;
+        long timestamp = System.currentTimeMillis()/1000;
+        ins.create_time = timestamp + "";
+        ins.update_time = timestamp + "";
+        dbHelper.addInsImg(ins);
+        insImg_list = dbHelper.getAllImgs(sel_photo.id);
+        refreshMarkups();
+
+    }
+
+    ActivityResultLauncher<Intent> photoResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    // There are no request codes
+                    Intent data = result.getData();
+                    Bitmap photo = (Bitmap) data.getExtras().get("data");
+                    String dir_name = EXT_STORAGE_IMG_PATH;
+                    File dir = new File(dir_name);
+                    if (!dir.exists()){
+                        dir.mkdir();
+                    }
+                    Long tsLong = System.currentTimeMillis()/60000;
+                    String ts = tsLong.toString();
+                    String f_name = dir_name + sel_photo.id + "_" + ts + ".png";
+                    try (FileOutputStream out = new FileOutputStream(f_name)) {
+                        photo.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
+                        // PNG is a lossless format, the compression factor (100) is ignored
+                        saveCustomImg(f_name);
+                    } catch (IOException e) {
+                        releaseEditMode();
+                        e.printStackTrace();
+                        Toast.makeText(this, "File save error!", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    releaseEditMode();
+                    Toast.makeText(this, "Camera was cancelled", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+    ActivityResultLauncher<Intent> chooseLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    // There are no request codes
+                    Intent data = result.getData();
+                    assert data != null;
+                    Uri contentUri = data.getData();
+                    String path = ImageFilePath.getPath(this, contentUri);
+                    if (path != null){
+                        String dir_name = EXT_STORAGE_IMG_PATH;
+                        File dir = new File(dir_name);
+                        if (!dir.exists()){
+                            dir.mkdir();
+                        }
+                        Long tsLong = System.currentTimeMillis()/60000;
+                        String ts = tsLong.toString();
+                        String f_name = dir_name + sel_photo.id + "_" + ts + ".png";
+                        File srcFile = new File(path);
+                        File destFile = new File(f_name);
+                        try {
+                            FileUtils.copyFile(srcFile, destFile);
+                            saveCustomImg(f_name);
+                        } catch (IOException e) {
+                            releaseEditMode();
+                            e.printStackTrace();
+                        }
+                    } else {
+                        releaseEditMode();
+                    }
+                } else {
+                    releaseEditMode();
+                }
+            });
+
+    void releaseEditMode(){
+        if (iv_img != null){
+            image_parent.removeView(iv_img);
+            iv_img = null;
+        }
+        edit_type = SCENE_EDIT_NONE;
+        tv_status.setVisibility(View.GONE);
+        if (media_type == SCENE_MEDIA_PHOTO_BUILT){
+            photoView.setFocusableInTouchMode(true);
+        } else if (media_type == SCENE_MEDIA_PHOTO_360){
+            mImagePlayerView.setFocusableInTouchMode(true);
+        }
+    }
+
+    final int SEL_MARKUP  = 1;
+    final int SEL_IMAGE   = 2;
+    final int SEL_NONE    = 0;
+    private int sel_type = SEL_NONE;
 
 }

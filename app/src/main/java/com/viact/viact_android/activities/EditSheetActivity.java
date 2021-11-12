@@ -379,6 +379,7 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
                     SpotPhoto sp = sp_list.get(k);
                     File sp_f = new File(sp.path);
                     sp_f.delete();
+                    dbHelper.deleteMarkupsByPhoto(sp.id);
                     dbHelper.deleteSpot(sp.id);
                 }
                 dbHelper.deletePin(selected_scene.ppt.id);

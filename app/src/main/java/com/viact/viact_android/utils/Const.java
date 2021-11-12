@@ -12,12 +12,15 @@ public class Const {
     public static final String EXT_STORAGE_VIDEO_PATH = EXT_STORAGE_APP_PATH + "video" + File.separator;
     public static final String EXT_STORAGE_PHOTO_PATH = EXT_STORAGE_APP_PATH + "photo" + File.separator;
     public static final String EXT_STORAGE_SPOT_PATH  = EXT_STORAGE_APP_PATH + "spots" + File.separator;
+    public static final String EXT_STORAGE_IMG_PATH  = EXT_STORAGE_APP_PATH + "images" + File.separator;
     public static final String EXT_STORAGE_SHEET_PATH = EXT_STORAGE_APP_PATH + "sheets" + File.separator;
 
     public static final String SITE_MAP_URL = "https://customindz-shinobi.s3.ap-southeast-1.amazonaws.com/cbimage.png";
 
     public final static int PIN_SIZE_MIN_LEN                      = 48;
     public final static int PIN_SIZE_MAX_LEN                      = 112;
+
+    public final static int CUSTOM_IMG_SIZE                       = 64;
 
     public final static int ACTIVE_MAIN_PAGE                      = 0;
     public final static int ACTIVE_OTHER_PAGE                     = 1;
