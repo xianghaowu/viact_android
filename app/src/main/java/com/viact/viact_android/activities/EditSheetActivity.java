@@ -6,6 +6,8 @@ import static com.viact.viact_android.utils.Const.CAMERA_360;
 import static com.viact.viact_android.utils.Const.CAMERA_BUILT_IN;
 import static com.viact.viact_android.utils.Const.PIN_SIZE_MAX_LEN;
 import static com.viact.viact_android.utils.Const.PIN_SIZE_MIN_LEN;
+import static com.viact.viact_android.utils.Const.SITE_MAX_SCALE;
+import static com.viact.viact_android.utils.Const.def_categories;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -39,6 +41,7 @@ import com.bumptech.glide.Glide;
 import com.github.chrisbanes.photoview.OnPhotoTapListener;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.viact.viact_android.R;
+import com.viact.viact_android.adapters.CategoriesAdapter;
 import com.viact.viact_android.adapters.ScenesAdapter;
 import com.viact.viact_android.dialogs.CreatePinDlg;
 import com.viact.viact_android.helpers.DatabaseHelper;
@@ -108,6 +111,18 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.edit_sheet_et_title)    EditText     et_title;
 
+    //Category
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.category_bg)             View                    category_bg;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.category_view)           View                    category_view;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.category_recycler)       RecyclerView            category_recycler;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.sheet_iv_layer)          ImageView               iv_layers;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.sheet_iv_filter)         ImageView               iv_filters;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -132,13 +147,46 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     }
 
     @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.sheet_iv_layer) void onClickShowLayer(){
+        filters = "";
+        bFilterMode = false;
+        iv_filters.setColorFilter(Color.rgb(255, 255, 255));
+        refreshLayout();
+        onClickMenuHide();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.sheet_iv_filter) void onClickShowFilter(){
+        bFilterMode = true;
+        iv_filters.setColorFilter(Color.rgb(255, 255, 0));
+        showCategoryView();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.sheet_iv_walk) void onClickSpeedMode(){
+        Intent speedIntent = new Intent(this, SpeedModeActivity.class);
+        speedIntent.putExtra("sheet_id", cur_sheet.id);
+        startActivity(speedIntent);
+    }
+
+    @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.rl_menu_bg) void onClickMenuHide(){
         hideSideMenu();
+        if (selected_scene.photos.size() == 0){
+            selected_scene.ppt.iv_mark.setImageResource(R.drawable.ic_mark);
+        } else {
+            selected_scene.ppt.iv_mark.setImageResource(R.drawable.ic_point);
+        }
     }
 
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.ll_side_menu_add) void onClickMenuAdd(){
         hideSideMenu();
+        if (selected_scene.photos.size() == 0){
+            selected_scene.ppt.iv_mark.setImageResource(R.drawable.ic_mark);
+        } else {
+            selected_scene.ppt.iv_mark.setImageResource(R.drawable.ic_point);
+        }
         selectCaptureKind();
     }
 
@@ -146,6 +194,11 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     @OnClick(R.id.ll_side_menu_view) void onClickMenuView(){
         hideSideMenu();
         if (selected_scene.ppt != null && selected_scene.ppt.id >= 0){
+            if (selected_scene.photos.size() == 0){
+                selected_scene.ppt.iv_mark.setImageResource(R.drawable.ic_mark);
+            } else {
+                selected_scene.ppt.iv_mark.setImageResource(R.drawable.ic_point);
+            }
             Intent viewIntent = new Intent(this, RoomViewActivity.class);
             viewIntent.putExtra("pin", selected_scene.ppt);
             startActivity(viewIntent);
@@ -156,6 +209,12 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     @OnClick(R.id.ll_side_menu_update) void onClickMenuUpdate(){
         hideSideMenu();
         if (selected_scene.ppt != null && selected_scene.ppt.id >= 0){
+            if (selected_scene.photos.size() == 0){
+                selected_scene.ppt.iv_mark.setImageResource(R.drawable.ic_mark);
+            } else {
+                selected_scene.ppt.iv_mark.setImageResource(R.drawable.ic_point);
+            }
+
             CreatePinDlg createDlg = new CreatePinDlg(this, selected_scene.ppt, null);
 
             View decorView = createDlg.getWindow().getDecorView();
@@ -168,6 +227,11 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     @OnClick(R.id.ll_side_menu_delete) void onClickMenuDelete(){
         hideSideMenu();
         if (selected_scene.ppt != null && selected_scene.ppt.id >= 0){
+            if (selected_scene.photos.size() == 0){
+                selected_scene.ppt.iv_mark.setImageResource(R.drawable.ic_mark);
+            } else {
+                selected_scene.ppt.iv_mark.setImageResource(R.drawable.ic_point);
+            }
             confirmDeletePin();
         }
     }
@@ -201,7 +265,11 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
                 if (scene_list.get(i).photos.size() == 0){
                     pp_pin.iv_mark.setImageResource(R.drawable.ic_mark);
                 } else {
-                    pp_pin.iv_mark.setImageResource(R.drawable.ic_point);
+                    if (bFilterMode && !checkPinByFilter(pp_pin)){
+                        pp_pin.iv_mark.setImageResource(R.drawable.ic_point_disable);
+                    } else {
+                        pp_pin.iv_mark.setImageResource(R.drawable.ic_point);
+                    }
                 }
 
                 RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(pin_wh, pin_wh);
@@ -263,11 +331,21 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
             if (scene_list.get(i).photos.size() == 0){
                 iv.setImageResource(R.drawable.ic_mark);
             } else {
-                iv.setImageResource(R.drawable.ic_point);
+                if (bFilterMode && !checkPinByFilter(p_pin)){
+                    iv.setImageResource(R.drawable.ic_point_disable);
+                } else {
+                    iv.setImageResource(R.drawable.ic_point);
+                }
             }
             iv.setOnClickListener(view -> {
                 selected_scene = getRoomFromList(view);
+
                 if (selected_scene != null && selected_scene.ppt != null){
+                    if (selected_scene.photos.size() == 0){
+                        selected_scene.ppt.iv_mark.setImageResource(R.drawable.ic_mark_sel);
+                    } else {
+                        selected_scene.ppt.iv_mark.setImageResource(R.drawable.ic_point_sel);
+                    }
                     //show side menu
                     showSideMenu();
                 }
@@ -319,6 +397,7 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
         et_title.setVisibility(View.GONE);
         view_menu_bg.setVisibility(View.GONE);
         ll_side_menu.setVisibility(View.GONE);
+        category_bg.setVisibility(View.GONE);
 
         tv_title.setText(cur_sheet.name);
 
@@ -331,6 +410,7 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
             }
         });
 
+        photo_view.setMaximumScale(SITE_MAX_SCALE);
         photo_view.setOnPhotoTapListener(new PhotoTapListener());
 
         configureRoomList();
@@ -347,6 +427,12 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
             }
             return false;
         });
+
+        //category view init
+        categoriesAdapter = new CategoriesAdapter(this, "", categoriesListener);
+        category_recycler.setLayoutManager(new LinearLayoutManager(this));
+        category_recycler.setAdapter(categoriesAdapter);
+
     }
 
     private Scene getRoomFromList(View view){
@@ -369,6 +455,7 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
 
     void confirmDeletePin(){
         if (selected_scene.ppt != null && selected_scene.ppt.id > -1){
+
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
             alertDialogBuilder.setMessage("Are you sure to remove this Pin?");
             alertDialogBuilder.setPositiveButton("Yes", (arg0, arg1) -> {
@@ -713,5 +800,94 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
             InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    //Category section
+    CategoriesAdapter categoriesAdapter;
+    String filters="";
+    boolean bFilterMode = false;
+
+    CategoriesAdapter.EventListener categoriesListener = new CategoriesAdapter.EventListener() {
+        @Override
+        public void onClickItem(int index) {
+            updateShowFilter(index);
+        }
+    };
+
+    boolean checkPinByFilter(PinPoint pin){
+        List<SpotPhoto> sp_list = dbHelper.getAllSpots(pin.id);
+        if (filters.length() > 0) {
+            String[] filter_items = filters.split(",");
+            for (int j = 0 ; j < sp_list.size(); j++){
+                for (int k = 0; k < filter_items.length; k ++){
+                    if (sp_list.get(j).category.contains(filter_items[k])){
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        return true;
+    }
+
+    void updateShowFilter(int cate_ind){
+        if (filters.contains(def_categories[cate_ind])){
+            filters = removeCateString(filters, def_categories[cate_ind]);
+        } else {
+            filters = addCateString(filters, def_categories[cate_ind]);
+        }
+        categoriesAdapter.setDataList(filters);
+        refreshLayout();
+    }
+
+    String removeCateString(String origin, String cate){
+        if (origin.length() == cate.length()) {
+            return "";
+        } else if (origin.contains("," + cate)){
+            String ret = origin.replace("," + cate, "");
+            return ret;
+        } else {
+            String ret = origin.replace( cate + ",", "");
+            return ret;
+        }
+    }
+
+    String addCateString(String origin, String cate){
+        if (origin.length() == 0 ){
+            origin = cate;
+        } else {
+            origin = origin + "," + cate;
+        }
+        return origin;
+    }
+
+    void showCategoryView(){
+        Animation fadein = AnimationUtils.loadAnimation(this, R.anim.fade_in);
+        category_bg.startAnimation(fadein);
+        category_bg.setVisibility(View.VISIBLE);
+        Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
+        category_view.startAnimation(bottomUp);
+        category_view.setVisibility(View.VISIBLE);
+
+        categoriesAdapter.setDataList(filters);
+    }
+
+    void hideCategoryView(){
+        Animation bottomDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
+        category_view.startAnimation(bottomDown);
+        category_view.setVisibility(View.GONE);
+        Animation fadeout = AnimationUtils.loadAnimation(this, R.anim.fade_out);
+        category_bg.startAnimation(fadeout);
+        category_bg.setVisibility(View.GONE);
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.category_bg) void onClickCategoryClose(){
+        hideCategoryView();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.category_tv_name) void onClickCategoryTitle(){
+        hideCategoryView();
     }
 }

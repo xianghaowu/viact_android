@@ -68,6 +68,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_SPOT_ID = "ID";
     private static final String KEY_SPOT_PIN_ID = "pin_id";
     private static final String KEY_SPOT_PATH = "path";
+    private static final String KEY_SPOT_CATEGORY = "category";
     private static final String KEY_SPOT_CREATE = "create_time";
 
     // markups Table Columns
@@ -142,6 +143,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         query = "CREATE TABLE " + TABLE_SPOTS + " (" + KEY_SPOT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + KEY_SPOT_PIN_ID + " TEXT, "
                 + KEY_SPOT_PATH + " TEXT, "
+                + KEY_SPOT_CATEGORY + " TEXT, "
                 + KEY_SPOT_CREATE + " TEXT);";
         db.execSQL(query);
 
@@ -461,6 +463,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_SPOT_PIN_ID, ct.pin_id);
         values.put(KEY_SPOT_PATH, ct.path);
+        values.put(KEY_SPOT_CATEGORY, ct.category);
         values.put(KEY_SPOT_CREATE, ct.create_time);
         //inserting new row
         sqLiteDatabase.insert(TABLE_SPOTS, null , values);
@@ -485,11 +488,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 spot.id = cursor.getInt(0);
                 spot.pin_id = cursor.getString(1);
                 spot.path = cursor.getString(2);
-                spot.create_time = cursor.getString(3);
+                spot.category = cursor.getString(3);
+                spot.create_time = cursor.getString(4);
                 arrayList.add(spot);
             }while (cursor.moveToNext());
         }
         return arrayList;
+    }
+
+    //update spot
+    public void updateSpot(SpotPhoto ct) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_SPOT_PIN_ID, ct.pin_id);
+        values.put(KEY_SPOT_PATH, ct.path);
+        values.put(KEY_SPOT_CATEGORY, ct.category);
+        values.put(KEY_SPOT_CREATE, ct.create_time);
+        sqLiteDatabase.update(TABLE_SPOTS, values, "ID=" + ct.id, null);
+        sqLiteDatabase.close();
     }
     //delete the spot by id
     public void deleteSpot(int spot_id) {

@@ -8,13 +8,29 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
+
+    <!-- As of Android 10 the ACTIVITY_RECOGNITION is required to be declared to track steps.
+    This is for the Step Sensor to work on Android 10 Devices
+    -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
+    <uses-feature
+        android:name="android.hardware.sensor.accelerometer"
+        android:required="true"/>
+    <uses-feature
+        android:name="android.hardware.sensor.stepcounter"
+        android:required="true"/>
+    <uses-feature
+        android:name="android.hardware.sensor.stepdetector"
+        android:required="true"/>
 
     <application
         android:name=".MyApp"
@@ -28,14 +44,18 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".activities.SpeedModeActivity"
+            android:theme="@style/splashTheme"
+            android:exported="false" />
+        <activity
             android:name=".activities.CreateSheetActivity"
             android:exported="false"
             android:theme="@style/splashTheme"
-            android:windowSoftInputMode="adjustPan"/>
+            android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".activities.ProjectActivity"
             android:exported="false"
-            android:theme="@style/splashTheme"/>
+            android:theme="@style/splashTheme" />
         <activity
             android:name=".activities.CaptureAndPlay"
             android:exported="false"

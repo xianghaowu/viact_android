@@ -17,8 +17,19 @@ public class Const {
 
     public static final String SITE_MAP_URL = "https://customindz-shinobi.s3.ap-southeast-1.amazonaws.com/cbimage.png";
 
-    public final static int PIN_SIZE_MIN_LEN                      = 48;
-    public final static int PIN_SIZE_MAX_LEN                      = 112;
+    public final static float SITE_MAX_SCALE                      = 16.0f;
+
+    public final static int SPEED_MODE_INIT_STEPS                 = 8;
+
+    public final static int SPEED_MODE_INIT_NONE                  = 0;
+    public final static int SPEED_MODE_INIT_START                 = 1;
+    public final static int SPEED_MODE_INIT_WALK                  = 2;
+    public final static int SPEED_MODE_INIT_END                   = 3;
+    public final static int SPEED_MODE_RUN                        = 4;
+
+
+    public final static int PIN_SIZE_MIN_LEN                      = 32;
+    public final static int PIN_SIZE_MAX_LEN                      = 72;
 
     public final static int CUSTOM_IMG_SIZE                       = 64;
 
@@ -45,4 +56,7 @@ public class Const {
     public final static int CAMERA_BUILT_IN                        = 1;
     public final static int CAMERA_360                             = 2;
 
+
+    public final static String[]    def_categories = new String[] {"Users Group", "Basic Structure", "Exterior Wall", "Interior Partition", "Window Frame",
+                                                        "Doors", "Electricity", "Air Conditioning Services", "Fire Protection Services", "Elevators", "Water Pipes", "Valves", "Others"};
 }

@@ -62,6 +62,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
@@ -135,12 +136,18 @@ public class CaptureAndPlay extends BaseObserveCameraActivity implements ICaptur
 
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.btn_confirm) void onClickConfirm(){
+        PinPoint pin = dbHelper.getPin(pin_id + "");
+        List<SpotPhoto> spp_list = dbHelper.getAllSpots(pin_id);
+
         SpotPhoto spot = new SpotPhoto();
         spot.pin_id = pin_id + "";
         spot.path = filename;
+        if (spp_list.size() > 0){
+            spot.category = spp_list.get(0).category;
+        }
         spot.create_time = (long)(System.currentTimeMillis()/1000) + "";
         dbHelper.addSpot(spot);
-        PinPoint pin = dbHelper.getPin(pin_id + "");
+
         pin.update_time = (long)(System.currentTimeMillis()/1000) + "";
         dbHelper.updatePin(pin);
         Toast.makeText(this, "Spot Photo was added successfully.", Toast.LENGTH_SHORT).show();

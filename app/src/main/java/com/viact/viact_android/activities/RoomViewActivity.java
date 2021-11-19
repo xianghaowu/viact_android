@@ -9,6 +9,7 @@ import static com.viact.viact_android.utils.Const.SCENE_MEDIA_PHOTO_360;
 import static com.viact.viact_android.utils.Const.SCENE_MEDIA_PHOTO_BUILT;
 import static com.viact.viact_android.utils.Const.SCENE_MEDIA_VIDEO_360;
 import static com.viact.viact_android.utils.Const.SCENE_MEDIA_VIDEO_BUILT;
+import static com.viact.viact_android.utils.Const.def_categories;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -41,6 +42,8 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.constraintlayout.widget.Group;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.arashivision.sdkmedia.player.image.ImageParamsBuilder;
 import com.arashivision.sdkmedia.player.image.InstaImagePlayerView;
@@ -53,6 +56,8 @@ import com.arashivision.sdkmedia.work.WorkWrapper;
 import com.bumptech.glide.Glide;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.viact.viact_android.R;
+import com.viact.viact_android.adapters.CategoriesAdapter;
+import com.viact.viact_android.adapters.ListSheetsAdapter;
 import com.viact.viact_android.dialogs.MarkupDlg;
 import com.viact.viact_android.helpers.DatabaseHelper;
 import com.viact.viact_android.models.InsImg;
@@ -123,6 +128,13 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
     @BindView(R.id.view_preview_image)      RelativeLayout              view_preview;
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.iv_preview)              ImageView                   iv_preview;
+    //Category
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.category_bg)             View                    category_bg;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.category_view)           View                    category_view;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.category_recycler)       RecyclerView            category_recycler;
 
 
     InstaImagePlayerView    mImagePlayerView;
@@ -177,6 +189,7 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
         view_preview.setVisibility(View.GONE);
         txt_date.setText("");
         tv_title.setText(cur_pin.name);
+        category_bg.setVisibility(View.GONE);
 
         photo_list = dbHelper.getAllSpots(cur_pin.id);
         if (photo_list.size() == 0) {
@@ -199,6 +212,11 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
             refreshMarkups();
         });
         photoView.setMaximumScale(10.0f);
+
+        //category view init
+        categoriesAdapter = new CategoriesAdapter(this, "", categoriesListener);
+        category_recycler.setLayoutManager(new LinearLayoutManager(this));
+        category_recycler.setAdapter(categoriesAdapter);
     }
 
     void playPhoto(){
@@ -470,7 +488,7 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
 
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.room_iv_menu_category) void onClickMenuCategory(){
-
+        showCategoryView();
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -1212,4 +1230,76 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
     final int SEL_NONE    = 0;
     private int sel_type = SEL_NONE;
 
+    //Category section
+    CategoriesAdapter categoriesAdapter;
+
+    CategoriesAdapter.EventListener categoriesListener = new CategoriesAdapter.EventListener() {
+        @Override
+        public void onClickItem(int index) {
+            updateCategoryOnSpot(index);
+        }
+    };
+
+    void updateCategoryOnSpot(int cate_ind){
+        if (sel_photo != null){
+            if (sel_photo.category.contains(def_categories[cate_ind])){
+                sel_photo.category = removeCateString(sel_photo.category, def_categories[cate_ind]);
+            } else {
+                sel_photo.category = addCateString(sel_photo.category, def_categories[cate_ind]);
+            }
+            dbHelper.updateSpot(sel_photo);
+            categoriesAdapter.setDataList(sel_photo.category);
+        }
+    }
+
+    String removeCateString(String origin, String cate){
+        if (origin.length() == cate.length()) {
+            return "";
+        } else if (origin.contains("," + cate)){
+            String ret = origin.replace("," + cate, "");
+            return ret;
+        } else {
+            String ret = origin.replace( cate + ",", "");
+            return ret;
+        }
+    }
+
+    String addCateString(String origin, String cate){
+        if (origin.length() == 0 ){
+            origin = cate;
+        } else {
+            origin = origin + "," + cate;
+        }
+        return origin;
+    }
+
+    void showCategoryView(){
+        Animation fadein = AnimationUtils.loadAnimation(this, R.anim.fade_in);
+        category_bg.startAnimation(fadein);
+        category_bg.setVisibility(View.VISIBLE);
+        Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
+        category_view.startAnimation(bottomUp);
+        category_view.setVisibility(View.VISIBLE);
+
+        categoriesAdapter.setDataList(sel_photo.category);
+    }
+
+    void hideCategoryView(){
+        Animation bottomDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
+        category_view.startAnimation(bottomDown);
+        category_view.setVisibility(View.GONE);
+        Animation fadeout = AnimationUtils.loadAnimation(this, R.anim.fade_out);
+        category_bg.startAnimation(fadeout);
+        category_bg.setVisibility(View.GONE);
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.category_bg) void onClickCategoryClose(){
+        hideCategoryView();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.category_tv_name) void onClickCategoryTitle(){
+        hideCategoryView();
+    }
 }

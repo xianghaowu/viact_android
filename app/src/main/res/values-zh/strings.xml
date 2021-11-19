@@ -322,4 +322,12 @@
     <string name="markup_dlg_description">请输入标记标题和信息：</string>
     <string name="btn_save_markup">保存标记</string>
 
+    <!--SpeedMode Activity -->
+    <string name="speed_mode_init_desc">放大并点击您当前的确切位置</string>
+    <string name="speed_mode_init_tip">提示：参考点（如列）将提高准确性</string>
+    <string name="speed_mode_init_desc_1">要进行精确跟踪，请保持手机或平板电脑的摄像头朝外。</string>
+    <string name="speed_mode_init_desc_2">朝任何方向走，直到进度栏满。</string>
+    <string name="speed_mode_init_desc_3">现在，点击您的新当前位置。这将定向您的表</string>
+    <string name="speed_mode_init_desc_4">现在，启动速度模式。您可以再次取消调整表的定位。</string>
+
 </resources>

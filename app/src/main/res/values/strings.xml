@@ -321,4 +321,12 @@
     <string name="markup_dlg_description">Please enter the markup title and information :</string>
     <string name="btn_save_markup">Save Markup</string>
 
+    <!--SpeedMode Activity -->
+    <string name="speed_mode_init_desc">Zoom in and tap on your current exact location</string>
+    <string name="speed_mode_init_tip">Tip: A reference point such as a column will increase accuracy</string>
+    <string name="speed_mode_init_desc_1">For accurate tracking, keep the camera of your phone or tablet facing outwards.</string>
+    <string name="speed_mode_init_desc_2">Walk in any direction until the progress bar is full.</string>
+    <string name="speed_mode_init_desc_3">Now, tap on your new current location. This will orient your Sheet</string>
+    <string name="speed_mode_init_desc_4">Now, start the SpeedMode. You can cancel to orient your Sheet again.</string>
+
 </resources>
