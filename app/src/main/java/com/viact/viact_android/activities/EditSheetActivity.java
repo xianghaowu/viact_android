@@ -158,15 +158,18 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.sheet_iv_filter) void onClickShowFilter(){
         bFilterMode = true;
-        iv_filters.setColorFilter(Color.rgb(255, 255, 0));
-        showCategoryView();
+//        showCategoryView();
     }
 
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.sheet_iv_walk) void onClickSpeedMode(){
-        Intent speedIntent = new Intent(this, SpeedModeActivity.class);
-        speedIntent.putExtra("sheet_id", cur_sheet.id);
-        startActivity(speedIntent);
+        if (InstaCameraManager.getInstance().getCameraConnectedType() != InstaCameraManager.CONNECT_TYPE_NONE && checkSdCardEnabled()){
+            Intent speedIntent = new Intent(this, SpeedModeActivity.class);
+            speedIntent.putExtra("sheet_id", cur_sheet.id);
+            startActivity(speedIntent);
+        } else {
+            connectCamera();
+        }
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -862,6 +865,7 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     }
 
     void showCategoryView(){
+        iv_filters.setColorFilter(Color.rgb(255, 255, 0));
         Animation fadein = AnimationUtils.loadAnimation(this, R.anim.fade_in);
         category_bg.startAnimation(fadein);
         category_bg.setVisibility(View.VISIBLE);
@@ -879,6 +883,7 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
         Animation fadeout = AnimationUtils.loadAnimation(this, R.anim.fade_out);
         category_bg.startAnimation(fadeout);
         category_bg.setVisibility(View.GONE);
+        iv_filters.setColorFilter(Color.rgb(255, 255, 255));
     }
 
     @SuppressLint("NonConstantResourceId")

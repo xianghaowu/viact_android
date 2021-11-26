@@ -46,6 +46,7 @@
         <activity
             android:name=".activities.SpeedModeActivity"
             android:theme="@style/splashTheme"
+            android:screenOrientation="portrait"
             android:exported="false" />
         <activity
             android:name=".activities.CreateSheetActivity"
@@ -55,6 +56,7 @@
         <activity
             android:name=".activities.ProjectActivity"
             android:exported="false"
+            android:screenOrientation="portrait"
             android:theme="@style/splashTheme" />
         <activity
             android:name=".activities.CaptureAndPlay"
@@ -68,6 +70,7 @@
         <activity
             android:name=".activities.EditSheetActivity"
             android:exported="true"
+            android:screenOrientation="portrait"
             android:theme="@style/splashTheme">
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
@@ -100,6 +103,7 @@
         <activity
             android:name=".activities.MainActivity"
             android:exported="true"
+            android:screenOrientation="portrait"
             android:theme="@style/splashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

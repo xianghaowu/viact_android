@@ -488,7 +488,7 @@ public class RoomViewActivity extends BaseObserveCameraActivity {
 
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.room_iv_menu_category) void onClickMenuCategory(){
-        showCategoryView();
+//        showCategoryView();
     }
 
     @SuppressLint("NonConstantResourceId")

@@ -27,6 +27,8 @@ public class Const {
     public final static int SPEED_MODE_INIT_END                   = 3;
     public final static int SPEED_MODE_RUN                        = 4;
 
+    public final static int SPEED_MODE_COUNTDOWN_DEFAULT            = 3;
+
 
     public final static int PIN_SIZE_MIN_LEN                      = 32;
     public final static int PIN_SIZE_MAX_LEN                      = 72;

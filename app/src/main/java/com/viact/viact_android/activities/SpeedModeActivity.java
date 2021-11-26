@@ -1,8 +1,12 @@
 package com.viact.viact_android.activities;
 
+import static com.viact.viact_android.utils.Const.EXT_STORAGE_PHOTO_PATH;
+import static com.viact.viact_android.utils.Const.EXT_STORAGE_SPOT_PATH;
+import static com.viact.viact_android.utils.Const.EXT_STORAGE_VIDEO_PATH;
 import static com.viact.viact_android.utils.Const.PIN_SIZE_MAX_LEN;
 import static com.viact.viact_android.utils.Const.PIN_SIZE_MIN_LEN;
 import static com.viact.viact_android.utils.Const.SITE_MAX_SCALE;
+import static com.viact.viact_android.utils.Const.SPEED_MODE_COUNTDOWN_DEFAULT;
 import static com.viact.viact_android.utils.Const.SPEED_MODE_INIT_END;
 import static com.viact.viact_android.utils.Const.SPEED_MODE_INIT_NONE;
 import static com.viact.viact_android.utils.Const.SPEED_MODE_INIT_START;
@@ -16,8 +20,13 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -25,6 +34,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.arashivision.sdkcamera.camera.InstaCameraManager;
+import com.arashivision.sdkcamera.camera.callback.ICaptureStatusListener;
+import com.arashivision.sdkmedia.export.ExportImageParamsBuilder;
+import com.arashivision.sdkmedia.export.ExportUtils;
+import com.arashivision.sdkmedia.export.IExportCallback;
+import com.arashivision.sdkmedia.work.WorkWrapper;
 import com.bumptech.glide.Glide;
 import com.github.chrisbanes.photoview.OnPhotoTapListener;
 import com.github.chrisbanes.photoview.PhotoView;
@@ -32,18 +48,22 @@ import com.viact.viact_android.R;
 import com.viact.viact_android.helpers.DatabaseHelper;
 import com.viact.viact_android.models.PinPoint;
 import com.viact.viact_android.models.Sheet;
+import com.viact.viact_android.models.SpotPhoto;
 import com.viact.viact_android.utils.Compass;
+import com.viact.viact_android.utils.NetworkManager;
 import com.viact.viact_android.utils.Pedometer;
 import com.viact.viact_android.views.PixelGridView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class SpeedModeActivity extends BaseObserveCameraActivity {
+public class SpeedModeActivity extends BaseObserveCameraActivity implements ICaptureStatusListener, IExportCallback {
 
     Sheet cur_sheet;
     DatabaseHelper dbHelper;
@@ -55,7 +75,9 @@ public class SpeedModeActivity extends BaseObserveCameraActivity {
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.speed_mode_tv_title)         TextView            tv_title;
     @SuppressLint("NonConstantResourceId")
-    @BindView(R.id.txt_choose_device)           TextView            txt_status;
+    @BindView(R.id.txt_choose_device)           TextView            txt_device;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.txt_capture_status)          TextView            txt_status;
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.speed_mode_bg_init)          RelativeLayout      view_setup_bg;
     @SuppressLint("NonConstantResourceId")
@@ -79,14 +101,26 @@ public class SpeedModeActivity extends BaseObserveCameraActivity {
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.speed_mode_iv_guide)         ImageView            iv_guide;
 
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.speed_menu_bg)               RelativeLayout      menu_view_bg;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.speed_menu_view)             View                 menu_view;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.speed_menu_cb_hdr)           CheckBox             cb_hdr;
+
     List<PinPoint> scene_list = new ArrayList<>();
     List<PinPoint> scene_list_init = new ArrayList<>();
+
+    boolean bHdr = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_speed_mode);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         ButterKnife.bind(this);
+
+        InstaCameraManager.getInstance().setCaptureStatusListener(this);
 
         Bundle data = getIntent().getExtras();
         int sh_id = data.getInt("sheet_id", -1);
@@ -102,6 +136,11 @@ public class SpeedModeActivity extends BaseObserveCameraActivity {
     }
 
     void initLayout(){
+        File folder = new File(EXT_STORAGE_SPOT_PATH);
+        folder.mkdirs();
+
+        menu_view_bg.setVisibility(View.GONE);
+        menu_timer_view_bg.setVisibility(View.GONE);
         view_setup_bg.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.GONE);
         progressBar.setMax(SPEED_MODE_INIT_STEPS);
@@ -111,6 +150,7 @@ public class SpeedModeActivity extends BaseObserveCameraActivity {
         txt_guide.setText(R.string.speed_mode_init_desc);
         txt_tip.setText(R.string.speed_mode_init_tip);
         iv_guide.setVisibility(View.GONE);
+        txt_status.setVisibility(View.GONE);
 
         Glide.with (this)
                 .load (cur_sheet.path)
@@ -143,8 +183,8 @@ public class SpeedModeActivity extends BaseObserveCameraActivity {
                     refreshLayout_Init();
             }
             Matrix mat = new Matrix();
-            setup_photoview.getDisplayMatrix(mat);
-            photo_view.setDisplayMatrix(mat);
+            setup_photoview.getSuppMatrix(mat);
+            photo_view.setSuppMatrix(mat);
         });
         setup_photoview.setOnPhotoTapListener(new PhotoTapListener());
         configureRoomList();
@@ -181,10 +221,23 @@ public class SpeedModeActivity extends BaseObserveCameraActivity {
     }
 
     @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.speed_mode_ib_more) void onClickMore(){
+        cb_hdr.setChecked(bHdr);
+        showSpeedMenu();
+    }
+
+    @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.speed_mode_ib_back) void onClickBack(){
         compass.stop();
         pedometer.stop();
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         finish();
+    }
+
+    @Override
+    public void onStop(){
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        super.onStop();
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -230,7 +283,7 @@ public class SpeedModeActivity extends BaseObserveCameraActivity {
                 tempX = (int) (site_width * pp_pin.x + rc.left) - pin_wh / 2;
                 tempY = (int) (site_height * pp_pin.y + rc.top) - pin_wh / 2;
 
-                pp_pin.iv_mark.setImageResource(R.drawable.ic_point);
+//                pp_pin.iv_mark.setImageResource(R.drawable.ic_point);
 
                 RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(pin_wh, pin_wh);
                 layoutParams.leftMargin = tempX;
@@ -276,11 +329,11 @@ public class SpeedModeActivity extends BaseObserveCameraActivity {
             ImageView iv = new ImageView(this);
             iv.setImageResource(R.drawable.ic_point);
             iv.setOnClickListener(view -> {
-                selected_scene = getRoomFromList_Init(view);
-
-                if (selected_scene != null){
-                    selected_scene.iv_mark.setImageResource(R.drawable.ic_point_sel);
-                }
+//                selected_scene = getRoomFromList_Init(view);
+//
+//                if (selected_scene != null){
+//                    selected_scene.iv_mark.setImageResource(R.drawable.ic_point_sel);
+//                }
             });
 
             RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -320,16 +373,16 @@ public class SpeedModeActivity extends BaseObserveCameraActivity {
         for (int i = 0; i < scene_list.size(); i++ ) {
             PinPoint pp_pin = scene_list.get(i);
             if (pp_pin.iv_mark != null){
-                moveMarkerView(pp_pin.iv_mark, pp_pin.x, pp_pin.y);
+                moveMarkerView(pp_pin.iv_mark, pp_pin.x, pp_pin.y, false);
 //                pp_pin.iv_mark.setImageResource(R.drawable.ic_point);
             }
         }
         if (iv_step != null){
-            moveMarkerView(iv_step, pos_start.x, pos_start.y);
+            moveMarkerView(iv_step, pos_start.x, pos_start.y, false);
         }
     }
 
-    void moveMarkerView(ImageView iView, float xx, float yy){
+    void moveMarkerView(ImageView iView, float xx, float yy, boolean bMove){
         float img_scale = photo_view.getScale();
         float img_max_scale = photo_view.getMaximumScale();
         int pin_wh = (int)(PIN_SIZE_MAX_LEN - (float)(PIN_SIZE_MAX_LEN - PIN_SIZE_MIN_LEN) * img_scale / img_max_scale);
@@ -348,8 +401,12 @@ public class SpeedModeActivity extends BaseObserveCameraActivity {
         int xMax = photo_view.getWidth();
         int yMax = photo_view.getHeight();
 
-        if (tempX < 0 || tempY < 0 || tempX > xMax || tempY > yMax) {
-            iView.setVisibility(View.INVISIBLE);
+        if (tempX < 0 || tempY < 0 || tempX + PIN_SIZE_MAX_LEN > xMax || tempY + PIN_SIZE_MAX_LEN > yMax) {
+            if (bMove){//move sheet
+                moveSheet(tempX, tempY);
+            } else {
+                iView.setVisibility(View.INVISIBLE);
+            }
         } else{
             iView.setVisibility(View.VISIBLE);
         }
@@ -374,6 +431,29 @@ public class SpeedModeActivity extends BaseObserveCameraActivity {
 //                    }
             });
         }
+    }
+
+    void moveSheet(int xxx, int yyy){
+        int xMax = photo_view.getWidth();
+        int yMax = photo_view.getHeight();
+        int nLeft = 0, nTop = 0;
+        Matrix mat = new Matrix();
+        photo_view.getSuppMatrix(mat);
+        if (xxx < 0) {
+            nLeft = PIN_SIZE_MIN_LEN - xxx;
+        }
+        if (xxx + PIN_SIZE_MAX_LEN > xMax) {
+            nLeft = xMax - xxx - PIN_SIZE_MAX_LEN;
+        }
+        if (yyy < 0) {
+            nTop = PIN_SIZE_MIN_LEN - yyy;
+        }
+        if (yyy + PIN_SIZE_MAX_LEN > yMax) {
+            nTop = yMax - yyy - PIN_SIZE_MAX_LEN;
+        }
+
+        mat.postTranslate(nLeft, nTop);
+        photo_view.setSuppMatrix(mat);
     }
 
     ImageView addMarkerView(float x, float y){
@@ -602,14 +682,14 @@ public class SpeedModeActivity extends BaseObserveCameraActivity {
         double angle = Math.PI * azi_real / 180;
         float xx = pos_start.x + (float) (step_feet * Math.sin(angle));
         float yy = pos_start.y - (float) (step_feet * Math.cos(angle));
-        moveMarkerView(iv_step, xx, yy);
+        moveMarkerView(iv_step, xx, yy, true);
         pos_start.x = xx;
         pos_start.y = yy;
         //checking the near-by marks
         for(int i = 0 ; i < scene_list.size(); i++){
             PinPoint pin = scene_list.get(i);
             float delta_dis = (float) Math.sqrt((pos_start.x - pin.x)*(pos_start.x - pin.x) + (pos_start.y - pin.y)*(pos_start.y - pin.y));
-            if (delta_dis < nearby_limit && (nearby_pin == null || nearby_pin != pin)){
+            if (!bCount && delta_dis < nearby_limit && (nearby_pin == null || nearby_pin != pin)){
                 nearby_pin = pin;
                 doCountDown(pin);
                 return;
@@ -617,29 +697,40 @@ public class SpeedModeActivity extends BaseObserveCameraActivity {
         }
     }
 
+    boolean bCount = false;
+    private int countdown = SPEED_MODE_COUNTDOWN_DEFAULT;
     void doCountDown(final PinPoint nearPin){
-        downcounter = 3;
+        downcounter = countdown;
         handler = new Handler();
 
         final Runnable r = new Runnable() {
             public void run() {
-                if (downcounter == 0){
-                    nearPin.iv_mark.setImageResource(R.drawable.ic_point_check);
-                } else {
-                    if(downcounter == 3){
+                if (downcounter > 0){
+                    if(downcounter == 5){
+                        nearPin.iv_mark.setImageResource(R.drawable.ic_point_check_5);
+                    } else if(downcounter == 4){
+                        nearPin.iv_mark.setImageResource(R.drawable.ic_point_check_4);
+                    } else if(downcounter == 3){
                         nearPin.iv_mark.setImageResource(R.drawable.ic_point_check_3);
                     } else if (downcounter == 2) {
                         nearPin.iv_mark.setImageResource(R.drawable.ic_point_check_2);
                     } else if (downcounter == 1) {
                         nearPin.iv_mark.setImageResource(R.drawable.ic_point_check_1);
+                        capture360Photo();
                     }
                     downcounter--;
                     handler.postDelayed(this, 1000);
+                } else {
+                    //testing code
+//                    goBackSpeedMode();
+//                    nearby_pin.iv_mark.setImageResource(R.drawable.ic_point_check);
+                    //capture 360 image
                 }
             }
         };
 
         handler.postDelayed(r, 1000);
+        bCount = true;
     }
 
     void setupSensor(){
@@ -685,5 +776,291 @@ public class SpeedModeActivity extends BaseObserveCameraActivity {
     }
     private Pedometer.PedometerListener getPedometerListener(){
         return step -> runOnUiThread(this::adjustPedometer);
+    }
+
+    //==================== Capture 360 photo ==========================//
+    WorkWrapper mWorkWrapper;
+    String exp_filename, EXPORT_DIR_PATH;
+    int mCurrentExportId = -1;
+
+    void capture360Photo(){
+        if (bHdr){
+            int funcMode = InstaCameraManager.FUNCTION_MODE_HDR_CAPTURE;
+            InstaCameraManager.getInstance().setAEBCaptureNum(funcMode, 3);
+            InstaCameraManager.getInstance().setExposureEV(funcMode, 2f);
+            InstaCameraManager.getInstance().startHDRCapture(false);
+        } else {
+            InstaCameraManager.getInstance().startNormalCapture(false);
+        }
+    }
+
+    @Override
+    public void onCameraConnectError() {
+        super.onCameraConnectError();
+        Toast.makeText(this, R.string.main_toast_camera_connect_error, Toast.LENGTH_SHORT).show();
+        finish();
+    }
+
+    @Override
+    public void onCameraSDCardStateChanged(boolean enabled) {
+        super.onCameraSDCardStateChanged(enabled);
+        if (enabled) {
+            Toast.makeText(this, R.string.main_toast_sd_enabled, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, R.string.main_toast_sd_disabled, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onCameraStatusChanged(boolean enabled) {
+        super.onCameraStatusChanged(enabled);
+        if (enabled) {
+            Toast.makeText(this, R.string.main_toast_camera_connected, Toast.LENGTH_SHORT).show();
+        } else {
+            NetworkManager.getInstance().clearBindProcess();
+            Toast.makeText(this, R.string.main_toast_camera_disconnected, Toast.LENGTH_SHORT).show();
+            finish();
+        }
+    }
+
+    @Override
+    public void onCaptureStarting() {
+        Log.d("Viact", "capture start");
+        txt_status.setText(R.string.capture_capture_starting);
+        txt_status.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onCaptureWorking() {
+        Log.d("Viact", "capture working");
+        txt_status.setText(R.string.capture_capture_working);
+    }
+
+    @Override
+    public void onCaptureStopping() {
+        txt_status.setVisibility(View.GONE);
+        Toast.makeText(this, R.string.capture_capture_stopping, Toast.LENGTH_SHORT).show();
+        goBackSpeedMode();
+    }
+
+    @Override
+    public void onCaptureTimeChanged(long captureTime) {
+
+    }
+
+    @Override
+    public void onCaptureCountChanged(int captureCount) {
+
+    }
+
+    @Override
+    public void onCaptureFinish(String[] filePaths) {
+        txt_status.setVisibility(View.VISIBLE);
+        if (filePaths != null && filePaths.length > 0) {
+            //download captured file as panorama
+            mWorkWrapper = new WorkWrapper(filePaths);
+            exp_filename = "exp_360_" + (long)(System.currentTimeMillis()/1000);
+            File folder = new File(EXT_STORAGE_PHOTO_PATH);
+            if (!folder.exists()) {
+                folder.mkdirs();
+            }
+            EXPORT_DIR_PATH = EXT_STORAGE_PHOTO_PATH;
+            exp_filename = exp_filename + ".jpg";
+            exportImageOriginal();
+            txt_status.setText(R.string.export_dialog_msg_exporting);
+        } else {
+            Toast.makeText(this, "Capture failed!", Toast.LENGTH_SHORT).show();
+            goBackSpeedMode();
+        }
+    }
+
+    private void exportImageOriginal() {
+        ExportImageParamsBuilder builder = new ExportImageParamsBuilder()
+                .setExportMode(ExportUtils.ExportMode.PANORAMA)
+                .setImageFusion(mWorkWrapper.isPanoramaFile())
+                .setTargetPath(EXPORT_DIR_PATH + "/" +exp_filename);
+
+        mCurrentExportId = ExportUtils.exportImage(mWorkWrapper, builder, this);
+    }
+
+    @Override
+    public void onSuccess() {
+        String filename = EXPORT_DIR_PATH + "/" + exp_filename;
+        if (bCount && nearby_pin != null){
+            SpotPhoto spot = new SpotPhoto();
+            List<SpotPhoto> spp_list = dbHelper.getAllSpots(nearby_pin.id);
+            spot.pin_id = nearby_pin.id + "";
+            spot.path = filename;
+            if (spp_list.size() > 0){
+                spot.category = spp_list.get(0).category;
+            }
+            spot.create_time = (long)(System.currentTimeMillis()/1000) + "";
+            dbHelper.addSpot(spot);
+            nearby_pin.iv_mark.setImageResource(R.drawable.ic_point_check);
+        }
+        bCount = false;
+        txt_status.setVisibility(View.GONE);
+        mCurrentExportId = -1;
+    }
+
+    @Override
+    public void onFail(int errorCode, String errorMsg) {
+        // if GPU not support, errorCode is -10003 or -10005 or -13020
+        Toast.makeText(this, R.string.export_dialog_msg_export_failed, Toast.LENGTH_SHORT).show();
+        goBackSpeedMode();
+    }
+
+    @Override
+    public void onCancel() {
+        Toast.makeText(this, R.string.export_dialog_msg_export_stopped, Toast.LENGTH_SHORT).show();
+        goBackSpeedMode();
+    }
+
+    @Override
+    public void onProgress(float progress) {
+        // callback only when exporting video
+        txt_status.setText(getString(R.string.export_dialog_msg_export_progress, String.format(Locale.CHINA, "%.1f", progress * 100) + "%"));
+    }
+
+    void goBackSpeedMode(){
+        nearby_pin.iv_mark.setImageResource(R.drawable.ic_point);
+        txt_status.setVisibility(View.GONE);
+        mCurrentExportId = -1;
+        bCount = false;
+    }
+
+    //======== Menu ==============
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.speed_menu_bg) void onClickMenuBg(){
+        hideSpeedMenu();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.speed_menu_hdr) void onClickMenuHdr(){
+        bHdr = !bHdr;
+        cb_hdr.setChecked(bHdr);
+        hideSpeedMenu();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.speed_menu_times) void onClickMenuTimes(){
+        cb_timer_1.setChecked(false);
+        cb_timer_2.setChecked(false);
+        cb_timer_3.setChecked(false);
+        cb_timer_4.setChecked(false);
+        cb_timer_5.setChecked(false);
+        switch (countdown){
+            case 1:
+                cb_timer_1.setChecked(true);
+                break;
+            case 2:
+                cb_timer_2.setChecked(true);
+                break;
+            case 4:
+                cb_timer_4.setChecked(true);
+                break;
+            case 5:
+                cb_timer_5.setChecked(true);
+                break;
+            default:
+                cb_timer_3.setChecked(true);
+                break;
+        }
+        hideSpeedMenu();
+        showSpeedTimerMenu();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.speed_menu_reset) void onClickMenuReset(){
+        hideSpeedMenu();
+        view_setup_bg.setVisibility(View.VISIBLE);
+        onClickCancel();
+    }
+
+    void showSpeedMenu(){
+        Animation fadein = AnimationUtils.loadAnimation(this, R.anim.fade_in);
+        menu_view_bg.startAnimation(fadein);
+        menu_view_bg.setVisibility(View.VISIBLE);
+        Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
+        menu_view.startAnimation(bottomUp);
+        menu_view.setVisibility(View.VISIBLE);
+    }
+
+    void hideSpeedMenu(){
+        Animation bottomDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
+        menu_view.startAnimation(bottomDown);
+        menu_view.setVisibility(View.GONE);
+        Animation fadeout = AnimationUtils.loadAnimation(this, R.anim.fade_out);
+        menu_view_bg.startAnimation(fadeout);
+        menu_view_bg.setVisibility(View.GONE);
+    }
+
+    //======= Timer menu ===========
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.speed_menu_timer_bg)               RelativeLayout      menu_timer_view_bg;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.speed_menu_timer_view)             View                menu_timer_view;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.speed_menu_cb_timer_1)             CheckBox             cb_timer_1;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.speed_menu_cb_timer_2)             CheckBox             cb_timer_2;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.speed_menu_cb_timer_3)             CheckBox             cb_timer_3;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.speed_menu_cb_timer_4)             CheckBox             cb_timer_4;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.speed_menu_cb_timer_5)             CheckBox             cb_timer_5;
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.speed_menu_timer_bg) void onClickMenuTimerBg(){
+        hideSpeedTimerMenu();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.speed_menu_timer_1) void onClickMenuTimer1(){
+        countdown = 1;
+        hideSpeedTimerMenu();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.speed_menu_timer_2) void onClickMenuTimer2(){
+        countdown = 2;
+        hideSpeedTimerMenu();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.speed_menu_timer_3) void onClickMenuTimer3(){
+        countdown = SPEED_MODE_COUNTDOWN_DEFAULT;
+        hideSpeedTimerMenu();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.speed_menu_timer_4) void onClickMenuTimer4(){
+        countdown = 4;
+        hideSpeedTimerMenu();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.speed_menu_timer_5) void onClickMenuTimer5(){
+        countdown = 5;
+        hideSpeedTimerMenu();
+    }
+
+    void showSpeedTimerMenu(){
+        Animation fadein = AnimationUtils.loadAnimation(this, R.anim.fade_in);
+        menu_timer_view_bg.startAnimation(fadein);
+        menu_timer_view_bg.setVisibility(View.VISIBLE);
+        Animation bottomUp = AnimationUtils.loadAnimation(this, R.anim.bottom_up);
+        menu_timer_view.startAnimation(bottomUp);
+        menu_timer_view.setVisibility(View.VISIBLE);
+    }
+
+    void hideSpeedTimerMenu(){
+        Animation bottomDown = AnimationUtils.loadAnimation(this, R.anim.bottom_down);
+        menu_timer_view.startAnimation(bottomDown);
+        menu_timer_view.setVisibility(View.GONE);
+        Animation fadeout = AnimationUtils.loadAnimation(this, R.anim.fade_out);
+        menu_timer_view_bg.startAnimation(fadeout);
+        menu_timer_view_bg.setVisibility(View.GONE);
     }
 }

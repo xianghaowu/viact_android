@@ -109,7 +109,6 @@ public class CaptureAndPlay extends BaseObserveCameraActivity implements ICaptur
         setContentView(R.layout.activity_capture_and_play);
         ButterKnife.bind(this);
 
-
         camera_kind = getIntent().getIntExtra("camera_kind", CAMERA_360);
         capture_mode = getIntent().getStringExtra("capture_mode");
         pin_id = getIntent().getIntExtra("pin_id", 0);

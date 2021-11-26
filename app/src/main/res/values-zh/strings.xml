@@ -330,4 +330,13 @@
     <string name="speed_mode_init_desc_3">现在，点击您的新当前位置。这将定向您的表</string>
     <string name="speed_mode_init_desc_4">现在，启动速度模式。您可以再次取消调整表的定位。</string>
 
+    <string name="menu_title_hdr">HDR 模式</string>
+    <string name="menu_title_reset_speed">重置速度模式设置</string>
+    <string name="menu_title_timer">更改速度模式计时器</string>
+    <string name="menu_title_1_sec">1 秒</string>
+    <string name="menu_title_2_sec">2 秒</string>
+    <string name="menu_title_3_sec">3 秒</string>
+    <string name="menu_title_4_sec">4 秒</string>
+    <string name="menu_title_5_sec">5 秒</string>
+
 </resources>

@@ -328,5 +328,14 @@
     <string name="speed_mode_init_desc_2">Walk in any direction until the progress bar is full.</string>
     <string name="speed_mode_init_desc_3">Now, tap on your new current location. This will orient your Sheet</string>
     <string name="speed_mode_init_desc_4">Now, start the SpeedMode. You can cancel to orient your Sheet again.</string>
+    
+    <string name="menu_title_hdr">HDR Mode</string>
+    <string name="menu_title_reset_speed">Reset SpeedMode Setup</string>
+    <string name="menu_title_timer">Change SpeedMode Timer</string>
+    <string name="menu_title_1_sec">1 second</string>
+    <string name="menu_title_2_sec">2 seconds</string>
+    <string name="menu_title_3_sec">3 seconds</string>
+    <string name="menu_title_4_sec">4 seconds</string>
+    <string name="menu_title_5_sec">5 seconds</string>
 
 </resources>

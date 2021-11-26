@@ -45,8 +45,8 @@
                 android:id="@+id/speed_mode_ib_more"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:layout_centerVertical="true"
                 android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
                 android:background="@android:color/transparent"
                 android:src="@drawable/ic_more_vert"
                 app:tint="@color/colorWhite" />
@@ -78,16 +78,27 @@
         android:id="@+id/txt_choose_device"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginBottom="16dp"
+        android:layout_alignParentBottom="true"
         android:layout_marginEnd="16dp"
-        android:textStyle="bold"
-        android:textSize="@dimen/_10sdp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/main_desc_camera_360"
         android:textColor="@color/menu_disable"
-        android:text="@string/main_desc_camera_built_in"/>
+        android:textSize="@dimen/_10sdp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/txt_capture_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp"
+        android:textStyle="bold"
+        android:textSize="@dimen/_9sdp"
+        android:textColor="@color/colorBlue"/>
 
     <RelativeLayout
+        android:visibility="gone"
         android:id="@+id/speed_mode_bg_init"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -157,8 +168,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginVertical="@dimen/padding_size"
-                android:progressDrawable="@drawable/progressbar_custom"
-                android:progress="3"/>
+                android:progress="3"
+                android:progressDrawable="@drawable/progressbar_custom" />
 
 
             <TextView
@@ -185,7 +196,7 @@
                 android:layout_width="72dp"
                 android:layout_height="72dp"
                 android:layout_gravity="center_horizontal"
-                android:src="@drawable/ic_speed_mode_guide"/>
+                android:src="@drawable/ic_speed_mode_guide" />
 
 
             <LinearLayout
@@ -221,5 +232,312 @@
         </LinearLayout>
     </RelativeLayout>
 
+    <RelativeLayout
+        android:id="@+id/speed_menu_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/dlg_bg_transparent">
+
+        <LinearLayout
+            android:id="@+id/speed_menu_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/round_bottom_white_bar"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/speed_menu_tv_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:layout_marginBottom="@dimen/padding_size"
+                android:text="SpeedMode"
+                android:textColor="@color/colorBlack"
+                android:textSize="@dimen/_12sdp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/menu_disable" />
+
+            <RelativeLayout
+                android:id="@+id/speed_menu_hdr"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorWhite">
+
+                <ImageView
+                    android:id="@+id/speed_menu_iv_hdr"
+                    android:layout_width="@dimen/image_size_small"
+                    android:layout_height="@dimen/image_size_small"
+                    android:layout_centerVertical="true"
+                    android:layout_marginVertical="@dimen/padding_size"
+                    android:layout_marginStart="@dimen/bottom_center_margin"
+                    android:src="@drawable/ic_camera"
+                    app:tint="@color/colorGray" />
+
+                <TextView
+                    android:id="@+id/speed_menu_tv_hdr"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="@dimen/bottom_center_margin"
+                    android:layout_toEndOf="@+id/speed_menu_iv_hdr"
+                    android:text="@string/menu_title_hdr"
+                    android:textColor="@color/colorGray"
+                    android:textSize="@dimen/_11sdp" />
+
+                <CheckBox
+                    android:id="@+id/speed_menu_cb_hdr"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="@dimen/padding_size"
+                    android:clickable="false" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/speed_menu_times"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorWhite">
+
+                <ImageView
+                    android:id="@+id/speed_menu_iv_times"
+                    android:layout_width="@dimen/image_size_small"
+                    android:layout_height="@dimen/image_size_small"
+                    android:layout_centerVertical="true"
+                    android:layout_marginVertical="@dimen/padding_size"
+                    android:layout_marginStart="@dimen/bottom_center_margin"
+                    android:src="@drawable/ic_timer"
+                    app:tint="@color/colorGray" />
+
+                <TextView
+                    android:id="@+id/speed_menu_tv_times"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="@dimen/bottom_center_margin"
+                    android:layout_toEndOf="@+id/speed_menu_iv_times"
+                    android:text="@string/menu_title_timer"
+                    android:textColor="@color/colorGray"
+                    android:textSize="@dimen/_11sdp" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/speed_menu_reset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:background="@color/colorWhite">
+
+                <ImageView
+                    android:id="@+id/speed_menu_iv_reset"
+                    android:layout_width="@dimen/image_size_small"
+                    android:layout_height="@dimen/image_size_small"
+                    android:layout_centerVertical="true"
+                    android:layout_marginVertical="@dimen/padding_size"
+                    android:layout_marginStart="@dimen/bottom_center_margin"
+                    android:src="@drawable/ic_directions_walk"
+                    app:tint="@color/colorGray" />
+
+                <TextView
+                    android:id="@+id/speed_menu_tv_reset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="@dimen/bottom_center_margin"
+                    android:layout_toEndOf="@+id/speed_menu_iv_reset"
+                    android:text="@string/menu_title_reset_speed"
+                    android:textColor="@color/colorGray"
+                    android:textSize="@dimen/_11sdp" />
+            </RelativeLayout>
+
+        </LinearLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:visibility="gone"
+        android:id="@+id/speed_menu_timer_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/dlg_bg_transparent">
+
+        <LinearLayout
+            android:id="@+id/speed_menu_timer_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/round_bottom_white_bar"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorWhite">
+
+                <ImageView
+                    android:id="@+id/speed_menu_iv_times_title"
+                    android:layout_width="@dimen/image_size_small"
+                    android:layout_height="@dimen/image_size_small"
+                    android:layout_marginVertical="@dimen/padding_size"
+                    android:layout_marginStart="@dimen/activity_horizontal_margin"
+                    android:src="@drawable/ic_timer"
+                    app:tint="@color/colorGray" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="@dimen/activity_horizontal_margin"
+                    android:layout_toEndOf="@+id/speed_menu_iv_times_title"
+                    android:text="@string/menu_title_timer"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="@dimen/_12sdp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/menu_disable" />
+
+            <RelativeLayout
+                android:id="@+id/speed_menu_timer_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorWhite">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="@dimen/middle_margin"
+                    android:text="@string/menu_title_1_sec"
+                    android:textColor="@color/colorGray"
+                    android:textSize="@dimen/_11sdp" />
+                <CheckBox
+                    android:id="@+id/speed_menu_cb_timer_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginVertical="@dimen/padding_size"
+                    android:layout_marginEnd="@dimen/padding_size"
+                    android:clickable="false" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/speed_menu_timer_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorWhite">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="@dimen/middle_margin"
+                    android:text="@string/menu_title_2_sec"
+                    android:textColor="@color/colorGray"
+                    android:textSize="@dimen/_11sdp" />
+                <CheckBox
+                    android:id="@+id/speed_menu_cb_timer_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginVertical="@dimen/padding_size"
+                    android:layout_marginEnd="@dimen/padding_size"
+                    android:clickable="false" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/speed_menu_timer_3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorWhite">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="@dimen/middle_margin"
+                    android:text="@string/menu_title_3_sec"
+                    android:textColor="@color/colorGray"
+                    android:textSize="@dimen/_11sdp" />
+                <CheckBox
+                    android:id="@+id/speed_menu_cb_timer_3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginVertical="@dimen/padding_size"
+                    android:layout_marginEnd="@dimen/padding_size"
+                    android:clickable="false" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/speed_menu_timer_4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorWhite">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="@dimen/middle_margin"
+                    android:text="@string/menu_title_4_sec"
+                    android:textColor="@color/colorGray"
+                    android:textSize="@dimen/_11sdp" />
+                <CheckBox
+                    android:id="@+id/speed_menu_cb_timer_4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginVertical="@dimen/padding_size"
+                    android:layout_marginEnd="@dimen/padding_size"
+                    android:clickable="false" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/speed_menu_timer_5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorWhite">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="@dimen/middle_margin"
+                    android:text="@string/menu_title_5_sec"
+                    android:textColor="@color/colorGray"
+                    android:textSize="@dimen/_11sdp" />
+                <CheckBox
+                    android:id="@+id/speed_menu_cb_timer_5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginVertical="@dimen/padding_size"
+                    android:layout_marginEnd="@dimen/padding_size"
+                    android:clickable="false" />
+
+            </RelativeLayout>
+
+
+
+
+
+        </LinearLayout>
+    </RelativeLayout>
 
 </RelativeLayout>
