@@ -69,8 +69,7 @@ public class Compass implements SensorEventListener {
                 mGravity[2] = alpha * mGravity[2] + (1 - alpha)
                         * event.values[2];
 
-                // mGravity = event.values;
-
+//                 mGravity = event.values;
                 // Log.e(TAG, Float.toString(mGravity[0]));
             }
 
@@ -87,8 +86,7 @@ public class Compass implements SensorEventListener {
 
             }
 
-            boolean success = SensorManager.getRotationMatrix(R, I, mGravity,
-                    mGeomagnetic);
+            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
             if (success) {
                 float orientation[] = new float[3];
                 SensorManager.getOrientation(R, orientation);

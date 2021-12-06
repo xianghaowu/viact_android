@@ -158,7 +158,7 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.sheet_iv_filter) void onClickShowFilter(){
         bFilterMode = true;
-//        showCategoryView();
+        showCategoryView();
     }
 
     @SuppressLint("NonConstantResourceId")

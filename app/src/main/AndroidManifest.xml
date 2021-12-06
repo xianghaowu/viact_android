@@ -3,34 +3,42 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.viact.viact_android">
 
+    <!--
+         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but you must specify either coarse or fine
+         location permissions for the "MyLocation" functionality.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
-
-    <!-- As of Android 10 the ACTIVITY_RECOGNITION is required to be declared to track steps.
+    <!--
+ As of Android 10 the ACTIVITY_RECOGNITION is required to be declared to track steps.
     This is for the Step Sensor to work on Android 10 Devices
     -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
-
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
     <uses-feature
         android:name="android.hardware.sensor.accelerometer"
-        android:required="true"/>
+        android:required="true" />
     <uses-feature
         android:name="android.hardware.sensor.stepcounter"
-        android:required="true"/>
+        android:required="true" />
     <uses-feature
         android:name="android.hardware.sensor.stepdetector"
-        android:required="true"/>
+        android:required="true" />
 
     <application
         android:name=".MyApp"
@@ -43,11 +51,28 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+
+        <!--
+             The API key for Google Maps-based APIs is defined as a string resource.
+             (See the file "res/values/google_maps_api.xml").
+             Note that the API key is linked to the encryption key used to sign the APK.
+             You need a different API key for each encryption key, including the release key that is used to
+             sign the APK for publishing.
+             You can define the keys for the debug and release targets in src/debug/ and src/release/.
+        -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
+        <activity
+            android:name=".activities.MapsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_maps" />
         <activity
             android:name=".activities.SpeedModeActivity"
-            android:theme="@style/splashTheme"
+            android:exported="false"
             android:screenOrientation="portrait"
-            android:exported="false" />
+            android:theme="@style/splashTheme" />
         <activity
             android:name=".activities.CreateSheetActivity"
             android:exported="false"

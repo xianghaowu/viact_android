@@ -111,6 +111,11 @@ public class CreateSheetActivity extends BaseActivity {
 
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.create_sheet_google) void onClickGoogle(){
+        Intent mapIntent = new Intent(this, MapsActivity.class);
+        mapIntent.putExtra("project", cur_proc);
+        mapIntent.putExtra("sheet_name", sheet_name);
+        mapsLauncher.launch(mapIntent);
+//        startActivity(mapIntent);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -308,6 +313,15 @@ public class CreateSheetActivity extends BaseActivity {
                             e.printStackTrace();
                         }
                     }
+                }
+            });
+
+    ActivityResultLauncher<Intent> mapsLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    // There are no request codes
+                    finish();
                 }
             });
 }

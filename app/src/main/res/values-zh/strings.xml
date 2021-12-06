@@ -339,4 +339,9 @@
     <string name="menu_title_4_sec">4 秒</string>
     <string name="menu_title_5_sec">5 秒</string>
 
+    <!--Google Map Activity -->
+    <string name="title_activity_maps">Google Maps</string>
+    <string name="map_move_current_location">请在当前位置移动地图</string>
+    <string name="map_crop_current_location">请在当前位置周围裁剪地图</string>
+
 </resources>

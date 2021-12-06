@@ -139,6 +139,9 @@ public class SpeedModeActivity extends BaseObserveCameraActivity implements ICap
         File folder = new File(EXT_STORAGE_SPOT_PATH);
         folder.mkdirs();
 
+        //SpeedMode on GoogleMap
+
+        //SpeedMode on plan sheet
         menu_view_bg.setVisibility(View.GONE);
         menu_timer_view_bg.setVisibility(View.GONE);
         view_setup_bg.setVisibility(View.VISIBLE);
