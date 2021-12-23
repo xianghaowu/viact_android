@@ -69,6 +69,9 @@
             android:exported="false"
             android:label="@string/title_activity_maps" />
         <activity
+            android:name=".activities.LiveActivity"
+            android:exported="true"/>
+        <activity
             android:name=".activities.SpeedModeActivity"
             android:exported="false"
             android:screenOrientation="portrait"

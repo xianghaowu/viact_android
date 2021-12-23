@@ -86,7 +86,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // images Table Columns
     private static final String KEY_INS_IMG_ID = "ID";
     private static final String KEY_INS_IMG_PHOTO_ID = "photo_id";
-    private static final String KEY_INS_IMG_PATH = "name";
+    private static final String KEY_INS_IMG_PATH = "path";
     private static final String KEY_INS_IMG_X = "x_loc";
     private static final String KEY_INS_IMG_Y = "y_loc";
     private static final String KEY_INS_IMG_CREATE = "create_time";

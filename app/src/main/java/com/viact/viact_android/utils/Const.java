@@ -17,6 +17,8 @@ public class Const {
 
     public static final String SITE_MAP_URL = "https://customindz-shinobi.s3.ap-southeast-1.amazonaws.com/cbimage.png";
 
+    public static final String LIVE_STREAM_URL = "rtmp://54.254.0.41/live/360app";
+
     public final static float SITE_MAX_SCALE                      = 16.0f;
 
     public final static int SPEED_MODE_INIT_STEPS                 = 8;
