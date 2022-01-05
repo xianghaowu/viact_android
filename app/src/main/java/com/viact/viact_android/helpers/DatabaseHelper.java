@@ -16,6 +16,7 @@ import com.viact.viact_android.models.InsImg;
 import com.viact.viact_android.models.Markup;
 import com.viact.viact_android.models.PinPoint;
 import com.viact.viact_android.models.Project;
+import com.viact.viact_android.models.RecVideo;
 import com.viact.viact_android.models.Sheet;
 import com.viact.viact_android.models.SpotPhoto;
 
@@ -33,6 +34,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String TABLE_SPOTS = "tbl_spots";
     public static final String TABLE_MARKUPS = "tbl_markups";
     public static final String TABLE_INS_IMGS = "tbl_ins_imgs";
+    public static final String TABLE_VIDEOS = "tbl_videos";
 
     // projects Table Columns
     private static final String KEY_PROJECT_ID = "ID";
@@ -91,6 +93,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_INS_IMG_Y = "y_loc";
     private static final String KEY_INS_IMG_CREATE = "create_time";
     private static final String KEY_INS_IMG_UPDATE = "update_time";
+
+    // videos Table Columns
+    private static final String KEY_VIDEO_ID = "ID";
+    private static final String KEY_VIDEO_SHEET_ID = "sh_id";
+    private static final String KEY_VIDEO_PATH = "path";
+    private static final String KEY_VIDEO_CREATE = "create_time";
 
 
     private static DatabaseHelper sInstance;
@@ -168,6 +176,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + KEY_INS_IMG_UPDATE + " TEXT);";
         db.execSQL(query);
 
+        query = "CREATE TABLE " + TABLE_VIDEOS + " (" + KEY_VIDEO_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + KEY_VIDEO_SHEET_ID + " TEXT, "
+                + KEY_VIDEO_PATH + " TEXT, "
+                + KEY_VIDEO_CREATE + " TEXT);";
+        db.execSQL(query);
     }
 
     //upgrading database
@@ -180,9 +193,61 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_SPOTS + ";");
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_MARKUPS + ";");
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_INS_IMGS + ";");
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_VIDEOS + ";");
 
             onCreate(db);
         }
+    }
+
+    //add the new video
+    public void addVideo(RecVideo ct) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KEY_VIDEO_SHEET_ID, ct.sh_id);
+        values.put(KEY_VIDEO_PATH, ct.path);
+        values.put(KEY_VIDEO_CREATE, ct.create_time);
+        //inserting new row
+        sqLiteDatabase.insert(TABLE_VIDEOS, null , values);
+        //close database connection
+        sqLiteDatabase.close();
+    }
+
+    //get the videos for sheet
+    public ArrayList<RecVideo> getVideos(int sh_id) {
+        ArrayList<RecVideo> arrayList = new ArrayList<>();
+        // select all query
+        String select_query= "SELECT * FROM " + TABLE_VIDEOS + " WHERE sh_id = " + sh_id + ";";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        @SuppressLint("Recycle") Cursor cursor = db.rawQuery(select_query, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                RecVideo v_dt = new RecVideo();
+                v_dt.id = cursor.getInt(0);
+                v_dt.sh_id = cursor.getString(1);
+                v_dt.path = cursor.getString(2);
+                v_dt.create_time = cursor.getString(3);
+                arrayList.add(v_dt);
+            }while (cursor.moveToNext());
+        }
+        return arrayList;
+    }
+    //delete the video
+    public void deleteVideo(int ID) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        //deleting row
+        sqLiteDatabase.delete(TABLE_VIDEOS, "ID=" + ID, null);
+        sqLiteDatabase.close();
+    }
+
+    //delete the video
+    public void deleteVideos(int shID) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        //deleting row
+        sqLiteDatabase.delete(TABLE_VIDEOS, "sh_id=" + shID, null);
+        sqLiteDatabase.close();
     }
 
     //insert image functions

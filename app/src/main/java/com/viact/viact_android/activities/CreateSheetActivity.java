@@ -271,7 +271,8 @@ public class CreateSheetActivity extends BaseActivity {
                     }
                     Long tsLong = System.currentTimeMillis()/60000;
                     String ts = tsLong.toString();
-                    String f_name = dir_name + cur_proc.name + "_" + sheet_name + "_" + ts + ".png";
+                    String temp_sheet = sheet_name.replaceAll("[;\\/:*?\"<>|&']", "_");
+                    String f_name = dir_name + cur_proc.name + "_" + temp_sheet + "_" + ts + ".png";
                     try (FileOutputStream out = new FileOutputStream(f_name)) {
                         photo.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
                         // PNG is a lossless format, the compression factor (100) is ignored
@@ -302,7 +303,7 @@ public class CreateSheetActivity extends BaseActivity {
                         }
                         Long tsLong = System.currentTimeMillis()/60000;
                         String ts = tsLong.toString();
-                        String temp_sheet = sheet_name.replace("[;\\/:*?\"<>|&']", "_");
+                        String temp_sheet = sheet_name.replaceAll("[;\\/:*?\"<>|&']", "_");
                         String f_name = dir_name + cur_proc.name + "_" + temp_sheet + "_" + ts + ".png";
                         File srcFile = new File(path);
                         File destFile = new File(f_name);

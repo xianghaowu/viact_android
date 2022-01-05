@@ -75,6 +75,13 @@
                     android:textColor="@color/colorBlack"
                     android:textSize="@dimen/_11sdp"
                     android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/item_iv_play"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/ic_play_circle"
+                    android:layout_margin="@dimen/padding_size"/>
             </RelativeLayout>
 
         </androidx.cardview.widget.CardView>

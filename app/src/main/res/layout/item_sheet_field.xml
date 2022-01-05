@@ -42,7 +42,6 @@
         android:id="@+id/item_txt_mark"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/padding_size"
         android:layout_toStartOf="@+id/item_iv_more"
         android:background="@drawable/round_txt_bg_yellow"
         android:paddingHorizontal="@dimen/activity_horizontal_margin"
@@ -51,6 +50,14 @@
         android:textColor="@color/colorBlack"
         android:textSize="@dimen/_11sdp"
         android:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/item_iv_play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toStartOf="@+id/item_txt_mark"
+        android:background="@drawable/ic_play_circle"
+        android:layout_marginHorizontal="@dimen/padding_size"/>
 
     <ImageView
         android:id="@+id/item_iv_more"

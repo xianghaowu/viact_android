@@ -183,6 +183,17 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     }
 
     @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.sheet_iv_record) void onClickRecordMode(){
+        if (InstaCameraManager.getInstance().getCameraConnectedType() != InstaCameraManager.CONNECT_TYPE_NONE && checkSdCardEnabled()){
+            Intent recordIntent = new Intent(this, RecordModeActivity.class);
+            recordIntent.putExtra("sheet_id", cur_sheet.id);
+            startActivity(recordIntent);
+        } else {
+            connectCamera();
+        }
+    }
+
+    @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.rl_menu_bg) void onClickMenuHide(){
         hideSideMenu();
         if (selected_scene != null){

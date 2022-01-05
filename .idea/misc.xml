@@ -7,6 +7,7 @@
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/border_thumbnail.xml" value="0.328125" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/circle_bottom_btn_bg.xml" value="0.36770833333333336" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/circle_btn_bg.xml" value="0.36770833333333336" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/circle_btn_play_bg.xml" value="0.36770833333333336" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/circle_btn_stop_bg.xml" value="0.36770833333333336" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/circle_white_bg.xml" value="0.328125" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/ic_add.xml" value="0.36770833333333336" />
@@ -49,11 +50,13 @@
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_maps.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_play_and_export.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_project.xml" value="0.33" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_record_mode.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_room_view.xml" value="0.25" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_speed_mode.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_splash.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_spot_preview.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_stitch.xml" value="0.2421875" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_videos_view.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/dialog_choose_sitemap.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/dialog_confirm_sheet.xml" value="0.2421875" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/dialog_create_project.xml" value="0.3515625" />

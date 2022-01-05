@@ -17,6 +17,7 @@ import com.bumptech.glide.Glide;
 import com.viact.viact_android.R;
 import com.viact.viact_android.helpers.DatabaseHelper;
 import com.viact.viact_android.models.PinPoint;
+import com.viact.viact_android.models.RecVideo;
 import com.viact.viact_android.models.Sheet;
 import com.viact.viact_android.models.SpotPhoto;
 
@@ -58,9 +59,21 @@ public class QuickSheetsAdapter extends RecyclerView.Adapter<QuickSheetsAdapter.
         viewHolder.item_name.setText(sh.name);
         viewHolder.item_date.setText(getDate(sh.create_time));
         setMarkTxt(viewHolder.item_mark, sh);
+        List<RecVideo> rv_list = dbHelper.getVideos(sh.id);
+        if (rv_list.size() > 0) {
+            viewHolder.item_play.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.item_play.setVisibility(View.GONE);
+        }
         viewHolder.view.setOnClickListener( view -> {
             if (listener != null){
                 listener.onClickItem(position);
+            }
+        });
+
+        viewHolder.item_play.setOnClickListener( view -> {
+            if (listener != null){
+                listener.onClickPlay(position);
             }
         });
     }
@@ -103,7 +116,7 @@ public class QuickSheetsAdapter extends RecyclerView.Adapter<QuickSheetsAdapter.
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView item_image;
+        ImageView item_image, item_play;
         TextView  item_name, item_date, item_mark;
         CardView view;
         public ViewHolder(@NonNull View itemView) {
@@ -113,10 +126,12 @@ public class QuickSheetsAdapter extends RecyclerView.Adapter<QuickSheetsAdapter.
             item_name   =       itemView.findViewById(R.id.item_tv_name);
             item_date   =       itemView.findViewById(R.id.item_tv_date);
             item_mark   =       itemView.findViewById(R.id.item_tv_mark);
+            item_play   =       itemView.findViewById(R.id.item_iv_play);
         }
     }
 
     public interface EventListener {
         void onClickItem(int index);
+        void onClickPlay(int index);
     }
 }

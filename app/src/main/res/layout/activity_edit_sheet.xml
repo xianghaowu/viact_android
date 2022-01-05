@@ -363,6 +363,23 @@
             android:src="@drawable/ic_live"
             app:tint="@color/colorWhite" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginHorizontal="@dimen/padding_size"
+            android:background="@color/menu_disable" />
+
+        <ImageView
+            android:id="@+id/sheet_iv_record"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="@dimen/padding_size"
+            android:layout_marginTop="@dimen/padding_size"
+            android:layout_marginEnd="@dimen/padding_size"
+            android:layout_marginBottom="@dimen/padding_size"
+            android:src="@drawable/ic_record"
+            app:tint="@color/colorWhite" />
+
     </LinearLayout>
 
     <RelativeLayout

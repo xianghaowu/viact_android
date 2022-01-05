@@ -205,7 +205,6 @@ public class LiveActivity extends BaseObserveCameraActivity implements IPreviewS
                     .setFps(Integer.parseInt(fps))
                     .setBitrate(Integer.parseInt(bitrate) * 1024 * 1024)
                     .setPanorama(mCbPanorama.isChecked())
-                    // 设置网络ID即可在使用WIFI连接相机时使用4G网络推流
                     // set NetId to use 4G to push live streaming when connecting camera by WIFI
                     .setNetId(NetworkManager.getInstance().getMobileNetId());
             InstaCameraManager.getInstance().startLive(builder, this);

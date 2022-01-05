@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.RecordModeActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/record_mode_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bottom_bar_height"
+        android:background="@color/colorPrimaryDark">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="16dp">
+
+            <ImageButton
+                android:id="@+id/record_mode_ib_back"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_centerVertical="true"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_back"
+                app:tint="@color/colorWhite" />
+
+            <TextView
+                android:id="@+id/record_mode_tv_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@+id/record_mode_ib_more"
+                android:layout_toEndOf="@+id/record_mode_ib_back"
+                android:gravity="center"
+                android:padding="@dimen/padding_size"
+                android:text="@string/btn_next"
+                android:textColor="@color/colorWhite"
+                android:textSize="@dimen/_12sdp"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/record_mode_ib_more"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_more_vert"
+                app:tint="@color/colorWhite" />
+
+        </RelativeLayout>
+    </androidx.appcompat.widget.Toolbar>
+
+    <RelativeLayout
+        android:id="@+id/view_home"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/record_mode_toolbar">
+        <com.github.chrisbanes.photoview.PhotoView
+            android:id="@+id/record_mode_photoview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/record_mode_toolbar">
+        <com.arashivision.sdkmedia.player.capture.InstaCapturePlayerView
+            android:id="@+id/player_capture"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/view_bg_transparent" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/tv_sd_card_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="20dp"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                tools:text="SD卡：剩余2.1G" />
+
+            <TextView
+                android:id="@+id/tv_battery_level"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:layout_below="@+id/tv_sd_card_state"
+                tools:text="电量：90%" />
+
+            <TextView
+                android:id="@+id/tv_record_duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_below="@+id/tv_battery_level"
+                tools:text="00:00" />
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/record_mode_btn_record"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/circle_btn_play_bg"/>
+
+        <FrameLayout
+            android:id="@+id/layout_loading"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#CC000000"
+            android:clickable="true"
+            android:focusable="true"
+            android:translationZ="5dp"
+            android:visibility="gone">
+
+            <ProgressBar
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_gravity="center" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/record_btn_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/record_mode_btn_again"
+                android:layout_width="wrap_content"
+                android:layout_height="64dp"
+                android:layout_margin="16dp"
+                android:textColor="@color/colorRed"
+                android:textAllCaps="false"
+                android:textSize="@dimen/_14sdp"
+                android:text="Again"
+                android:background="@android:color/transparent"/>
+            <Button
+                android:id="@+id/record_mode_btn_confirm"
+                android:layout_width="wrap_content"
+                android:layout_height="64dp"
+                android:layout_margin="16dp"
+                android:textColor="@color/colorPlay"
+                android:textAllCaps="false"
+                android:textSize="@dimen/_14sdp"
+                android:text="Confirm"
+                android:background="@android:color/transparent"/>
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>

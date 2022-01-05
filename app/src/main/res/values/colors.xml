@@ -19,7 +19,10 @@
     <color name="colorGray">#808080</color>
     <color name="colorYellow">#FFFF00</color>
     <color name="colorBlue">#0000FF</color>
+    <color name="colorPlay">#00C000</color>
 
     <color name="colorBottomBtn">#e5a75c</color>
+
+    <color name="view_bg_transparent">#60000000</color>
 
 </resources>

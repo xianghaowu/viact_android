@@ -22,6 +22,7 @@ import com.viact.viact_android.adapters.QuickSheetsAdapter;
 import com.viact.viact_android.helpers.DatabaseHelper;
 import com.viact.viact_android.models.PinPoint;
 import com.viact.viact_android.models.Project;
+import com.viact.viact_android.models.RecVideo;
 import com.viact.viact_android.models.Sheet;
 import com.viact.viact_android.models.SpotPhoto;
 
@@ -68,6 +69,13 @@ public class ProjectActivity extends AppCompatActivity {
         public void onClickItem(int index) {
             moveEditSitemap(index);
         }
+        @Override
+        public void onClickPlay(int index) {
+            sel_sheet = sheet_list.get(index);
+            Intent viewIntent = new Intent(ProjectActivity.this, VideosViewActivity.class);
+            viewIntent.putExtra("sheet", sel_sheet.id);
+            startActivity(viewIntent);
+        }
     };
 
     ListSheetsAdapter.EventListener listListener = new ListSheetsAdapter.EventListener() {
@@ -80,6 +88,14 @@ public class ProjectActivity extends AppCompatActivity {
             sel_sheet = sheet_list.get(index);
             menu_sheet_title.setText(sel_sheet.name);
             showSheetMenu();
+        }
+
+        @Override
+        public void onClickPlay(int index) {
+            sel_sheet = sheet_list.get(index);
+            Intent viewIntent = new Intent(ProjectActivity.this, VideosViewActivity.class);
+            viewIntent.putExtra("sheet", sel_sheet.id);
+            startActivity(viewIntent);
         }
     };
 
@@ -341,6 +357,14 @@ public class ProjectActivity extends AppCompatActivity {
             }
             dbHelper.deletePin(pt.id);
         }
+        List<RecVideo> vd_list = dbHelper.getVideos(sel_sheet.id);
+        for (int j = 0; j < vd_list.size(); j++){
+            RecVideo pt = vd_list.get(j);
+            File sp_f = new File(pt.path);
+            sp_f.delete();
+        }
+        dbHelper.deleteVideos(sel_sheet.id);
+
         File sh_f = new File(sel_sheet.path);
         sh_f.delete();
         dbHelper.deleteSheet(sel_sheet.id);

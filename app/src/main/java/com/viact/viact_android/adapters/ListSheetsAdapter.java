@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.viact.viact_android.R;
 import com.viact.viact_android.helpers.DatabaseHelper;
 import com.viact.viact_android.models.PinPoint;
+import com.viact.viact_android.models.RecVideo;
 import com.viact.viact_android.models.Sheet;
 import com.viact.viact_android.models.SpotPhoto;
 
@@ -57,6 +58,13 @@ public class ListSheetsAdapter extends RecyclerView.Adapter<ListSheetsAdapter.Vi
 
         setMarkTxt(viewHolder.item_mark, sh);
 
+        List<RecVideo> rv_list = dbHelper.getVideos(sh.id);
+        if (rv_list.size() > 0) {
+            viewHolder.item_play.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.item_play.setVisibility(View.GONE);
+        }
+
         viewHolder.item_parent.setOnClickListener( view -> {
             if (listener != null){
                 listener.onClickItem(position);
@@ -66,6 +74,12 @@ public class ListSheetsAdapter extends RecyclerView.Adapter<ListSheetsAdapter.Vi
         viewHolder.item_menu.setOnClickListener( view -> {
             if (listener != null){
                 listener.onClickMenu(position);
+            }
+        });
+
+        viewHolder.item_play.setOnClickListener( view -> {
+            if (listener != null){
+                listener.onClickPlay(position);
             }
         });
     }
@@ -119,7 +133,7 @@ public class ListSheetsAdapter extends RecyclerView.Adapter<ListSheetsAdapter.Vi
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView item_name, item_count, item_mark;
-        ImageView  item_menu;
+        ImageView  item_menu, item_play;
         View    item_parent;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -128,11 +142,13 @@ public class ListSheetsAdapter extends RecyclerView.Adapter<ListSheetsAdapter.Vi
             item_count   =       itemView.findViewById(R.id.item_tv_count);
             item_menu   =       itemView.findViewById(R.id.item_iv_more);
             item_mark   =       itemView.findViewById(R.id.item_txt_mark);
+            item_play   =       itemView.findViewById(R.id.item_iv_play);
         }
     }
 
     public interface EventListener {
         void onClickItem(int index);
         void onClickMenu(int index);
+        void onClickPlay(int index);
     }
 }
