@@ -555,6 +555,7 @@ public class SpeedModeActivity extends BaseObserveCameraActivity implements ICap
             pinsContainer.removeView(iv_step);
             iv_step = null;
         }
+        pos_start = pos_end;
         iv_step = addMarkerView(pos_start.x, pos_start.y);
         iv_step.setImageResource(R.drawable.ic_navigation);
         //rotate

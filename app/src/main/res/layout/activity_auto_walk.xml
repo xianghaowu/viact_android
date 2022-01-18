@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.RecordModeActivity">
+    tools:context=".activities.AutoWalkActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/record_mode_toolbar"
@@ -30,7 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_toStartOf="@+id/record_mode_ib_more"
+                android:layout_toStartOf="@+id/record_mode_ib_restart"
                 android:layout_toEndOf="@+id/record_mode_ib_back"
                 android:gravity="center"
                 android:padding="@dimen/padding_size"
@@ -39,86 +39,27 @@
                 android:textSize="@dimen/_12sdp"
                 android:textStyle="bold" />
 
-            <ImageButton
-                android:id="@+id/record_mode_ib_more"
+            <ImageView
+                android:id="@+id/record_mode_ib_restart"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:background="@android:color/transparent"
-                android:src="@drawable/ic_more_vert"
+                android:src="@drawable/ic_restart"
                 app:tint="@color/colorWhite" />
 
         </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 
     <RelativeLayout
-        android:id="@+id/view_home"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/record_mode_toolbar">
-        <com.github.chrisbanes.photoview.PhotoView
-            android:id="@+id/record_mode_photoview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/record_mode_toolbar">
+        android:layout_below="@+id/record_mode_toolbar"
+        android:layout_above="@+id/record_mode_guide_view">
         <com.arashivision.sdkmedia.player.capture.InstaCapturePlayerView
             android:id="@+id/player_capture"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/view_bg_transparent" />
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <TextView
-                android:id="@+id/tv_sd_card_state"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="20dp"
-                android:textColor="@android:color/black"
-                android:textSize="14sp"
-                tools:text="SD卡：剩余2.1G" />
-
-            <TextView
-                android:id="@+id/tv_battery_level"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginStart="16dp"
-                android:textColor="@android:color/black"
-                android:textSize="14sp"
-                android:layout_below="@+id/tv_sd_card_state"
-                tools:text="电量：90%" />
-
-            <TextView
-                android:id="@+id/tv_record_duration"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginStart="16dp"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_below="@+id/tv_battery_level"
-                tools:text="00:00" />
-        </RelativeLayout>
-
-        <Button
-            android:id="@+id/record_mode_btn_record"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/circle_btn_play_bg"/>
+            android:layout_height="match_parent"/>
 
         <FrameLayout
             android:id="@+id/layout_loading"
@@ -135,8 +76,75 @@
                 android:layout_height="64dp"
                 android:layout_gravity="center" />
         </FrameLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/view_home"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/record_mode_toolbar"
+        android:layout_above="@+id/record_mode_guide_view">
+        <com.github.chrisbanes.photoview.PhotoView
+            android:id="@+id/record_mode_photoview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.6"/>
+
+        <RelativeLayout
+            android:id="@+id/pinsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"></RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/record_mode_status_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/tv_sd_card_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="20dp"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                tools:text="SD卡：剩余2.1G" />
+
+            <TextView
+                android:id="@+id/tv_battery_level"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tv_sd_card_state"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                tools:text="电量：90%" />
+
+            <TextView
+                android:id="@+id/tv_record_duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tv_battery_level"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                tools:text="00:00" />
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/record_mode_btn_record"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/circle_btn_play_bg"/>
 
         <LinearLayout
+            android:visibility="gone"
             android:id="@+id/record_btn_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -166,6 +174,22 @@
                 android:background="@android:color/transparent"/>
         </LinearLayout>
 
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/record_mode_guide_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/colorBlack">
+
+        <TextView
+            android:id="@+id/record_mode_guide"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/activity_vertical_margin"
+            android:textColor="@color/colorWhite"
+            android:textSize="@dimen/_12sdp" />
     </RelativeLayout>
 
 </RelativeLayout>

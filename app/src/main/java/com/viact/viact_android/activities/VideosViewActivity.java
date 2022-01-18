@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.constraintlayout.widget.Group;
 
+import com.arashivision.sdkcamera.camera.InstaCameraManager;
 import com.arashivision.sdkmedia.player.listener.PlayerGestureListener;
 import com.arashivision.sdkmedia.player.listener.PlayerViewListener;
 import com.arashivision.sdkmedia.player.listener.VideoStatusListener;
@@ -24,6 +26,8 @@ import com.viact.viact_android.R;
 import com.viact.viact_android.helpers.DatabaseHelper;
 import com.viact.viact_android.models.RecVideo;
 import com.viact.viact_android.models.Sheet;
+import com.viact.viact_android.utils.API;
+import com.viact.viact_android.utils.APICallback;
 import com.viact.viact_android.utils.TimeFormat;
 
 import java.io.File;
@@ -56,6 +60,10 @@ public class VideosViewActivity extends BaseObserveCameraActivity {
     @BindView(R.id.video_iv_forward)        ImageView           iv_forward;
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.video_play_view)         RelativeLayout      player_container;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.video_menu_upload_view)         View         menu_upload_view;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.video_tv_url)          TextView            tv_url;
 
     //toolbar
     @SuppressLint("NonConstantResourceId")
@@ -80,12 +88,41 @@ public class VideosViewActivity extends BaseObserveCameraActivity {
         dbHelper = DatabaseHelper.getInstance(this);
         if (sh_id == -1) {finish();}
         cur_sheet = dbHelper.getSheet(sh_id);
+
+        if (InstaCameraManager.getInstance().getCameraConnectedType() != InstaCameraManager.CONNECT_TYPE_NONE){
+            InstaCameraManager.getInstance().closeCamera();
+        }
         initLayout();
     }
 
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.video_iv_delete) void onClickDelete(){
         confirmDeletePhoto();
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.video_iv_upload) void onClickUpload(){
+        //edit code
+        showProgress("Uploading...");
+        API.uploadSLAMVideo(sel_video, new APICallback<Pair<String, String>>() {
+            @Override
+            public void onSuccess(Pair<String, String> response) {
+                dismissProgress();
+                RecVideo rc_video = video_list.get(sel_index);
+                String v_id = response.first;
+                String url = response.second;
+                rc_video.cloud_id = v_id;
+                rc_video.url = url;
+                dbHelper.updateVideo(rc_video);
+                initPlay();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                dismissProgress();
+                Toast.makeText(VideosViewActivity.this, error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -110,7 +147,7 @@ public class VideosViewActivity extends BaseObserveCameraActivity {
     }
 
     void initLayout(){
-        tv_title.setText(cur_sheet.name);
+        tv_title.setText(cur_sheet.name + " - AutoWalk Videos");
         video_list = dbHelper.getVideos(cur_sheet.id);
         if (video_list.size() == 0) {
             finish();
@@ -143,6 +180,14 @@ public class VideosViewActivity extends BaseObserveCameraActivity {
         sel_video = video_list.get(sel_index);
         long ctime = Long.parseLong(sel_video.create_time);
         showDateTime(ctime);
+
+        if (!sel_video.cloud_id.isEmpty()){
+            menu_upload_view.setVisibility(View.GONE);
+            tv_url.setText(sel_video.url);
+        } else {
+            menu_upload_view.setVisibility(View.VISIBLE);
+            tv_url.setText("");
+        }
 
         String filename = sel_video.path;
         String[] filepaths = new String[] {filename};
@@ -232,6 +277,7 @@ public class VideosViewActivity extends BaseObserveCameraActivity {
                 RecVideo sp = video_list.get(sel_index);
                 File ff = new File(sp.path);
                 ff.delete();
+                dbHelper.deleteVideo(sp.id);
                 video_list.clear();
                 video_list = dbHelper.getVideos(cur_sheet.id);
                 if (sel_index == video_list.size()){

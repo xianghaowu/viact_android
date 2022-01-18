@@ -343,4 +343,18 @@
     <string name="map_move_current_location">Please move the map around current location</string>
     <string name="map_crop_current_location">Please crop the map around current location</string>
 
+    <!--AutoWalk Activity -->
+    <string name="auto_walk_connect_disp">The camera is disconnected. Do you want to reconnect?</string>
+    <string name="auto_walk_guide_1">Zoom in and tap on your current exact location</string>
+    <string name="auto_walk_guide_2">Press the Record button to start AutoWalk.\nOnce the camera starts capturing, please walk more than 5 meters straight away.</string>
+    <string name="auto_walk_guide_3">When you reach a place of 5 meters from the starting place, tap the correct current point on the map.\nPlease keep walking in any direction on the site.</string>
+    <string name="auto_walk_guide_4">Press the stop button to stop or end the camera captures. The video is stored and uploaded to the cloud.</string>
+    <string name="auto_walk_guide_5">Please wait…\nYou can restart or exit AutoWalk after uploading.</string>
+    <string name="auto_walk_mobile_net">Mobile Network</string>
+    <string name="auto_walk_wifi_net">Wifi Network</string>
+    <string name="auto_walk_bind_mobile_network_desc">Bind mobile network, then you can use 4G to upload the video data to the cloud when connecting camera by WIFI.</string>
+    <string name="auto_walk_bind_wifi_network_desc">If you are going to upload the video file by using the wifi network, please cancel this dialog and go to video player view. And disconnect the camera and set the Wifi connection on the phone settings, and then try to upload the video file.</string>
+    <string name="auto_walk_btn_upload">Upload</string>
+    <string name="auto_walk_btn_cancel">Cancel</string>
+
 </resources>

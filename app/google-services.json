@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "499090430350",
+    "project_id": "viact-333417",
+    "storage_bucket": "viact-333417.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:499090430350:android:3a610ff002f01801c02cdf",
+        "android_client_info": {
+          "package_name": "com.viact.viact_android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "499090430350-6q5b2jetdceoalcfdttn4137sl2epf5j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASLOIW6lXdWsW177RDY03Kx7wJax6T_O8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "499090430350-6q5b2jetdceoalcfdttn4137sl2epf5j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -71,8 +71,8 @@
                 android:id="@+id/edit_sheet_ib_more"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:layout_centerVertical="true"
                 android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
                 android:background="@android:color/transparent"
                 android:src="@drawable/ic_more_vert"
                 app:tint="@color/colorWhite" />
@@ -336,14 +336,14 @@
             android:background="@color/menu_disable" />
 
         <ImageView
-            android:id="@+id/sheet_iv_walk"
+            android:id="@+id/sheet_iv_speedmode"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_marginStart="@dimen/padding_size"
             android:layout_marginTop="@dimen/padding_size"
             android:layout_marginEnd="@dimen/padding_size"
             android:layout_marginBottom="@dimen/padding_size"
-            android:src="@drawable/ic_directions_walk"
+            android:src="@drawable/ic_offline_bolt"
             app:tint="@color/colorWhite" />
 
         <LinearLayout
@@ -377,7 +377,7 @@
             android:layout_marginTop="@dimen/padding_size"
             android:layout_marginEnd="@dimen/padding_size"
             android:layout_marginBottom="@dimen/padding_size"
-            android:src="@drawable/ic_record"
+            android:src="@drawable/ic_play_circle"
             app:tint="@color/colorWhite" />
 
     </LinearLayout>

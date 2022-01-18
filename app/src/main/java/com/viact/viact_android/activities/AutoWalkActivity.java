@@ -1,20 +1,28 @@
 package com.viact.viact_android.activities;
 
-import static com.viact.viact_android.utils.Const.EXT_STORAGE_PHOTO_PATH;
 import static com.viact.viact_android.utils.Const.EXT_STORAGE_SPOT_PATH;
 import static com.viact.viact_android.utils.Const.EXT_STORAGE_VIDEO_PATH;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
+import static com.viact.viact_android.utils.Const.PIN_SIZE_MAX_LEN;
+import static com.viact.viact_android.utils.Const.PIN_SIZE_MIN_LEN;
+import static com.viact.viact_android.utils.Const.SITE_MAX_SCALE;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Matrix;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -22,7 +30,6 @@ import com.arashivision.sdkcamera.camera.InstaCameraManager;
 import com.arashivision.sdkcamera.camera.callback.ICameraChangedCallback;
 import com.arashivision.sdkcamera.camera.callback.ICaptureStatusListener;
 import com.arashivision.sdkcamera.camera.callback.IPreviewStatusListener;
-import com.arashivision.sdkcamera.camera.live.LiveParamsBuilder;
 import com.arashivision.sdkcamera.camera.preview.ExposureData;
 import com.arashivision.sdkcamera.camera.preview.GyroData;
 import com.arashivision.sdkcamera.camera.preview.VideoData;
@@ -35,13 +42,16 @@ import com.arashivision.sdkmedia.player.capture.InstaCapturePlayerView;
 import com.arashivision.sdkmedia.player.listener.PlayerViewListener;
 import com.arashivision.sdkmedia.work.WorkWrapper;
 import com.bumptech.glide.Glide;
+import com.github.chrisbanes.photoview.OnPhotoTapListener;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.viact.viact_android.R;
+import com.viact.viact_android.dialogs.UploadAutoWalkDlg;
 import com.viact.viact_android.helpers.DatabaseHelper;
+import com.viact.viact_android.models.PinPoint;
 import com.viact.viact_android.models.RecVideo;
 import com.viact.viact_android.models.Sheet;
+import com.viact.viact_android.models.SpotPhoto;
 import com.viact.viact_android.utils.FileUtils;
-import com.viact.viact_android.utils.NetworkManager;
 import com.viact.viact_android.utils.TimeFormat;
 
 import java.io.File;
@@ -52,13 +62,15 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class RecordModeActivity extends AppCompatActivity implements ICameraChangedCallback, IPreviewStatusListener, ICaptureStatusListener, IExportCallback {
+public class AutoWalkActivity extends BaseObserveCameraActivity implements IPreviewStatusListener, ICaptureStatusListener, IExportCallback {
 
     Sheet cur_sheet;
     DatabaseHelper dbHelper;
 
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.record_mode_photoview)       PhotoView photo_view;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.pinsContainer)               RelativeLayout   pinsContainer;
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.record_mode_tv_title)        TextView tv_title;
     @SuppressLint("NonConstantResourceId")
@@ -76,15 +88,36 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.record_btn_view)             View mBtnView;
 
-    private boolean mNeedToRestartPreview;
-    private boolean mIsCaptureButtonClicked;
-    private int mCurPreviewType = -1;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.record_mode_status_view)      View mStatusView;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.record_mode_guide_view)      View mGuideView;
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.record_mode_guide)           TextView mTvGuide;
+
+//    private boolean mNeedToRestartPreview;
+    private boolean mIsCapture;
+//    private int mCurPreviewType = -1;
     private PreviewStreamResolution mCurPreviewResolution = null;
+
+    final int STEP_INIT                 = 0;
+    final int STEP_FIRST_POINT          = 1;
+    final int STEP_START_RECORD         = 2;
+    final int STEP_SECOND_POINT         = 3;
+    final int STEP_STOP_RECORD          = 4;
+
+    private int nStep = STEP_INIT;
+
+    private PinPoint    firstPin, secondPin;
+    private long        ts_first, ts_second;
+    private Matrix      mat_site = new Matrix();
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_record_mode);
+        setContentView(R.layout.activity_auto_walk);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         ButterKnife.bind(this);
 
@@ -105,21 +138,42 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
         File folder = new File(EXT_STORAGE_SPOT_PATH);
         folder.mkdirs();
 
+        photo_view.setOnMatrixChangeListener(rect -> {
+            drawPins();
+        });
+
+        photo_view.setMaximumScale(SITE_MAX_SCALE);
+        photo_view.setOnPhotoTapListener(new PhotoTapListener());
+
         Glide.with (this)
                 .load (cur_sheet.path)
                 .into (photo_view);
 
-        tv_title.setText(cur_sheet.name);
-        mBtnView.setVisibility(View.GONE);
+        tv_title.setText("AutoWalk - " + cur_sheet.name);
+
+        nStep = STEP_INIT;
+        refreshLayout();
 
         InstaCameraManager cameraManager = InstaCameraManager.getInstance();
         if (isCameraConnected()) {
-            onCameraStatusChanged(true);
-            onCameraBatteryUpdate(cameraManager.getCameraCurrentBatteryLevel(), cameraManager.isCameraCharging());
-            onCameraSDCardStateChanged(cameraManager.isSdCardEnabled());
-            onCameraStorageChanged(cameraManager.getCameraStorageFreeSpace(), cameraManager.getCameraStorageTotalSpace());
+            setCameraStatusCallback();
+        } else {
+            connectCameraWifi();
         }
         cameraManager.registerCameraChangedCallback(this);
+
+    }
+
+    void connectCameraWifi() {
+        InstaCameraManager.getInstance().openCamera(InstaCameraManager.CONNECT_TYPE_WIFI);
+    }
+
+    void setCameraStatusCallback(){
+        InstaCameraManager cameraManager = InstaCameraManager.getInstance();
+        onCameraStatusChanged(true);
+        onCameraBatteryUpdate(cameraManager.getCameraCurrentBatteryLevel(), cameraManager.isCameraCharging());
+        onCameraSDCardStateChanged(cameraManager.isSdCardEnabled());
+        onCameraStorageChanged(cameraManager.getCameraStorageFreeSpace(), cameraManager.getCameraStorageTotalSpace());
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -130,17 +184,23 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
 
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.record_mode_btn_record) void onClickRecord(){
-        mIsCaptureButtonClicked = !mIsCaptureButtonClicked;
-
-        if(mIsCaptureButtonClicked){
-            mRecBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.circle_btn_stop_bg));
-            if (!checkToRestartCameraPreviewStream()) {
-                doCameraWork();
+        if (isCameraConnected() && mLayoutLoading.getVisibility() == View.GONE){
+            if(nStep == STEP_FIRST_POINT){
+                mIsCapture = true;
+                if (!checkToRestartCameraPreviewStream()) {
+                    nStep = STEP_START_RECORD;
+                    refreshLayout();
+                    doCameraWork();
+                }
+            } else if (nStep == STEP_SECOND_POINT){
+                nStep = STEP_STOP_RECORD;
+                refreshLayout();
+                stopCameraWork();
             }
-        } else{
-            mRecBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.circle_btn_play_bg));
-            stopCameraWork();
+        } else {
+            Toast.makeText(this, "Please check the connection with the 360 camera", Toast.LENGTH_SHORT).show();
         }
+
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -153,7 +213,7 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
         if (captured_files != null && captured_files.length > 0) {
             //download captured file as panorama
             mWorkWrapper = new WorkWrapper(captured_files);
-            exp_filename = "exp_360_" + (long)(System.currentTimeMillis()/1000);
+            exp_filename = "exp_walk_" + (long)(System.currentTimeMillis()/1000);
             if (mWorkWrapper.isVideo()) {
                 File folder = new File(EXT_STORAGE_VIDEO_PATH);
                 if (!folder.exists()) {
@@ -163,8 +223,8 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
                 exp_filename = exp_filename + ".mp4";
                 exportVideoOriginal();
             } else {
-                mRecBtn.setVisibility(View.VISIBLE);
-                mBtnView.setVisibility(View.GONE);
+                nStep = STEP_INIT;
+                refreshLayout();
             }
             showExportDialog();
         }
@@ -190,18 +250,15 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
         mLayoutLoading.setVisibility(View.GONE);
         mTvRecordDuration.setText(null);
         checkToRestartCameraPreviewStream();
-        // 拍摄结束返回文件路径，可执行下载、播放、导出操作，任君选择
-        // 如果是HDR拍照则必须从相机下载到本地才可进行HDR合成操作
-        // After capture, the file paths will be returned. Then download, play and export operations can be performed
-        // If it is HDR Capture, you must download images from the camera to the local to perform HDR stitching operation
         if (strings.length > 0){
-            mBtnView.setVisibility(View.VISIBLE);
-            mRecBtn.setVisibility(View.GONE);
+            nStep = STEP_STOP_RECORD;
+            refreshLayout();
             captured_files = strings;
+            onClickConfirm();
         } else {
             Toast.makeText(this, "Capture failed!", Toast.LENGTH_SHORT).show();
-            mRecBtn.setVisibility(View.VISIBLE);
-            mRecBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.circle_btn_play_bg));
+            nStep = STEP_INIT;
+            refreshLayout();
         }
     }
 
@@ -217,22 +274,38 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
 
     @Override
     public void onCameraStatusChanged(boolean enabled) {
+        super.onCameraSDCardStateChanged(enabled);
         mLayoutLoading.setVisibility(View.GONE);
         resetState();
+        nStep = STEP_INIT;
+        refreshLayout();
 
         // 连接相机后自动开启预览、注册拍照监听
         // After connecting the camera, open preview stream and register listeners
         if (enabled) {
+            Toast.makeText(this, R.string.main_toast_camera_connected, Toast.LENGTH_SHORT).show();
             InstaCameraManager.getInstance().setCaptureStatusListener(this);
             InstaCameraManager.getInstance().setPreviewStatusChangedListener(this);
-            checkToRestartCameraPreviewStream();
+        } else {
+            Toast.makeText(this, R.string.main_toast_camera_disconnected, Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
     public void onCameraConnectError() {
         Toast.makeText(this, "Please check the connection with the 360 camera", Toast.LENGTH_SHORT).show();
-        finish();
+        Toast.makeText(this, R.string.main_toast_camera_disconnected, Toast.LENGTH_SHORT).show();
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage(R.string.auto_walk_connect_disp);
+        alertDialogBuilder.setPositiveButton("Yes", (arg0, arg1) -> {
+            InstaCameraManager.getInstance().openCamera(InstaCameraManager.CONNECT_TYPE_WIFI);
+        });
+        alertDialogBuilder.setNegativeButton("Finish", (dialogInterface, i) -> {
+            finish();
+        });
+        alertDialogBuilder.setCancelable(false);
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 
     @Override
@@ -248,6 +321,14 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
     public void onCameraSDCardStateChanged(boolean enabled) {
         if (!enabled) {
             mTvSdCard.setText(R.string.full_demo_sd_error);
+            if (nStep == STEP_START_RECORD){
+                nStep = STEP_FIRST_POINT;
+                refreshLayout();
+            } else {
+                stopCameraWork();
+                nStep = STEP_STOP_RECORD;
+                refreshLayout();
+            }
         }
     }
 
@@ -272,6 +353,8 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
             @Override
             public void onLoadingFinish() {
                 InstaCameraManager.getInstance().setPipeline(mCapturePlayerView.getPipeline());
+                photo_view.setSuppMatrix(mat_site);
+                drawPins();
             }
 
             @Override
@@ -285,8 +368,11 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
 
         // 预览开启后再录像
         // Record after preview is opened
-        if (mIsCaptureButtonClicked) {
-            mIsCaptureButtonClicked = false;
+        if (mIsCapture) {
+            mIsCapture = false;
+            nStep = STEP_START_RECORD;
+            refreshLayout();
+
             doCameraWork();
         }
     }
@@ -296,7 +382,7 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
                 .setCameraType(InstaCameraManager.getInstance().getCameraType())
                 .setMediaOffset(InstaCameraManager.getInstance().getMediaOffset())
                 .setCameraSelfie(InstaCameraManager.getInstance().isCameraSelfie())
-                .setLive(mCurPreviewType == InstaCameraManager.PREVIEW_TYPE_LIVE)  // 是否为直播模式
+                .setLive(false)  // 是否为直播模式
                 .setResolutionParams(mCurPreviewResolution.width, mCurPreviewResolution.height, mCurPreviewResolution.fps);
     }
 
@@ -321,15 +407,27 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
 
     }
 
+    @SuppressLint("NonConstantResourceId")
+    @OnClick(R.id.record_mode_ib_restart) void onClickMore(){
+        if (isCameraConnected()){
+            nStep = STEP_INIT;
+            refreshLayout();
+        } else{
+            connectCameraWifi();
+        }
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
         if (isFinishing()) {
             // 退出页面时销毁预览
             // Destroy the preview when exiting the page
+            stopCameraWork();
             InstaCameraManager.getInstance().setPreviewStatusChangedListener(null);
             InstaCameraManager.getInstance().closePreviewStream();
             mCapturePlayerView.destroy();
+            InstaCameraManager.getInstance().closeCamera();
         }
     }
 
@@ -341,29 +439,15 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
 
     private boolean checkToRestartCameraPreviewStream() {
         if (isCameraConnected()) {
-            int newPreviewType = getNewPreviewType();
-            PreviewStreamResolution newResolution = getPreviewResolution(newPreviewType);
-            if (mCurPreviewType != newPreviewType || mCurPreviewResolution != newResolution) {
-                mCurPreviewType = newPreviewType;
+            PreviewStreamResolution newResolution = getPreviewResolution(InstaCameraManager.PREVIEW_TYPE_RECORD);
+//            if (mCurPreviewResolution != newResolution) {
                 mCurPreviewResolution = newResolution;
                 InstaCameraManager.getInstance().closePreviewStream();
-                InstaCameraManager.getInstance().startPreviewStream(newResolution, newPreviewType);
+                InstaCameraManager.getInstance().startPreviewStream(newResolution, InstaCameraManager.PREVIEW_TYPE_RECORD);
                 return true;
-            }
+//            }
         }
         return false;
-    }
-    // Get the preview mode currently to be turned on
-    private int getNewPreviewType() {
-        if (mIsCaptureButtonClicked) {
-            // 即将开启录像
-            // About to start recording
-            return InstaCameraManager.PREVIEW_TYPE_RECORD;
-        } else {
-            // 普通预览
-            // Normal Mode
-            return InstaCameraManager.PREVIEW_TYPE_NORMAL;
-        }
     }
 
     // 获取预览的分辨率
@@ -373,9 +457,8 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
     private PreviewStreamResolution getPreviewResolution(int previewType) {
         // Optional resolution (as long as you feel the effect is OK)
         if (previewType == InstaCameraManager.PREVIEW_TYPE_RECORD) {
-            return PreviewStreamResolution.STREAM_5760_2880_30FPS;
+            return PreviewStreamResolution.STREAM_5760_2880_15FPS; //STREAM_5760_2880_30FPS
         }
-
         // Or choose one of the supported shooting modes of the current camera
         return InstaCameraManager.getInstance().getSupportedPreviewStreamResolution(previewType).get(0);
     }
@@ -383,67 +466,33 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
     private void doCameraWork() {
         if (!InstaCameraManager.getInstance().isSdCardEnabled()) {
             Toast.makeText(this, R.string.capture_toast_sd_card_error, Toast.LENGTH_SHORT).show();
-            mIsCaptureButtonClicked = false;
-            mRecBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.circle_btn_play_bg));
+            mIsCapture = false;
+            nStep = STEP_INIT;
+            refreshLayout();
             return;
         }
-        switch (mCurPreviewType) {
-            case InstaCameraManager.PREVIEW_TYPE_RECORD:
-                InstaCameraManager.getInstance().startNormalRecord(); //startHDRRecord();
-                break;
-            case InstaCameraManager.PREVIEW_TYPE_NORMAL:
-                mLayoutLoading.setVisibility(View.VISIBLE);
-                InstaCameraManager.getInstance().startNormalCapture(false);
-                break;
-//            case InstaCameraManager.PREVIEW_TYPE_LIVE:
-//                NetworkManager.getInstance().exchangeNetToMobile();
-//                InstaCameraManager.getInstance().startLive(createLiveParams(), this);
-//                break;
-        }
+        InstaCameraManager.getInstance().startNormalRecord(); //startHDRRecord();
+        ts_first = System.currentTimeMillis();
     }
     private void stopCameraWork() {
-        switch (mCurPreviewType) {
-            case InstaCameraManager.PREVIEW_TYPE_RECORD:
-                InstaCameraManager.getInstance().stopNormalRecord();
-                break;
-//            case InstaCameraManager.PREVIEW_TYPE_LIVE:
-//                InstaCameraManager.getInstance().stopLive();
-//                NetworkManager.getInstance().clearBindProcess();
-//                break;
-        }
+        InstaCameraManager.getInstance().stopNormalRecord();
     }
 
     private void resetState() {
         mTvRecordDuration.setText(null);
-        mCurPreviewType = InstaCameraManager.PREVIEW_TYPE_NORMAL;
         mCurPreviewResolution = null;
+        mIsCapture = false;
 
-        mNeedToRestartPreview = false;
         int captureType = InstaCameraManager.getInstance().getCurrentCaptureType();
-        if (captureType == InstaCameraManager.CAPTURE_TYPE_NORMAL_RECORD) {
-
-        } else if (captureType == InstaCameraManager.CAPTURE_TYPE_NORMAL_CAPTURE) {
-            mLayoutLoading.setVisibility(View.VISIBLE);
-        }
-        mNeedToRestartPreview = true;
+//        if (captureType == InstaCameraManager.CAPTURE_TYPE_NORMAL_RECORD) {
+//
+//        } else if (captureType == InstaCameraManager.CAPTURE_TYPE_NORMAL_CAPTURE) {
+//            mLayoutLoading.setVisibility(View.VISIBLE);
+//        }
     }
 
     private boolean isCameraConnected() {
         return InstaCameraManager.getInstance().getCameraConnectedType() != InstaCameraManager.CONNECT_TYPE_NONE;
-    }
-
-    // All live streaming parameters are arbitrarily filled in according to your product requirements
-    private LiveParamsBuilder createLiveParams() {
-        return new LiveParamsBuilder()
-                .setRtmp("rtmp://txy.live-send.acg.tv/live-txy/?streamname=live_23968708_6785332&key=6abecd453e112c38f190f69fabc6d3da")
-                .setWidth(1440)
-                .setHeight(720)
-                .setFps(30)
-                .setBitrate(2 * 1024 * 1024)
-                .setPanorama(true)
-                // 设置网络ID即可在使用WIFI连接相机时使用4G网络推流
-                // set NetId to use 4G to push live streaming when connecting camera by WIFI
-                .setNetId(NetworkManager.getInstance().getMobileNetId());
     }
 
     //Export Video
@@ -456,6 +505,7 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
         ExportVideoParamsBuilder builder = new ExportVideoParamsBuilder()
                 .setExportMode(ExportUtils.ExportMode.PANORAMA)
                 .setTargetPath(EXPORT_DIR_PATH + "/" + exp_filename)
+                .setFps(15)
                 .setWidth(2048)
                 .setHeight(1024);
 //                .setBitrate(20 * 1024 * 1024);
@@ -483,8 +533,9 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
             ExportUtils.stopExport(mCurrentExportId);
             mCurrentExportId = -1;
             Toast.makeText(this, "Export stopped!", Toast.LENGTH_SHORT).show();
-            mRecBtn.setVisibility(View.VISIBLE);
-            mBtnView.setVisibility(View.GONE);
+
+            nStep = STEP_INIT;
+            refreshLayout();
         }
     }
 
@@ -496,11 +547,15 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
         RecVideo rec_video =  new RecVideo();
         rec_video.path = EXPORT_DIR_PATH + "/" + exp_filename;
         rec_video.sh_id = cur_sheet.id + "";
+        rec_video.first_pos = firstPin.x + "," + firstPin.y;
+        rec_video.second_pos = secondPin.x + "," + secondPin.y;
+        rec_video.gap_time = (ts_second - ts_first) + "";
         rec_video.create_time = System.currentTimeMillis()/1000 + "";
         dbHelper.addVideo(rec_video);
 
-        mRecBtn.setVisibility(View.VISIBLE);
-        mBtnView.setVisibility(View.GONE);
+        InstaCameraManager.getInstance().closePreviewStream();
+
+        showUploadDlg(rec_video);
     }
 
     @Override
@@ -510,8 +565,9 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
         mExportDialog.getActionButton(DialogAction.NEUTRAL).setVisibility(View.GONE);
         mCurrentExportId = -1;
         Toast.makeText(this, "Export failed!", Toast.LENGTH_SHORT).show();
-        mRecBtn.setVisibility(View.VISIBLE);
-        mBtnView.setVisibility(View.GONE);
+
+        nStep = STEP_INIT;
+        refreshLayout();
     }
 
     @Override
@@ -521,12 +577,154 @@ public class RecordModeActivity extends AppCompatActivity implements ICameraChan
         mExportDialog.getActionButton(DialogAction.NEUTRAL).setVisibility(View.GONE);
         mCurrentExportId = -1;
         Toast.makeText(this, "Export failed!", Toast.LENGTH_SHORT).show();
-        mRecBtn.setVisibility(View.VISIBLE);
-        mBtnView.setVisibility(View.GONE);
+
+        nStep = STEP_INIT;
+        refreshLayout();
     }
 
     @Override
     public void onProgress(float progress) {
         mExportDialog.setContent(getString(R.string.export_dialog_msg_export_progress, String.format(Locale.CHINA, "%.1f", progress * 100) + "%"));
+    }
+
+    void refreshLayout(){
+        switch (nStep){
+            case STEP_FIRST_POINT:
+                mTvGuide.setText(R.string.auto_walk_guide_2);
+                mBtnView.setVisibility(View.GONE);
+                mRecBtn.setVisibility(View.VISIBLE);
+                mRecBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.circle_btn_play_bg));
+                mStatusView.setVisibility(View.VISIBLE);
+                photo_view.getSuppMatrix(mat_site);
+                checkToRestartCameraPreviewStream();
+                break;
+            case STEP_START_RECORD:
+                mTvGuide.setText(R.string.auto_walk_guide_3);
+                mRecBtn.setVisibility(View.GONE);
+                break;
+            case STEP_SECOND_POINT:
+                mTvGuide.setText(R.string.auto_walk_guide_4);
+                mRecBtn.setVisibility(View.VISIBLE);
+                mRecBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.circle_btn_stop_bg));
+                break;
+            case STEP_STOP_RECORD:
+                mTvGuide.setText(R.string.auto_walk_guide_5);
+                mRecBtn.setVisibility(View.GONE);
+                mRecBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.circle_btn_play_bg));
+                break;
+            default:
+                mTvGuide.setText(R.string.auto_walk_guide_1);
+                mBtnView.setVisibility(View.GONE);
+                mRecBtn.setVisibility(View.GONE);
+                mStatusView.setVisibility(View.GONE);
+
+                firstPin = null;
+                secondPin = null;
+                pinsContainer.removeAllViews();
+                InstaCameraManager.getInstance().closePreviewStream();
+                break;
+        }
+    }
+
+    void drawPins(){
+        if (firstPin != null){
+            drawPin(firstPin);
+        }
+        if (secondPin != null){
+            drawPin(secondPin);
+        }
+    }
+
+    void drawPin(PinPoint p_pin){
+        // calculate Pin position
+        float img_scale = photo_view.getScale();
+        int pin_wh = (int)((PIN_SIZE_MAX_LEN - PIN_SIZE_MIN_LEN) * img_scale);
+        RectF rc = photo_view.getDisplayRect();
+        float site_width = rc.width();
+        float site_height = rc.height();
+        int tempX = (int) (site_width * p_pin.x + rc.left) - pin_wh / 2;
+        int tempY = (int) (site_height * p_pin.y + rc.top) - pin_wh;
+
+        if (p_pin.iv_mark == null){
+            ImageView iv = new ImageView(this);
+            iv.setImageResource(R.drawable.ic_pin);
+            iv.setOnClickListener(view -> {
+
+            });
+
+            RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            lp.setMargins(tempX, tempY, 0, 0);
+            lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+            lp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+
+            pinsContainer.addView(iv, lp);
+            iv.getLayoutParams().height = pin_wh;
+            iv.getLayoutParams().width = pin_wh;
+            iv.requestLayout();
+            p_pin.iv_mark = iv;
+        } else {
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(pin_wh, pin_wh);
+            layoutParams.leftMargin = tempX;
+            layoutParams.topMargin = tempY;
+            p_pin.iv_mark.setLayoutParams(layoutParams);
+            p_pin.iv_mark.requestLayout();
+        }
+
+        int xMax = photo_view.getWidth();
+        int yMax = photo_view.getHeight();
+
+        if (tempX < 0 || tempY < 0 || tempX > xMax || tempY > yMax) {
+            p_pin.iv_mark.setVisibility(View.INVISIBLE);
+        } else{
+            p_pin.iv_mark.setVisibility(View.VISIBLE);
+        }
+
+    }
+
+    void showUploadDlg(RecVideo recv){
+        UploadAutoWalkDlg uploadDlg = new UploadAutoWalkDlg(this, recv, uploadListener);
+
+        View decorView = uploadDlg.getWindow().getDecorView();
+        decorView.setBackgroundResource(android.R.color.transparent);
+        uploadDlg.show();
+    }
+
+    UploadAutoWalkDlg.EventListener uploadListener = new UploadAutoWalkDlg.EventListener() {
+        @Override
+        public void onUploadSuccess() {
+            Toast.makeText(AutoWalkActivity.this, "360 Video was uploaded successfully.", Toast.LENGTH_SHORT).show();
+            nStep = STEP_INIT;
+            refreshLayout();
+        }
+
+        @Override
+        public void onFailed() {
+            nStep = STEP_INIT;
+            refreshLayout();
+        }
+    };
+
+    private class PhotoTapListener implements OnPhotoTapListener {
+
+        @Override
+        public void onPhotoTap(ImageView view, float x, float y) {
+            if (isCameraConnected()){
+                if (nStep == STEP_INIT){
+                    firstPin = new PinPoint();
+                    firstPin.x = x;
+                    firstPin.y = y;
+                    nStep = STEP_FIRST_POINT;
+                } else if (nStep == STEP_START_RECORD){
+                    secondPin = new PinPoint();
+                    secondPin.x = x;
+                    secondPin.y = y;
+                    nStep = STEP_SECOND_POINT;
+                    ts_second = System.currentTimeMillis();
+                }
+
+                drawPins();
+                refreshLayout();
+            }
+        }
     }
 }

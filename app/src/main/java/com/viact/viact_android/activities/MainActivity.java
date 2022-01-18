@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toolbar;
@@ -15,6 +16,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.arashivision.sdkcamera.camera.InstaCameraManager;
+import com.google.firebase.perf.FirebasePerformance;
+import com.google.firebase.perf.metrics.Trace;
 import com.viact.viact_android.R;
 import com.viact.viact_android.adapters.ProjectsAdapter;
 import com.viact.viact_android.dialogs.CreateProjectDlg;
@@ -46,6 +49,8 @@ public class MainActivity extends BaseObserveCameraActivity {
 
     DatabaseHelper  dbHelper;
 
+    private Trace mTrace;
+
     ProjectsAdapter.EventListener listener = new ProjectsAdapter.EventListener() {
         @Override
         public void onClickEdit(int index) {
@@ -65,6 +70,12 @@ public class MainActivity extends BaseObserveCameraActivity {
 
         ButterKnife.bind(this);
         dbHelper = DatabaseHelper.getInstance(this);
+
+        // Begin tracing app startup tasks.
+        mTrace = FirebasePerformance.getInstance().newTrace("STARTUP_TRACE");
+        Log.d("TAG", "Starting trace");
+        mTrace.start();
+
         initLayout();
     }
 
@@ -79,6 +90,9 @@ public class MainActivity extends BaseObserveCameraActivity {
         if (InstaCameraManager.getInstance().getCameraConnectedType() != InstaCameraManager.CONNECT_TYPE_NONE) {
             InstaCameraManager.getInstance().closeCamera();
         }
+
+        Log.d("TAG", "Stopping trace");
+        mTrace.stop();
         super.onDestroy();
     }
 

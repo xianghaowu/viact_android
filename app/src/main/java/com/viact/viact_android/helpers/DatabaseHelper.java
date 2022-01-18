@@ -98,7 +98,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_VIDEO_ID = "ID";
     private static final String KEY_VIDEO_SHEET_ID = "sh_id";
     private static final String KEY_VIDEO_PATH = "path";
+    private static final String KEY_VIDEO_FIRST = "first_pos";
+    private static final String KEY_VIDEO_SECOND = "second_pos";
+    private static final String KEY_VIDEO_TIME = "gap_time";
     private static final String KEY_VIDEO_CREATE = "create_time";
+    private static final String KEY_VIDEO_CLOUD = "cloud_id";
+    private static final String KEY_VIDEO_URL = "url";
 
 
     private static DatabaseHelper sInstance;
@@ -179,7 +184,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         query = "CREATE TABLE " + TABLE_VIDEOS + " (" + KEY_VIDEO_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + KEY_VIDEO_SHEET_ID + " TEXT, "
                 + KEY_VIDEO_PATH + " TEXT, "
-                + KEY_VIDEO_CREATE + " TEXT);";
+                + KEY_VIDEO_FIRST + " TEXT, "
+                + KEY_VIDEO_SECOND + " TEXT, "
+                + KEY_VIDEO_TIME + " TEXT, "
+                + KEY_VIDEO_CREATE + " TEXT, "
+                + KEY_VIDEO_CLOUD + " TEXT, "
+                + KEY_VIDEO_URL + " TEXT);";
         db.execSQL(query);
     }
 
@@ -199,15 +209,49 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    //update the video
+    public boolean updateVideo(RecVideo rv) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        String select_query= "SELECT * FROM " + TABLE_VIDEOS + " WHERE sh_id = " + rv.sh_id + " AND " + KEY_VIDEO_CREATE + " = " + rv.create_time + ";";
+        @SuppressLint("Recycle") Cursor cursor = sqLiteDatabase.rawQuery(select_query, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            int video_id = cursor.getInt(0);
+            ContentValues values = new ContentValues();
+            values.put(KEY_VIDEO_SHEET_ID, rv.sh_id);
+            values.put(KEY_VIDEO_PATH, rv.path);
+            values.put(KEY_VIDEO_FIRST, rv.first_pos);
+            values.put(KEY_VIDEO_SECOND, rv.second_pos);
+            values.put(KEY_VIDEO_TIME, rv.gap_time);
+            values.put(KEY_VIDEO_CREATE, rv.create_time);
+            values.put(KEY_VIDEO_CLOUD, rv.cloud_id);
+            values.put(KEY_VIDEO_URL, rv.url);
+            //inserting new row
+            sqLiteDatabase.update(TABLE_VIDEOS, values, "ID=" + video_id, null);
+            sqLiteDatabase.close();
+            return true;
+        } else {
+            sqLiteDatabase.close();
+            return false;
+        }
+    }
+
     //add the new video
     public void addVideo(RecVideo ct) {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KEY_VIDEO_SHEET_ID, ct.sh_id);
         values.put(KEY_VIDEO_PATH, ct.path);
+        values.put(KEY_VIDEO_FIRST, ct.first_pos);
+        values.put(KEY_VIDEO_SECOND, ct.second_pos);
+        values.put(KEY_VIDEO_TIME, ct.gap_time);
         values.put(KEY_VIDEO_CREATE, ct.create_time);
+        values.put(KEY_VIDEO_CLOUD, ct.cloud_id);
+        values.put(KEY_VIDEO_URL, ct.url);
         //inserting new row
         sqLiteDatabase.insert(TABLE_VIDEOS, null , values);
+
         //close database connection
         sqLiteDatabase.close();
     }
@@ -228,7 +272,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 v_dt.id = cursor.getInt(0);
                 v_dt.sh_id = cursor.getString(1);
                 v_dt.path = cursor.getString(2);
-                v_dt.create_time = cursor.getString(3);
+                v_dt.first_pos = cursor.getString(3);
+                v_dt.second_pos = cursor.getString(4);
+                v_dt.gap_time = cursor.getString(5);
+                v_dt.create_time = cursor.getString(6);
+                v_dt.cloud_id = cursor.getString(7);
+                v_dt.url = cursor.getString(8);
+
                 arrayList.add(v_dt);
             }while (cursor.moveToNext());
         }

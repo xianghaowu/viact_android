@@ -57,6 +57,8 @@ public class LiveActivity extends BaseObserveCameraActivity implements IPreviewS
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
         setTitle(R.string.live_toolbar_title);
         bindViews();
         restoreLiveData();
@@ -218,6 +220,12 @@ public class LiveActivity extends BaseObserveCameraActivity implements IPreviewS
     }
 
     @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         if (isFinishing()) {
@@ -283,11 +291,11 @@ public class LiveActivity extends BaseObserveCameraActivity implements IPreviewS
         mTvLiveStatus.setText(R.string.live_push_finished);
     }
 
-    @Override
-    public void onLivePushError() {
-        mBtnLive.setChecked(false);
-        mTvLiveStatus.setText(R.string.live_push_error);
-    }
+//    @Override
+//    public void onLivePushError() {
+//        mBtnLive.setChecked(false);
+//        mTvLiveStatus.setText(R.string.live_push_error);
+//    }
 
     @Override
     public void onLiveFpsUpdate(int fps) {
@@ -318,9 +326,9 @@ public class LiveActivity extends BaseObserveCameraActivity implements IPreviewS
     private void restoreLiveData() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         mEtRtmp.setText(sp.getString("rtmp", LIVE_STREAM_URL));
-        mEtWidth.setText(sp.getString("width", "640"));
-        mEtHeight.setText(sp.getString("height", "480"));
-        mEtFps.setText(sp.getString("fps", "30"));
+        mEtWidth.setText(sp.getString("width", "1080"));
+        mEtHeight.setText(sp.getString("height", "768"));
+        mEtFps.setText(sp.getString("fps", "24"));
         mEtBitrate.setText(sp.getString("bitrate", "2"));
         mCbPanorama.setChecked(sp.getBoolean("panorama", true));
         mCbAudioEnabled.setChecked(sp.getBoolean("audio", true));

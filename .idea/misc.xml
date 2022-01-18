@@ -24,6 +24,7 @@
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/ic_history.xml" value="0.36770833333333336" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/ic_home.xml" value="0.36770833333333336" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/ic_navigation.xml" value="0.36770833333333336" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/ic_play_circle.xml" value="0.2859375" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/ic_view_comfy.xml" value="0.36770833333333336" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/progressbar_custom.xml" value="0.36770833333333336" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/round_border_btn.xml" value="0.36770833333333336" />
@@ -39,6 +40,7 @@
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/round_layermenu_bg.xml" value="0.278125" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/round_sidemenu_bg.xml" value="0.27760416666666665" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/drawable/round_txt_bg_yellow.xml" value="0.36770833333333336" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_auto_walk.xml" value="0.26979166666666665" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_capture_and_play.xml" value="0.26145833333333335" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_choose_sitemap.xml" value="0.19479166666666667" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/activity_create_sheet.xml" value="0.22" />
@@ -62,6 +64,7 @@
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/dialog_create_project.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/dialog_create_spot.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/dialog_markup.xml" value="0.3515625" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/dialog_upload_autowalk.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/item_category_field.xml" value="0.240625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/item_photo_field.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/item_project_field.xml" value="0.3515625" />
@@ -73,6 +76,7 @@
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/item_spot_field.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/layout/layout_bottom.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/menu/menu_setting.xml" value="0.3515625" />
+        <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/menu/menu_setting_1.xml" value="0.3515625" />
         <entry key="..\:/mydevel/2021_09_02(Khushboo)/Android_work/viact_android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.36770833333333336" />
       </map>
     </option>

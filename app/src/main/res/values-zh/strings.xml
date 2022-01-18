@@ -344,4 +344,18 @@
     <string name="map_move_current_location">请在当前位置移动地图</string>
     <string name="map_crop_current_location">请在当前位置周围裁剪地图</string>
 
+    <!--AutoWalk Activity -->
+    <string name="auto_walk_connect_disp">相机已断开连接。是否要重新连接？</string>
+    <string name="auto_walk_guide_1">放大并点击您当前的确切位置</string>
+    <string name="auto_walk_guide_2">按"录制"按钮开始自动行走。\n相机开始拍摄后，请立即步行超过5米。</string>
+    <string name="auto_walk_guide_3">当您到达距离起始地点 5 米的地方时，点击地图上正确的当前点。\n请继续向网站上的任何方向走。</string>
+    <string name="auto_walk_guide_4">按下停止按钮可停止或结束相机拍摄。视频被存储并上传到云端</string>
+    <string name="auto_walk_guide_5">请稍候。。。\n您可以在上传后重新启动或退出自动行走。</string>
+    <string name="auto_walk_mobile_net">移动网络</string>
+    <string name="auto_walk_wifi_net">无线网络</string>
+    <string name="auto_walk_bind_mobile_network_desc">绑定移动网络，那么在通过WIFI连接摄像头时，可以使用4G将视频数据上传到云端。</string>
+    <string name="auto_walk_bind_wifi_network_desc">如果您要使用wifi网络上传视频文件，请取消此对话框并转到视频播放器视图。然后断开相机并在手机设置上设置Wifi连接，然后尝试上传视频文件。</string>
+    <string name="auto_walk_btn_upload">上载</string>
+    <string name="auto_walk_btn_cancel">取消</string>
+
 </resources>

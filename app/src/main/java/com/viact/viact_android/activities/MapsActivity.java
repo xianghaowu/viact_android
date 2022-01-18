@@ -6,17 +6,15 @@ import static com.viact.viact_android.utils.Const.SHEET_TYPE_GMAP;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -33,6 +31,11 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -40,6 +43,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.snackbar.Snackbar;
 import com.viact.viact_android.R;
 import com.viact.viact_android.helpers.DatabaseHelper;
 import com.viact.viact_android.models.Project;
@@ -53,7 +58,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     final int REQUEST_CUSTOM_PERMISSION = 9998;
 
@@ -76,9 +81,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String[] map_types = {"Satellite", "Terrain", "Hybrid", "Normal"};
     int nMapType = GoogleMap.MAP_TYPE_SATELLITE;
 
-    private LocationManager locationManager;
-    private static final long MIN_TIME = 400;
-    private static final float MIN_DISTANCE = 1000;
     boolean bCrop = false;
 
     LatLng latLng;
@@ -99,17 +101,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         cur_proc = (Project) data.getParcelable("project");
         sheet_name = data.getString("sheet_name", "");
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_CUSTOM_PERMISSION);
-            }
-        }
-
-
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+        assert mapFragment != null;
         mapFragment.getMapAsync(this);
 
         dbHelper = DatabaseHelper.getInstance(this);
@@ -154,8 +149,44 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //Setting the ArrayAdapter data on the Spinner
         sp_map_type.setAdapter(aa);
 
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME, MIN_DISTANCE, this); //You can also use LocationManager.GPS_PROVIDER and LocationManager.PASSIVE_PROVIDER
+        // Initialize Location
+//        provider = getProvider();
+//        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+//        locationManager.requestLocationUpdates(provider, 100, 0, locationListener);
+//        cur_loc = locationManager.getLastKnownLocation(getProvider());
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_CUSTOM_PERMISSION);
+            }
+        }
+        fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
+            if (location != null) {
+                cur_loc = location;
+                reDrawLocation();
+            }
+        });
+        // Create the location request
+        mLocationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(UPDATE_INTERVAL)
+                .setFastestInterval(FASTEST_INTERVAL);
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                float hAcc = 10000;
+                for (Location location : locationResult.getLocations()) {
+                    // Update UI with location data
+                    if (location != null && hAcc > location.getAccuracy()){
+                        hAcc = location.getAccuracy();
+                        cur_loc = location;
+                        reDrawLocation();
+                    }
+                }
+            }
+        };
     }
 
     void refreshMap(){
@@ -302,7 +333,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             one.name = sheet_name;
             one.path = f_name;
             one.type = SHEET_TYPE_GMAP;
-            one.lt_loc = f_pos.toString();
+            one.lt_loc = f_pos + "-" + cur_loc.getLatitude() + "," + cur_loc.getLongitude(); //PointF(0.60504204, 0.8769841)-41.8033062,123.3839886
             one.rb_loc = f_bearing + "";
             one.create_time = (long)System.currentTimeMillis()/1000 + "";
             one.update_time = one.create_time;
@@ -339,38 +370,183 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setMyLocationEnabled(true);
+//        mMap.setMyLocationEnabled(true);
         mMap.setMapType(nMapType);
-        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+//        mMap.getUiSettings().setMyLocationButtonEnabled(true);
         mMap.getUiSettings().setCompassEnabled(true);
+
+        reDrawLocation();
     }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        float zoom = mMap.getCameraPosition().zoom;
-        zoom = zoom < 17.0? 17:zoom;
-        latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoom);
-        mMap.animateCamera(cameraUpdate);
-        locationManager.removeUpdates(this);
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) { }
-
-    @Override
-    public void onProviderEnabled(String provider) { }
-
-    @Override
-    public void onProviderDisabled(String provider) { }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == REQUEST_CUSTOM_PERMISSION && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, "Please check the permission on setting", Toast.LENGTH_SHORT).show();
             finish();
+        } else {
+            getLastLocation();
+            return;
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
+
+    //get current Location
+    Location    cur_loc;
+    /*GPSTracker gps;
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+    private void stopLocationUpdates() {
+        gps.stopUsingGPS();
+        gps = null;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (gps == null) {
+            gps = new GPSTracker(this, loc_listener);
+            cur_loc = gps.getLocation();
+            reDrawLocation();
+        }
+    }
+
+    GPSTracker.LocationChangeListener loc_listener = new GPSTracker.LocationChangeListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            if (mMap != null && location != null){
+                cur_loc = location;
+                reDrawLocation();
+            }
+        }
+    };*/
+
+    void reDrawLocation(){
+        if (mMap != null && cur_loc != null){
+            float zoom = mMap.getCameraPosition().zoom;
+            zoom = zoom < 17.0? 17:zoom;
+            latLng = new LatLng(cur_loc.getLatitude(), cur_loc.getLongitude());
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoom);
+            mMap.animateCamera(cameraUpdate);
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(latLng);
+            markerOptions.title("Me");
+            mMap.clear();
+            mMap.addMarker(markerOptions);
+        }
+    }
+
+    FusedLocationProviderClient fusedLocationClient;
+    private Location mLocation;
+    private LocationRequest mLocationRequest;
+    private LocationCallback mLocationCallback;
+    final int UPDATE_INTERVAL = 400;
+    final int FASTEST_INTERVAL = 200;
+
+
+    protected void startLocationUpdates() {
+        // Request location updates
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            startLocationPermissionRequest();
+            return;
+        }
+        fusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.getMainLooper());
+    }
+    private boolean checkPermissions() {
+        int permissionState1 = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
+        int permissionState2 = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        return permissionState1 == PackageManager.PERMISSION_GRANTED && permissionState2 == PackageManager.PERMISSION_GRANTED;
+    }
+
+
+    private void startLocationPermissionRequest() {
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
+                REQUEST_CUSTOM_PERMISSION);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!checkPermissions()){
+            startLocationUpdates();
+        } else {
+            getLastLocation();
+            startLocationUpdates();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+    private void stopLocationUpdates() {
+        fusedLocationClient.removeLocationUpdates(mLocationCallback);
+    }
+
+    @SuppressWarnings("MissingPermission")
+    private void getLastLocation() {
+        fusedLocationClient.getLastLocation()
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        cur_loc = task.getResult();
+                        reDrawLocation();
+                    } else {
+                        Toast.makeText(MapsActivity.this, "No location detected", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+
+    /*LocationManager locationManager;
+    String provider;
+
+    public String getProvider() {
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        Criteria criteria = new Criteria();
+        criteria.setPowerRequirement(Criteria.NO_REQUIREMENT);
+        criteria.setAccuracy(Criteria.NO_REQUIREMENT);
+        String Provider = locationManager.getBestProvider(criteria, true);
+        return Provider;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        locationManager.requestLocationUpdates(getProvider(), 0, 0, locationListener);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        locationManager.removeUpdates(locationListener);
+    }
+
+    private LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            cur_loc = location;
+            reDrawLocation();
+        }
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            // TODO Auto-generated method stub
+        }
+        @Override
+        public void onProviderEnabled(String provider) {
+            // TODO Auto-generated method stub
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            // TODO Auto-generated method stub
+        }
+    };*/
 
 }

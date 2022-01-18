@@ -162,7 +162,7 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
     }
 
     @SuppressLint("NonConstantResourceId")
-    @OnClick(R.id.sheet_iv_walk) void onClickSpeedMode(){
+    @OnClick(R.id.sheet_iv_speedmode) void onClickSpeedMode(){
         if (InstaCameraManager.getInstance().getCameraConnectedType() != InstaCameraManager.CONNECT_TYPE_NONE && checkSdCardEnabled()){
             Intent speedIntent = new Intent(this, SpeedModeActivity.class);
             speedIntent.putExtra("sheet_id", cur_sheet.id);
@@ -184,13 +184,12 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
 
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.sheet_iv_record) void onClickRecordMode(){
-        if (InstaCameraManager.getInstance().getCameraConnectedType() != InstaCameraManager.CONNECT_TYPE_NONE && checkSdCardEnabled()){
-            Intent recordIntent = new Intent(this, RecordModeActivity.class);
-            recordIntent.putExtra("sheet_id", cur_sheet.id);
-            startActivity(recordIntent);
-        } else {
-            connectCamera();
+        if (InstaCameraManager.getInstance().getCameraConnectedType() != InstaCameraManager.CONNECT_TYPE_NONE){
+            InstaCameraManager.getInstance().closeCamera();
         }
+        Intent recordIntent = new Intent(this, AutoWalkActivity.class);
+        recordIntent.putExtra("sheet_id", cur_sheet.id);
+        startActivity(recordIntent);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -794,6 +793,7 @@ public class EditSheetActivity extends BaseObserveCameraActivity {
 
         builder.show();
     }
+
     @SuppressLint("NonConstantResourceId")
     @OnClick(R.id.edit_sheet_ib_edit) void onClickEdit(){
         if (et_title.getVisibility() == View.GONE){

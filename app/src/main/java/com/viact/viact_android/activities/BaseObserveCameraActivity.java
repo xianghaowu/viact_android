@@ -7,8 +7,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.arashivision.sdkcamera.camera.InstaCameraManager;
 import com.arashivision.sdkcamera.camera.callback.ICameraChangedCallback;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.kaopiz.kprogresshud.KProgressHUD;
 
 public abstract class BaseObserveCameraActivity extends AppCompatActivity implements ICameraChangedCallback {
+
+    FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,6 +89,31 @@ public abstract class BaseObserveCameraActivity extends AppCompatActivity implem
      */
     @Override
     public void onCameraSensorModeChanged(int cameraSensorMode) {
+    }
+
+    private KProgressHUD hud;
+
+    public void showProgress() {
+        showProgress("wait...");
+    }
+
+    public void showProgress(String message) {
+        hud = KProgressHUD.create(this).setLabel(message);
+        hud.show();
+    }
+
+    public void dismissProgress() {
+        if (hud != null) {
+            hud.dismiss();
+        }
+    }
+
+    public void putBoolValueToCrash(String key, Boolean bValue){
+        crashlytics.setCustomKey(key, bValue);
+    }
+
+    public void putStringValueToCrash(String key, String sValue){
+        crashlytics.setCustomKey(key, sValue);
     }
 
 }
